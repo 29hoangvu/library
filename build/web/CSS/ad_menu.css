@@ -1,0 +1,53 @@
+.user-menu {
+    position: absolute; /* Giữ nguyên vị trí tương đối */
+    width: 70%;
+    text-align: center;
+    cursor: pointer;
+    padding: 10px;
+    background: #2c3e50;
+    color: white;
+    border-top: 1px solid #fff;
+    bottom: 15%;
+    border-radius: 10px;
+}
+
+.user-menu p {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px; /* Khoảng cách giữa tên và mũi tên */
+}
+
+/* Mũi tên hiệu ứng xoay */
+.user-menu .arrow {
+    transition: transform 0.3s ease;
+}
+
+.user-dropup{
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #222;
+    padding: 10px;
+    width: 80%;
+    z-index: 10;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    border-radius: 15px;
+}
+.user-dropup a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-top: 1px solid #222;
+    border-radius: 15px;
+    font-size: 15px;
+}
+.user-dropup a:hover {
+    background: #1abc9c;
+
+}

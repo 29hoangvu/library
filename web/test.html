@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gợi ý tìm kiếm - Thư viện Sách</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .search-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .suggestions-dropdown {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .suggestion-item {
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .suggestion-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+        
+        .book-thumbnail {
+            width: 50px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-input {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            background: rgba(255, 255, 255, 1);
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.3);
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+        
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .no-results {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 1px solid #f59e0b;
+        }
+        
+        /* Scrollbar styling */
+        .suggestions-dropdown::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .suggestions-dropdown::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 3px;
+        }
+        
+        .suggestions-dropdown::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.5);
+            border-radius: 3px;
+        }
+        
+        .suggestions-dropdown::-webkit-scrollbar-thumb:hover {
+            background: rgba(59, 130, 246, 0.7);
+        }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-white mb-4">
+                <i class="fas fa-book-open mr-3"></i>
+                Thư viện Sách Điện tử
+            </h1>
+            <p class="text-blue-100 text-lg">Tìm kiếm sách yêu thích của bạn với gợi ý thông minh</p>
+        </div>
+
+        <!-- Search Container -->
+        <div class="search-container rounded-2xl p-8 mb-8 relative">
+            <div class="relative">
+                <div class="flex items-center space-x-4">
+                    <div class="relative flex-1">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-500 text-lg"></i>
+                        </div>
+                        <input 
+                            type="text" 
+                            id="searchInput"
+                            class="search-input w-full pl-12 pr-12 py-4 rounded-xl text-lg font-medium placeholder-gray-500 outline-none"
+                            placeholder="Nhập tên sách, tác giả để tìm kiếm..."
+                            autocomplete="off"
+                        >
+                        <div class="absolute inset-y-0 right-0 pr-4 flex items-center">
+                            <div id="loadingSpinner" class="loading-spinner text-blue-500 text-lg hidden">
+                                <i class="fas fa-spinner"></i>
+                            </div>
+                            <button id="clearButton" class="text-gray-400 hover:text-gray-600 text-lg hidden">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg">
+                        <i class="fas fa-search mr-2"></i>
+                        Tìm kiếm
+                    </button>
+                </div>
+                
+                <!-- Suggestions Dropdown -->
+                <div id="suggestionsDropdown" class="suggestions-dropdown absolute top-full left-0 right-0 mt-2 rounded-xl hidden z-50 fade-in">
+                    <div id="suggestionsList" class="p-2">
+                        <!-- Suggestions will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo Results -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="resultsGrid">
+            <!-- Results will be shown here -->
+        </div>
+    </div>
+
+    <script>
+        // Sample book data for demonstration
+        const sampleBooks = [
+            {
+                isbn: "978-0-123-45678-9",
+                title: "Lập trình Java cơ bản",
+                author: "Nguyễn Văn A",
+                publishedYear: 2023,
+                coverImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop",
+                format: "HARDCOVER"
+            },
+            {
+                isbn: "978-0-123-45679-6",
+                title: "Cấu trúc dữ liệu và giải thuật",
+                author: "Trần Thị B",
+                publishedYear: 2022,
+                coverImage: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=400&fit=crop",
+                format: "PAPERBACK"
+            },
+            {
+                isbn: "978-0-123-45680-2",
+                title: "Thiết kế web hiện đại",
+                author: "Lê Văn C",
+                publishedYear: 2024,
+                coverImage: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=300&h=400&fit=crop",
+                format: "EBOOK"
+            },
+            {
+                isbn: "978-0-123-45681-9",
+                title: "Python cho người mới bắt đầu",
+                author: "Phạm Thị D",
+                publishedYear: 2023,
+                coverImage: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&h=400&fit=crop",
+                format: "HARDCOVER"
+            },
+            {
+                isbn: "978-0-123-45682-6",
+                title: "Machine Learning với TensorFlow",
+                author: "Hoàng Văn E",
+                publishedYear: 2024,
+                coverImage: "https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?w=300&h=400&fit=crop",
+                format: "EBOOK"
+            },
+            {
+                isbn: "978-0-123-45683-3",
+                title: "Cơ sở dữ liệu MySQL",
+                author: "Võ Thị F",
+                publishedYear: 2022,
+                coverImage: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=300&h=400&fit=crop",
+                format: "PAPERBACK"
+            }
+        ];
+
+        const searchInput = document.getElementById('searchInput');
+        const suggestionsDropdown = document.getElementById('suggestionsDropdown');
+        const suggestionsList = document.getElementById('suggestionsList');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const clearButton = document.getElementById('clearButton');
+        const resultsGrid = document.getElementById('resultsGrid');
+
+        let searchTimeout;
+        let currentFocus = -1;
+
+        // Search input event listeners
+        searchInput.addEventListener('input', handleSearchInput);
+        searchInput.addEventListener('keydown', handleKeyNavigation);
+        searchInput.addEventListener('focus', () => {
+            if (searchInput.value.trim()) {
+                suggestionsDropdown.classList.remove('hidden');
+            }
+        });
+
+        // Clear button functionality
+        clearButton.addEventListener('click', () => {
+            searchInput.value = '';
+            suggestionsDropdown.classList.add('hidden');
+            clearButton.classList.add('hidden');
+            resultsGrid.innerHTML = '';
+            searchInput.focus();
+        });
+
+        // Click outside to close suggestions
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !suggestionsDropdown.contains(e.target)) {
+                suggestionsDropdown.classList.add('hidden');
+            }
+        });
+
+        function handleSearchInput(e) {
+            const query = e.target.value.trim();
+            
+            if (query.length === 0) {
+                suggestionsDropdown.classList.add('hidden');
+                clearButton.classList.add('hidden');
+                resultsGrid.innerHTML = '';
+                return;
+            }
+
+            clearButton.classList.remove('hidden');
+            showLoading(true);
+
+            // Debounce search
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                performSearch(query);
+            }, 300);
+        }
+
+        function handleKeyNavigation(e) {
+            const suggestions = suggestionsList.querySelectorAll('.suggestion-item');
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                currentFocus = Math.min(currentFocus + 1, suggestions.length - 1);
+                updateFocus(suggestions);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                currentFocus = Math.max(currentFocus - 1, -1);
+                updateFocus(suggestions);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (currentFocus >= 0 && suggestions[currentFocus]) {
+                    suggestions[currentFocus].click();
+                } else {
+                    performFullSearch(searchInput.value.trim());
+                }
+            } else if (e.key === 'Escape') {
+                suggestionsDropdown.classList.add('hidden');
+                currentFocus = -1;
+            }
+        }
+
+        function updateFocus(suggestions) {
+            suggestions.forEach((item, index) => {
+                if (index === currentFocus) {
+                    item.classList.add('bg-blue-100');
+                } else {
+                    item.classList.remove('bg-blue-100');
+                }
+            });
+        }
+
+        function performSearch(query) {
+            // Simulate API call delay
+            setTimeout(() => {
+                const results = searchBooks(query);
+                displaySuggestions(results, query);
+                showLoading(false);
+            }, 200);
+        }
+
+        function searchBooks(query) {
+            const keywords = query.toLowerCase().split(' ').filter(k => k.length > 0);
+            
+            return sampleBooks.filter(book => {
+                const searchText = `${book.title} ${book.author}`.toLowerCase();
+                return keywords.some(keyword => searchText.includes(keyword));
+            }).slice(0, 6); // Limit to 6 suggestions
+        }
+
+        function displaySuggestions(books, query) {
+            currentFocus = -1;
+            
+            if (books.length === 0) {
+                suggestionsList.innerHTML = `
+                    <div class="no-results p-4 rounded-lg text-center">
+                        <i class="fas fa-search text-yellow-600 text-2xl mb-2"></i>
+                        <p class="text-yellow-800 font-medium">Không tìm thấy kết quả nào</p>
+                        <p class="text-yellow-600 text-sm mt-1">Hãy thử từ khóa khác</p>
+                    </div>
+                `;
+            } else {
+                const keywords = query.toLowerCase().split(' ').filter(k => k.length > 0);
+                
+                suggestionsList.innerHTML = books.map(book => `
+                    <div class="suggestion-item p-3 cursor-pointer flex items-center space-x-3 rounded-lg" 
+                         data-isbn="${book.isbn}" onclick="selectBook('${book.isbn}')">
+                        <img src="${book.coverImage}" 
+                             alt="${book.title}" 
+                             class="book-thumbnail"
+                             onerror="this.src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop'">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-semibold text-gray-900 truncate">
+                                ${highlightText(book.title, keywords)}
+                            </h3>
+                            <p class="text-sm text-gray-600 truncate">
+                                <i class="fas fa-user-edit mr-1"></i>
+                                ${highlightText(book.author, keywords)}
+                            </p>
+                            <div class="flex items-center space-x-3 mt-1">
+                                <span class="text-xs text-gray-500">
+                                    <i class="fas fa-calendar mr-1"></i>
+                                    ${book.publishedYear}
+                                </span>
+                                <span class="text-xs px-2 py-1 rounded-full ${getFormatBadgeClass(book.format)}">
+                                    ${getFormatText(book.format)}
+                                </span>
+                            </div>
+                        </div>
+                        <i class="fas fa-arrow-right text-gray-400"></i>
+                    </div>
+                `).join('');
+            }
+            
+            suggestionsDropdown.classList.remove('hidden');
+        }
+
+        function highlightText(text, keywords) {
+            let result = text;
+            keywords.forEach(keyword => {
+                const regex = new RegExp(`(${keyword})`, 'gi');
+                result = result.replace(regex, '<span class="highlight">$1</span>');
+            });
+            return result;
+        }
+
+        function getFormatBadgeClass(format) {
+            switch(format) {
+                case 'HARDCOVER': return 'bg-blue-100 text-blue-800';
+                case 'PAPERBACK': return 'bg-green-100 text-green-800';
+                case 'EBOOK': return 'bg-purple-100 text-purple-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function getFormatText(format) {
+            switch(format) {
+                case 'HARDCOVER': return 'Bìa cứng';
+                case 'PAPERBACK': return 'Bìa mềm';
+                case 'EBOOK': return 'Ebook';
+                default: return format;
+            }
+        }
+
+        function selectBook(isbn) {
+            const book = sampleBooks.find(b => b.isbn === isbn);
+            if (book) {
+                searchInput.value = book.title;
+                suggestionsDropdown.classList.add('hidden');
+                displayBookDetails(book);
+            }
+        }
+
+        function displayBookDetails(book) {
+            resultsGrid.innerHTML = `
+                <div class="col-span-full">
+                    <div class="bg-white rounded-2xl shadow-lg p-6 flex items-center space-x-6">
+                        <img src="${book.coverImage}" 
+                             alt="${book.title}" 
+                             class="w-32 h-44 object-cover rounded-lg shadow-md"
+                             onerror="this.src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop'">
+                        <div class="flex-1">
+                            <h2 class="text-2xl font-bold text-gray-900 mb-2">${book.title}</h2>
+                            <p class="text-lg text-gray-600 mb-3">
+                                <i class="fas fa-user-edit mr-2"></i>
+                                ${book.author}
+                            </p>
+                            <div class="flex items-center space-x-4 mb-4">
+                                <span class="text-gray-500">
+                                    <i class="fas fa-calendar mr-1"></i>
+                                    ${book.publishedYear}
+                                </span>
+                                <span class="px-3 py-1 rounded-full text-sm ${getFormatBadgeClass(book.format)}">
+                                    ${getFormatText(book.format)}
+                                </span>
+                            </div>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors duration-300">
+                                <i class="fas fa-eye mr-2"></i>
+                                Xem chi tiết
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function performFullSearch(query) {
+            const results = searchBooks(query);
+            suggestionsDropdown.classList.add('hidden');
+            
+            if (results.length === 0) {
+                resultsGrid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <i class="fas fa-search text-gray-400 text-6xl mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-600 mb-2">Không tìm thấy kết quả</h3>
+                        <p class="text-gray-500">Hãy thử tìm kiếm với từ khóa khác</p>
+                    </div>
+                `;
+            } else {
+                resultsGrid.innerHTML = results.map(book => `
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                        <img src="${book.coverImage}" 
+                             alt="${book.title}" 
+                             class="w-full h-48 object-cover"
+                             onerror="this.src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop'">
+                        <div class="p-4">
+                            <h3 class="font-semibold text-gray-900 mb-2 line-clamp-2">${book.title}</h3>
+                            <p class="text-sm text-gray-600 mb-2">${book.author}</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-500">${book.publishedYear}</span>
+                                <span class="text-xs px-2 py-1 rounded-full ${getFormatBadgeClass(book.format)}">
+                                    ${getFormatText(book.format)}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function showLoading(show) {
+            if (show) {
+                loadingSpinner.classList.remove('hidden');
+            } else {
+                loadingSpinner.classList.add('hidden');
+            }
+        }
+
+        // Initialize with some sample results
+        document.addEventListener('DOMContentLoaded', () => {
+            resultsGrid.innerHTML = sampleBooks.slice(0, 3).map(book => `
+                <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                    <img src="${book.coverImage}" 
+                         alt="${book.title}" 
+                         class="w-full h-48 object-cover"
+                         onerror="this.src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop'">
+                    <div class="p-4">
+                        <h3 class="font-semibold text-gray-900 mb-2 line-clamp-2">${book.title}</h3>
+                        <p class="text-sm text-gray-600 mb-2">${book.author}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-500">${book.publishedYear}</span>
+                            <span class="text-xs px-2 py-1 rounded-full ${getFormatBadgeClass(book.format)}">
+                                ${getFormatText(book.format)}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        });
+    </script>
+</body>
+</html>

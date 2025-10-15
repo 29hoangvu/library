@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Library" default="default" basedir=".">
+    <description>Builds, tests, and runs the project Library.</description>
+
+    <!-- ==== Config ==== -->
+    <property name="reco.port" value="8000"/>
+    <property name="reco.dir"  value="${basedir}/reco_svc"/>
+
+    <condition property="is.windows">
+        <os family="windows"/>
+    </condition>
+
+    <!-- Optional: ensure .sh executable -->
+    <target name="-pre-init">
+        <chmod perm="755" dir="${reco.dir}">
+            <include name="*.sh"/>
+        </chmod>
+    </target>
+
+    <!-- Health check -->
+    <target name="check-reco">
+        <delete file="${reco.dir}/.health" quiet="true"/>
+        <get src="http://localhost:${reco.port}/health"
+             dest="${reco.dir}/.health"
+             ignoreerrors="true"/>
+        <condition property="reco.running">
+            <available file="${reco.dir}/.health"/>
+        </condition>
+        <echo>Reco service running? ${reco.running}</echo>
+    </target>
+
+    <!-- Stop service -->
+    <target name="stop-reco">
+        <echo message="Stopping Python Reco Service (if any)..."/>
+        <exec executable="cmd" osfamily="windows" dir="${reco.dir}" failonerror="false">
+            <arg value="/c"/>
+            <arg value="stop-reco-win.bat"/>
+        </exec>
+        <exec executable="/bin/sh" osfamily="unix" dir="${reco.dir}" failonerror="false">
+            <arg value="-c"/>
+            <arg value="./stop-reco-unix.sh"/>
+        </exec>
+        <sleep seconds="1"/>
+    </target>
+
+    <!-- Start service -->
+    <target name="start-reco">
+        <echo message="Starting Python Reco Service on port ${reco.port}..."/>
+        <exec executable="cmd" osfamily="windows" dir="${reco.dir}" spawn="true">
+            <arg value="/c"/>
+            <arg value="start-reco-win.bat"/>
+            <arg value="${reco.port}"/>
+            <arg value="0"/> <!-- RELOAD=0 for NetBeans -->
+        </exec>
+        <exec executable="/bin/sh" osfamily="unix" dir="${reco.dir}" spawn="true">
+            <arg value="-c"/>
+            <arg value="./start-reco-unix.sh ${reco.port}"/>
+        </exec>
+        <sleep seconds="1"/>
+    </target>
+
+
+    <!-- Restart + verify -->
+    <target name="restart-reco" depends="stop-reco,start-reco">
+        <echo>Verifying Python Reco Service on port ${reco.port}...</echo>
+        <delete file="${reco.dir}/.health" quiet="true"/>
+        <get src="http://localhost:${reco.port}/health"
+             dest="${reco.dir}/.health"
+             ignoreerrors="true"/>
+        <available file="${reco.dir}/.health" property="reco.ok"/>
+
+        <sequential>
+            <condition property="reco.need.retry1">
+                <not><isset property="reco.ok"/></not>
+            </condition>
+            <antcall target="__retry1"/>
+        </sequential>
+
+        <sequential>
+            <condition property="reco.need.retry2">
+                <not><isset property="reco.ok"/></not>
+            </condition>
+            <antcall target="__retry2"/>
+        </sequential>
+
+        <fail unless="reco.ok">Reco service failed to start on port ${reco.port}</fail>
+    </target>
+
+    <target name="__retry1" if="reco.need.retry1">
+        <sleep seconds="1"/>
+        <get src="http://localhost:${reco.port}/health"
+             dest="${reco.dir}/.health"
+             ignoreerrors="true"/>
+        <available file="${reco.dir}/.health" property="reco.ok"/>
+    </target>
+
+    <target name="__retry2" if="reco.need.retry2">
+        <sleep seconds="2"/>
+        <get src="http://localhost:${reco.port}/health"
+             dest="${reco.dir}/.health"
+             ignoreerrors="true"/>
+        <available file="${reco.dir}/.health" property="reco.ok"/>
+    </target>
+
+    <!-- Hook NetBeans -->
+    <target name="-pre-run-deploy" depends="restart-reco"/>
+    <import file="nbproject/build-impl.xml"/>
+</project>

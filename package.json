@@ -1,0 +1,24 @@
+{
+  "dependencies": {
+    "@tailwindcss/cli": "^4.1.11",
+    "@tailwindcss/forms": "^0.5.10"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17"
+  },
+  "name": "nln_library",
+  "description": "Description: Library management is a web application that helps manage library resources including book borrowing and return management, user management better than traditional methods.\r ## Setting\r - JDK 17+\r - Apache Tomcat 10\r - NetBeans 21\r - MySQL in Xampp 8.2\r - Import Database: qlthuvien.sql\r - Create triggers to update book status and user accounts: TriggerLibrary.txt\r ## The project folder layout is as follows\r <pre>\r Web pages\r |\t-- WEB-INF\r |\t\t| -- web.xml\r |\t-- images\r |\t\t| -- default-avatar.png\r |\t\t| -- nen2.png\r |\t\t| -- reading-book.png\r |\t-- addBook.jsp\r |\t-- admin.jsp\r |\t-- adminBorrowedBook.jsp\r |\t-- adminDashboard.jsp\r |\t-- adminReports.jsp\r |\t-- bookDetails.jsp\r |\t-- borrowList.jsp\r |\t-- borrowedBooks.jsp\r |\t-- createUser.jsp\r |\t-- editBook.jsp\r |\t-- index.jsp\r |\t-- login.jsp\r |\t-- register.jsp\r Source Packages\r |\t-- Data\r |\t\t| -- BookDAO.java\r |\t\t| -- Books.java\r |\t\t| -- Roles.java\r |\t\t| -- UserDAO.java\r |\t\t| -- User.java\r |\t-- Servlet\r |\t\t| -- AddUserServlet.java\r |\t\t| -- AdminServlet.java\r |\t\t| -- ApproveBorrowServlet.java\r |\t\t| -- ApproveUserServlet.java\r |\t\t| -- BookItemServlet.java\r |\t\t| -- BorrowBookServlet.java\r |\t\t| -- CancelBorrowServlet.java\r |\t\t| -- BDConnection.java\r |\t\t| -- DeleteBookServlet.java\r |\t\t| -- EmailUtility.java\r |\t\t| -- ImageServlet.java\r |\t\t| -- LogOutServlet.java\r |\t\t| -- LoginServlet.java\r |\t\t| -- PasswordHashing.java\r |\t\t| -- RegisterServlet.java\r |\t\t| -- ReturnBookServlet.java\r |\t\t| -- UpdateBookServlet.java\r ...\r </pre>\r ## Project installation and setup\r 1. Download Install and unzip it\r 2. Install Netbeans\r 3. Because netbeans requires installation with a JDK version greater than 11, please install an additional JDK version at https://www.oracle.com/java/technologies/downloads/ to be able to use Netbean.\r 4. Start netbeans and add tomcat 10, jdk 21, mysql-connector-j-8.3.0, jakarta.activation-2.0.1.jar, jakarta.activation-api-2.0.1.jar, jakarta.mail-2.0.1.jar\r 5. Start Xampp and import qlthuvien.sql, create triggers\r 6. Build and run the project",
+  "version": "1.0.0",
+  "main": "tailwind.config.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

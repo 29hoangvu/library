@@ -1,0 +1,900 @@
+/* Định dạng chung cho mobile */
+@media (max-width: 768px) {
+    .container {
+        grid-template-areas: 
+            "header"
+            "content"
+            "menu"
+            "footer";
+        grid-template-columns: 1fr;
+    }
+
+    .menu-navbar ul {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .menu-navbar ul li {
+        width: 100%;
+    }
+
+    /* Điều chỉnh lại sách dạng lưới */
+    .books-container {
+        flex-wrap: wrap; /* Cho phép xuống dòng */
+        justify-content: center;
+    }
+
+    .book-card {
+        flex-wrap: wrap;
+    }
+
+    .book-card img {
+        height: 180px;
+    }
+
+    /* Chỉnh form tìm kiếm nhỏ lại */
+    .search-form {
+        width: 100%;
+    }
+
+    .search-form input {
+        width: 70%;
+    }
+
+    /* Điều chỉnh chi tiết sách */
+    .book-detail {
+        flex-direction: column;
+        width: 90%;
+    }
+
+    .book-image img {
+        width: 150px;
+    }
+
+    .book-info h3 {
+        font-size: 20px;
+    }
+
+    .book-info p {
+        font-size: 16px;
+    }
+
+    /* Điều chỉnh dropdown user */
+    .user-menu {
+        top: 10px;
+        right: 5px;
+    }
+
+    .dropdown-content {
+        min-width: 120px;
+    }
+
+    /* Điều chỉnh avatar */
+    .avatar-large {
+        width: 50px;
+        height: 50px;
+    }
+
+    .avatar {
+        width: 30px;
+        height: 30px;
+    }
+}
+/* Định dạng chung cho toàn bộ trang */
+body {
+    font-family: Arial, sans-serif;
+    padding: 0;
+    background-color: #141414; /* Đổi sang màu tối Netflix */
+    color: #e5e5e5; /* Text màu sáng */
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #e5e5e5; /* Text sáng cho dark theme */
+}
+
+/* Container chính */
+.container {
+    flex: 1;
+    display: grid;
+    grid-template-areas:
+        "header header"
+        "menu content"
+        "footer footer";
+    grid-template-columns: 1fr 3fr;
+    gap: 5px;
+    padding: 5px;
+}
+
+.container > div {
+    background-color: rgba(30, 30, 30, 0.95); /* Dark background */
+    padding: 10px;
+    border-radius: 20px;
+}
+
+.container > div.header {
+    grid-area: header;
+    text-align: center;
+    background: linear-gradient(to bottom, rgba(20,20,20,0.95), rgba(20,20,20,0.7));
+    backdrop-filter: blur(10px);
+    justify-content: space-between;
+    max-height: 250px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.container > div.menu {
+    grid-area: menu;
+    height: 100%;
+    background-color: rgba(25, 25, 25, 0.95);
+}
+
+.container > div.content {
+    overflow-x: auto;
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+    height: 100%;
+    background: transparent;
+}
+
+.container > div.footer {
+    grid-area: footer;
+    background-color: #0a0a0a;
+    padding: 10px;
+    text-align: center;
+    margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    color: #999;
+}
+
+.container > div.menu,
+.container > div.content {
+    min-height: 90vh;
+}
+
+/* ========== MENU NAVBAR - UPDATED ========== */
+.menu-navbar {
+    width: 100%;
+    background-color: rgba(35, 35, 35, 0.95);
+    padding: 6px;
+    border-radius: 10px;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.menu-navbar ul {
+    list-style: none;
+    padding: 0;
+    text-align: center;
+}
+
+.menu-navbar ul li {
+    margin: 4px 0;
+}
+
+.menu-navbar ul li a {
+    text-decoration: none;
+    color: #e5e5e5;
+    font-size: 18px;
+    display: block;
+    padding: 10px;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+.menu-navbar ul li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+/* ========== NETFLIX STYLE ENHANCEMENTS ========== */
+
+/* Page background với gradient */
+.page-background {
+    background: #141414;
+    min-height: 100vh;
+    color: #fff;
+}
+
+/* Container enhanced */
+.container-enhanced {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 4%;
+}
+
+/* Glass effect cho search results */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ========== NETFLIX STYLE BOOKS CONTAINER ========== */
+
+/* Category Section */
+.category-section {
+    margin-bottom: 3vw;
+    position: relative;
+}
+
+/* Category Header - Netflix Style */
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0 10px;
+    position: relative;
+    z-index: 10;
+}
+
+.category-title {
+    font-size: 1.4vw;
+    font-weight: 700;
+    color: #e5e5e5;
+    margin: 0;
+    line-height: 1.25;
+    display: inline-block;
+}
+
+/* Count badge */
+.count-badge {
+    background: rgba(255, 255, 255, 0.15);
+    color: #999;
+    font-size: 0.8em;
+    padding: 4px 12px;
+    border-radius: 4px;
+    margin-left: 10px;
+    font-weight: normal;
+}
+
+/* Expand button - Netflix style */
+.expand-button {
+    color: #54b9c9;
+    font-size: 0.9vw;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-weight: 600;
+}
+
+.category-section:hover .expand-button {
+    opacity: 1;
+}
+
+.expand-button:hover {
+    color: #fff;
+}
+
+/* Books Container - Netflix Horizontal Scroll */
+.books-container {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    gap: 0.5vw;
+    padding: 0.5vw 0;
+    margin: 0 -4%;
+    padding: 0 4%;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    cursor: default;
+}
+
+.books-container::-webkit-scrollbar {
+    display: none;
+}
+
+/* Book Grid - Netflix Style */
+.book-grid {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    gap: 0.5vw;
+    padding: 0.5vw 0;
+    margin: 0 -4%;
+    padding: 0 4%;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.book-grid::-webkit-scrollbar {
+    display: none;
+}
+
+/* Book Card - Netflix Style */
+.book-card {
+    flex: 0 0 auto;
+    width: 16.66%;
+    min-width: 200px;
+    max-width: 250px;
+    text-align: center;
+    background: transparent;
+    padding: 0;
+    border-radius: 4px;
+    box-shadow: none;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.book-card:hover {
+    transform: scale(1.05);
+    z-index: 10;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8);
+}
+
+/* Book Image Container */
+.book-image-container {
+    position: relative;
+    width: 100%;
+    padding-top: 150%;
+    overflow: hidden;
+    border-radius: 4px;
+    background: #1a1a1a;
+}
+
+.book-card img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+/* Book Overlay */
+.book-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.9) 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.book-card:hover .book-overlay {
+    opacity: 1;
+}
+
+/* Book Info - Netflix Style */
+.book-info {
+    padding: 0.5vw;
+    background: transparent;
+    display: none;
+}
+
+.book-card:hover .book-info {
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
+    padding: 15px 10px 10px;
+    border-radius: 0 0 4px 4px;
+}
+
+.book-card h3,
+.book-title {
+    font-size: 0.9em;
+    font-weight: 600;
+    color: #fff;
+    margin: 5px 0;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.book-card p,
+.book-meta {
+    font-size: 0.75em;
+    color: #999;
+    margin: 2px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.book-meta i {
+    font-size: 0.9em;
+    color: #666;
+}
+
+/* ========== BOOK DETAIL - DARK THEME ========== */
+.book-detail {
+    display: flex;
+    gap: 40px;
+    width: 70%;
+    max-width: 900px;
+    background: rgba(30, 30, 30, 0.95);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+    align-items: center;
+    color: #e5e5e5;
+}
+
+.book-image {
+    flex: 1;
+    text-align: center;
+}
+
+.book-image img {
+    width: 200px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.book-info h3 {
+    font-size: 28px;
+    margin-bottom: 15px;
+    color: #fff;
+}
+
+.book-info p {
+    font-size: 18px;
+    margin: 8px 0;
+    color: #ccc;
+}
+
+.book-description {
+    margin-top: 30px;
+    width: 70%;
+    max-width: 900px;
+    text-align: justify;
+    padding: 20px;
+    border-top: 3px solid #333;
+    font-size: 18px;
+    background: rgba(25, 25, 25, 0.95);
+    border-radius: 8px;
+    color: #e5e5e5;
+}
+
+/* ========== BUTTONS - DARK THEME ========== */
+.btn {
+    display: block;
+    margin-top: 15px;
+    padding: 12px 20px;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 6px;
+    transition: 0.3s;
+    font-size: 18px;
+}
+
+.borrow-btn { background: #28a745; }
+.borrow-btn:hover { background: #218838; }
+
+.read-btn { background: #007bff; }
+.read-btn:hover { background: #0056b3; }
+
+.download-btn { background: #ffc107; color: #000; }
+.download-btn:hover { background: #e0a800; }
+
+.show-more-btn {
+    padding: 6px 12px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.show-more-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* ========== SEARCH FORM - DARK THEME ========== */
+.search-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 8px 15px;
+    border-radius: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    width: 50%;
+    margin: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.search-form input {
+    border: none;
+    padding: 8px;
+    border-radius: 20px;
+    outline: none;
+    width: 85%;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.search-form input::placeholder {
+    color: #999;
+}
+
+.search-form button {
+    background: #e50914; /* Netflix red */
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-left: 10px;
+}
+
+.search-form button:hover {
+    background: #f40612;
+}
+
+/* ========== USER MENU - DARK THEME ========== */
+.dropbtn {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: rgba(20, 20, 20, 0.95);
+    min-width: 160px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.5);
+    z-index: 1;
+    right: 0;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-content a {
+    color: #e5e5e5;
+    padding: 10px;
+    text-decoration: none;
+    display: block;
+    border: none;
+    background: none;
+    width: 88%;
+    cursor: pointer;
+    padding-left: 10px;
+    border-radius: 10px;
+}
+
+.dropdown-content form {
+    color: #e5e5e5;
+    padding: 10px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+    border: none;
+    background: none;
+    width: 100%;
+    cursor: pointer;
+    padding-left: 10px;
+}
+
+.dropdown-content a:hover,
+.dropdown-content form:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* User menu positioning */
+.user-menu {
+    position: absolute;
+    top: -70%;
+    right: 0;
+    width: 70px;
+    height: 70px;
+    margin-bottom: -60px;
+    border-radius: 10px;
+}
+
+.user-menu span {
+    padding: 10px;
+    background-color: rgba(35, 35, 35, 0.95);
+    border-radius: 5px;
+    color: #e5e5e5;
+}
+
+.user-info {
+    text-align: center;
+    padding: 10px;
+    color: #e5e5e5;
+}
+
+.avatar-large {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    margin-bottom: 5px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: 0.3s;
+}
+
+.avatar:hover {
+    border-color: #e50914;
+}
+
+.logout-btn {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #e5e5e5;
+}
+
+.logout-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn-login {
+    position: absolute;
+    top: 20%;
+    right: 0;
+    width: 70px;
+    height: 70px;
+}
+
+.btn-login i {
+    margin-top: -20px;
+    border: 2px solid #fff;
+    padding: 15px;
+    border-radius: 50%;
+    color: #fff;
+}
+
+/* ========== SPECIAL SECTIONS ========== */
+
+/* Search Results Grid */
+#search-results .book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1vw;
+    overflow: visible;
+    margin: 0;
+    padding: 0;
+}
+
+#search-results .book-card {
+    width: 100%;
+    max-width: none;
+}
+
+/* Recommend Section */
+#recommend-section .category-title {
+    color: #ffa500;
+}
+
+#recommend-section .book-overlay i {
+    color: #ffd700;
+}
+
+/* Digital Badge for Ebooks */
+.digital-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(138, 43, 226, 0.9);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.7em;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    z-index: 5;
+}
+
+/* Floating elements - Hidden */
+.floating-elements {
+    display: none;
+}
+
+/* Remove max-height constraints */
+.books-container.grid-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.book-grid.max-h-\[600px\] {
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* ========== MEDIA QUERIES ========== */
+@media (max-width: 1400px) {
+    .book-card {
+        width: 20%;
+        min-width: 180px;
+    }
+}
+
+@media (max-width: 1000px) {
+    .book-card {
+        width: 25%;
+        min-width: 150px;
+    }
+    
+    .category-title {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        grid-template-areas: 
+            "header"
+            "content"
+            "menu"
+            "footer";
+        grid-template-columns: 1fr;
+    }
+
+    .menu-navbar ul {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .menu-navbar ul li {
+        width: 100%;
+    }
+
+    .books-container,
+    .book-grid {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .book-card {
+        width: 33.33%;
+        min-width: 120px;
+        flex-wrap: wrap;
+    }
+
+    .book-card img {
+        height: 180px;
+    }
+
+    .search-form {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .search-form input {
+        width: 100%;
+    }
+
+    .book-detail {
+        flex-direction: column;
+        width: 90%;
+    }
+
+    .book-image img {
+        width: 150px;
+    }
+
+    .book-info h3 {
+        font-size: 20px;
+    }
+
+    .book-info p {
+        font-size: 16px;
+    }
+
+    .user-menu {
+        top: 10px;
+        right: 5px;
+    }
+
+    .dropdown-content {
+        min-width: 120px;
+    }
+
+    .avatar-large {
+        width: 50px;
+        height: 50px;
+    }
+
+    .avatar {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .container-enhanced {
+        padding: 0 3%;
+    }
+}
+
+@media (max-width: 500px) {
+    .book-card {
+        width: 40%;
+        min-width: 100px;
+    }
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.rotate-180 {
+    transform: rotate(180deg);
+}
+
+/* General link colors for dark theme */
+a {
+    color: #e5e5e5;
+}
+
+a:hover {
+    color: #fff;
+}

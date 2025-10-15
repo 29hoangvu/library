@@ -1,0 +1,136 @@
+/* CSS chung */
+html, body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background-color: #f4f4f4;
+    display: block;
+    margin: 0;
+}
+
+/* Thanh điều hướng */
+.navbar {
+    width: 100%;
+    background-color: #2c3e50;
+    padding: 10px;
+    color: white;
+    text-align: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.navbar h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 10%;
+    background-color: #2c3e50;
+    color: white;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    height: 100vh;
+    position: fixed;
+    top: 50px;
+    left: 0;
+}
+
+.sidebar h2 {
+    font-size: 24px;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    margin: 15px 0;
+}
+
+.sidebar ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    display: block;
+    padding: 10px;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.sidebar ul li a:hover {
+    background-color: #34495e;
+}
+
+/* Content */
+.content {
+    margin-left: 13%;
+    padding: 10px;
+}
+
+.content h2 {
+    text-align: center;
+}
+
+
+.form {
+    max-width: 1000px;
+    margin: auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Chia form thành 2 cột */
+    gap: 15px;  
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+form input, form select {
+    width: 90%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+
+}
+form select{
+    width: 95%;
+}
+/* Căn chỉnh nút thêm sách 
+.button-group {
+    grid-column: span 2;  Trải dài cả 2 cột 
+    display: flex;
+    justify-content: center;  Căn giữa theo chiều ngang 
+    width: 100%;  Chiếm toàn bộ chiều rộng 
+    margin-top: 20px;  Tạo khoảng cách với các input trên 
+}*/
+
+.btn {
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    width: 50%;
+    margin-left: 25%;
+}
+
+.btn button:hover {
+    background-color: #0056b3;
+}
+
+
+.col{
+    margin-bottom: 10px;
+}

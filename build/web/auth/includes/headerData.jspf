@@ -1,0 +1,20 @@
+<%@ page import="java.sql.*" %>
+<%@ page import="Servlet.DBConnection" %>
+<%
+    try (Connection conn = DBConnection.getConnection();
+         Statement stmt = conn.createStatement()) {
+
+        ResultSet rs1 = stmt.executeQuery("SELECT COUNT(*) AS total FROM book");
+        if (rs1.next()) {
+            request.setAttribute("totalBooks", rs1.getInt("total"));
+        }
+
+        ResultSet rs2 = stmt.executeQuery("SELECT COUNT(*) AS borrowed FROM borrow WHERE status = 'borrowed'");
+        if (rs2.next()) {
+            request.setAttribute("totalBorrowed", rs2.getInt("borrowed"));
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+%>

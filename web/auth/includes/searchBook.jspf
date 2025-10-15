@@ -1,0 +1,110 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.sql.*, java.util.*, Servlet.DBConnection" %>
+<%
+    // Kết quả mặc định (phòng khi DB lỗi)
+    List<Map<String, Object>> searchBooks = new ArrayList<>();
+    request.setAttribute("books", searchBooks);
+    request.setAttribute("totalBooks", 0);
+
+    String searchQuery = request.getParameter("search");
+
+    // Pagination lấy từ request attributes (đã set ở file gọi)
+    Integer searchCurrentPageAttr   = (Integer) request.getAttribute("currentPage");
+    int     searchCurrentPage       = (searchCurrentPageAttr != null && searchCurrentPageAttr > 0) ? searchCurrentPageAttr : 1;
+
+    Integer searchBooksPerPageAttr  = (Integer) request.getAttribute("booksPerPage");
+    int     searchBooksPerPage      = (searchBooksPerPageAttr != null && searchBooksPerPageAttr > 0) ? searchBooksPerPageAttr : 20;
+
+    // Chuẩn bị điều kiện tìm kiếm
+    List<String> whereClauses = new ArrayList<>();
+    List<String> params = new ArrayList<>();
+
+    // Trạng thái không bị xóa
+    whereClauses.add("b.status <> 'DELETED'");
+
+    if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+        String[] keywords = searchQuery.trim().toLowerCase().split("\\s+");
+        for (String kw : keywords) {
+            whereClauses.add("(LOWER(b.title) LIKE ? OR LOWER(a.name) LIKE ? OR LOWER(b.isbn) LIKE ?)");
+            params.add("%" + kw + "%");
+            params.add("%" + kw + "%");
+            params.add("%" + kw + "%");
+        }
+    }
+
+    String whereSql = whereClauses.isEmpty() ? "" : " WHERE " + String.join(" AND ", whereClauses);
+
+    // COUNT DISTINCT
+    String countSql =
+        "SELECT COUNT(DISTINCT b.isbn) AS total " +
+        "FROM book b " +
+        "JOIN author a ON b.authorId = a.id " +
+        "LEFT JOIN bookitem bi ON b.isbn = bi.book_isbn " +
+        "LEFT JOIN rack r ON bi.rack_id = r.rack_id " +
+        whereSql;
+
+    // DATA SELECT
+    String dataSql =
+        "SELECT b.isbn, b.title, a.name AS author, r.rack_number, b.quantity " +
+        "FROM book b " +
+        "JOIN author a ON b.authorId = a.id " +
+        "LEFT JOIN bookitem bi ON b.isbn = bi.book_isbn " +
+        "LEFT JOIN rack r ON bi.rack_id = r.rack_id " +
+        whereSql + " " +
+        "GROUP BY b.isbn, b.title, author, b.quantity, r.rack_number " +
+        // Ưu tiên kệ có giá trị trước; sau đó sắp A1, A2, B1...
+        "ORDER BY (CASE WHEN r.rack_number IS NULL OR r.rack_number = '' THEN 1 ELSE 0 END), " +
+        "         LEFT(COALESCE(r.rack_number,''), 1), " +
+        "         CAST(SUBSTRING(COALESCE(r.rack_number,''), 2) AS UNSIGNED) " +
+        "LIMIT ? OFFSET ?";
+
+    try (Connection searchConn = DBConnection.getConnection()) {
+        if (searchConn == null) {
+            // Không có kết nối: trả rỗng, không ném lỗi ra UI
+            // (Có thể ghi log server-side nếu cần)
+        } else {
+            // Đếm tổng
+            try (PreparedStatement psCount = searchConn.prepareStatement(countSql)) {
+                int idx = 1;
+                for (String p : params) psCount.setString(idx++, p);
+                try (ResultSet rs = psCount.executeQuery()) {
+                    if (rs.next()) {
+                        request.setAttribute("totalBooks", rs.getInt("total"));
+                    }
+                }
+            }
+
+            // Lấy dữ liệu trang hiện tại
+            try (PreparedStatement psData = searchConn.prepareStatement(dataSql)) {
+                int idx = 1;
+                for (String p : params) psData.setString(idx++, p);
+                psData.setInt(idx++, searchBooksPerPage);
+                psData.setInt(idx,   (searchCurrentPage - 1) * searchBooksPerPage);
+
+                try (ResultSet rs = psData.executeQuery()) {
+                    while (rs.next()) {
+                        Map<String, Object> row = new HashMap<>();
+                        row.put("isbn", rs.getString("isbn"));
+                        row.put("title", rs.getString("title"));
+                        row.put("author", rs.getString("author"));
+                        String rack = rs.getString("rack_number");
+                        row.put("rack", (rack == null || rack.isBlank()) ? "Chưa sắp xếp" : rack);
+
+                        // quantity có thể null -> dùng getObject để tránh 0 giả
+                        Object qObj = rs.getObject("quantity");
+                        row.put("quantity", qObj == null ? null : ((Number) qObj).intValue());
+
+                        searchBooks.add(row);
+                    }
+                }
+            }
+
+            // Set lại (đã set mặc định ở đầu, set lần nữa sau khi có dữ liệu)
+            request.setAttribute("books", searchBooks);
+        }
+    } catch (SQLException e) {
+        // In lỗi ra log server, hạn chế lộ SQL ra UI
+        e.printStackTrace();
+        out.println("<p style='color:red;'>Lỗi truy vấn dữ liệu danh sách sách.</p>");
+    }
+%>
