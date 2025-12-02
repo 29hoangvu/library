@@ -19,6 +19,15 @@
             <file>file:/D:/Năm%204/library-management-system/src/java/service/AdminResetPasswordService.java</file>
             <file>file:/D:/Năm%204/library-management-system/src/java/api/admin/BookItemApi.java</file>
             <file>file:/D:/Năm%204/library-management-system/src/java/api/admin/AdminBorrowApi.java</file>
+            <file>file:/D:/Năm%204/library-management-system/web/auth/includes/header.jsp</file>
+            <file>file:/D:/Năm%204/library-management-system/web/auth/lib/adminBorrowedBooks.jsp</file>
+            <file>file:/D:/Năm%204/library-management-system/web/auth/admin.css</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/api/borrows/BorrowApi.java</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/api/borrows/BorrowBookApi.java</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/service/AuthService.java</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/service/BookService.java</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/service/BorrowService.java</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/dto/borrow/BorrowRegisterRequest.java</file>
         </group>
     </open-files>
 </project-private>
