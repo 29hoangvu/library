@@ -65,7 +65,6 @@ public class BorrowBookApi extends BaseApiServlet {
             ), 201);
 
         } catch (IllegalStateException e) {
-            // Map các mã lỗi business ra HTTP code + message
             String code = e.getMessage();
             if ("LIMIT_REACHED".equals(code)) {
                 writeJson(resp, Map.of(
@@ -74,6 +73,10 @@ public class BorrowBookApi extends BaseApiServlet {
             } else if ("NO_COPY_AVAILABLE".equals(code)) {
                 writeJson(resp, Map.of(
                         "message", "Không còn bản vật lý nào của sách này sẵn sàng để mượn!"
+                ), 409);
+            } else if ("DUPLICATE_BORROW".equals(code)) {
+                writeJson(resp, Map.of(
+                        "message", "Bạn đã mượn hoặc đã đăng ký mượn sách này rồi. Vui lòng không đăng ký trùng."
                 ), 409);
             } else {
                 writeJson(resp, Map.of("message", "Lỗi nghiệp vụ: " + code), 400);

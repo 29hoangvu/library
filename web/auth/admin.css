@@ -1,620 +1,128 @@
+/* ==================== ADVANCED VARIABLES ==================== */
 :root {
-    --primary: #7c3aed;
-    --primary-soft: #a78bfa;
-    --secondary: #3b82f6;
-    --accent: #ec4899;
-    --cyan: #06b6d4;
-    --glass-bg: rgba(30, 27, 75, 0.8);
-    --glass-border: rgba(139, 92, 246, 0.5);
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --glow-color: rgba(79, 172, 254, 0.6);
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-/* Background siêu mạnh với nhiều lớp gradient */
-body.admin-gradient {
-    min-height: 100vh;
-    background: 
-        radial-gradient(circle at 20% 80%, rgba(124, 58, 237, 0.5) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.5) 0%, transparent 50%),
-        radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.3) 0%, transparent 50%),
-        linear-gradient(135deg, #1e1b4b 0%, #0f172a 25%, #1e1b4b 50%, #0f172a 75%, #1e1b4b 100%);
+/* ==================== ANIMATED GRADIENT BACKGROUND ==================== */
+.admin-gradient {
+    background: linear-gradient(-45deg, #1a1a2e, #16213e, #0f3460, #1a1a2e);
     background-size: 400% 400%;
-    animation: gradient-shift 20s ease infinite;
-    color: #e5e7eb;
+    animation: gradientShift 15s ease infinite;
     position: relative;
     overflow-x: hidden;
 }
 
-@keyframes gradient-shift {
+@keyframes gradientShift {
     0% { background-position: 0% 50%; }
-    25% { background-position: 50% 75%; }
     50% { background-position: 100% 50%; }
-    75% { background-position: 50% 25%; }
     100% { background-position: 0% 50%; }
 }
 
-/* Orbs phát sáng mạnh mẽ */
-body.admin-gradient::before,
-body.admin-gradient::after {
-    content: "";
-    position: fixed;
-    border-radius: 999px;
-    filter: blur(120px);
-    opacity: 0.85;
-    z-index: -2;
-    animation: float-orb 35s infinite alternate ease-in-out;
-}
-
-body.admin-gradient::before {
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, #7c3aed, #3b82f6, #06b6d4);
-    top: -150px;
-    left: -120px;
-    box-shadow: 
-        0 0 200px rgba(124, 58, 237, 0.8),
-        0 0 400px rgba(59, 130, 246, 0.6);
-}
-
-body.admin-gradient::after {
-    width: 700px;
-    height: 700px;
-    background: radial-gradient(circle, #ec4899, #a78bfa, #7c3aed);
-    bottom: -180px;
-    right: -140px;
-    box-shadow: 
-        0 0 200px rgba(236, 72, 153, 0.8),
-        0 0 400px rgba(167, 139, 250, 0.6);
-}
-
-@keyframes float-orb {
-    0% { 
-        transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
-        opacity: 0.85;
-    }
-    33% { 
-        transform: translate3d(60px, -50px, 0) scale(1.15) rotate(120deg);
-        opacity: 0.95;
-    }
-    66% { 
-        transform: translate3d(-40px, 60px, 0) scale(0.95) rotate(240deg);
-        opacity: 0.9;
-    }
-    100% { 
-        transform: translate3d(30px, -30px, 0) scale(1.1) rotate(360deg);
-        opacity: 0.85;
-    }
-}
-
-/* Particles phát sáng */
+/* ==================== ENHANCED PARTICLES ==================== */
 .particle {
     position: fixed;
-    border-radius: 999px;
-    background: radial-gradient(circle, rgba(167, 139, 250, 0.7), rgba(59, 130, 246, 0.5), transparent);
-    filter: blur(60px);
-    opacity: 0.7;
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(circle, rgba(79, 172, 254, 0.8), transparent);
+    border-radius: 50%;
     pointer-events: none;
-    z-index: -1;
-    animation: particle-float 30s ease-in-out infinite;
-    box-shadow: 
-        0 0 80px rgba(124, 58, 237, 0.9),
-        0 0 150px rgba(59, 130, 246, 0.7);
+    animation: float 20s infinite;
+    box-shadow: 0 0 20px rgba(79, 172, 254, 0.6);
+    z-index: 1;
 }
 
-.particle.p1 { 
-    width: 180px; 
-    height: 180px; 
-    top: 15%; 
-    left: 5%;
-    animation-delay: 0s;
-}
-.particle.p2 { 
-    width: 140px;  
-    height: 140px;  
-    top: 65%; 
-    left: 18%; 
-    animation-duration: 35s;
-    animation-delay: -5s;
-}
-.particle.p3 { 
-    width: 160px; 
-    height: 160px; 
-    top: 30%; 
-    right: 8%;
-    animation-duration: 32s;
-    animation-delay: -10s;
-}
-.particle.p4 { 
-    width: 100px;  
-    height: 100px;  
-    bottom: 12%; 
-    right: 25%;
-    animation-duration: 38s;
-    animation-delay: -15s;
-}
-
-@keyframes particle-float {
-    0%, 100%   { 
-        transform: translate3d(0, 0, 0) scale(1); 
-        opacity: 0.5; 
-    }
-    20%  { 
-        transform: translate3d(30px, -40px, 0) scale(1.15); 
-        opacity: 0.7; 
-    }
-    40%  { 
-        transform: translate3d(-25px, 50px, 0) scale(0.95); 
-        opacity: 0.8; 
-    }
-    60%  { 
-        transform: translate3d(40px, 30px, 0) scale(1.1); 
-        opacity: 0.6; 
-    }
-    80%  { 
-        transform: translate3d(-35px, -25px, 0) scale(0.9); 
-        opacity: 0.75; 
-    }
-}
-
-/* Header với gradient siêu mạnh */
-.glass-header {
-    background: linear-gradient(135deg, 
-        rgba(124, 58, 237, 0.95), 
-        rgba(59, 130, 246, 0.9), 
-        rgba(6, 182, 212, 0.95),
-        rgba(167, 139, 250, 0.9));
-    background-size: 400% 400%;
-    animation: header-gradient 15s ease infinite;
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border-bottom: 2px solid rgba(167, 139, 250, 0.6);
-    box-shadow: 
-        0 20px 60px rgba(124, 58, 237, 0.6),
-        0 0 100px rgba(59, 130, 246, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    position: relative;
-}
-
-.glass-header::before {
-    content: "";
+.particle::before {
+    content: '';
     position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, transparent 100%);
-    pointer-events: none;
-}
-
-@keyframes header-gradient {
-    0%   { background-position: 0% 50%; }
-    25%  { background-position: 50% 100%; }
-    50%  { background-position: 100% 50%; }
-    75%  { background-position: 50% 0%; }
-    100% { background-position: 0% 50%; }
-}
-
-/* Sidebar với glass effect mạnh */
-.glass-sidebar {
-    background: linear-gradient(165deg, 
-        rgba(30, 27, 75, 0.95), 
-        rgba(15, 23, 42, 0.98),
-        rgba(30, 58, 138, 0.92));
-    border-right: 2px solid rgba(139, 92, 246, 0.6);
-    backdrop-filter: blur(25px) saturate(180%);
-    -webkit-backdrop-filter: blur(25px) saturate(180%);
-    box-shadow:
-        0 0 0 1px rgba(124, 58, 237, 0.3),
-        20px 0 60px rgba(30, 27, 75, 0.95),
-        0 0 100px rgba(124, 58, 237, 0.4);
-}
-
-.glass-sidebar::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 2px;
+    width: 100%;
     height: 100%;
-    background: linear-gradient(to bottom, 
-        transparent,
-        rgba(167, 139, 250, 0.8),
-        rgba(59, 130, 246, 0.8),
-        rgba(236, 72, 153, 0.8),
-        transparent);
-    animation: sidebar-glow 3s ease-in-out infinite;
+    background: inherit;
+    border-radius: 50%;
+    animation: pulse 3s ease-in-out infinite;
 }
 
-@keyframes sidebar-glow {
-    0%, 100% { opacity: 0.5; }
-    50% { opacity: 1; }
+.p1 { width: 6px; height: 6px; top: 20%; left: 10%; animation-duration: 25s; animation-delay: 0s; }
+.p2 { width: 8px; height: 8px; top: 60%; left: 80%; animation-duration: 30s; animation-delay: 2s; }
+.p3 { width: 5px; height: 5px; top: 40%; left: 30%; animation-duration: 20s; animation-delay: 4s; }
+.p4 { width: 7px; height: 7px; top: 80%; left: 60%; animation-duration: 28s; animation-delay: 1s; }
+
+/* Thêm nhiều particles */
+.particle.p5 { width: 4px; height: 4px; top: 15%; left: 50%; animation-duration: 22s; }
+.particle.p6 { width: 6px; height: 6px; top: 70%; left: 20%; animation-duration: 26s; }
+.particle.p7 { width: 5px; height: 5px; top: 35%; left: 70%; animation-duration: 24s; }
+.particle.p8 { width: 7px; height: 7px; top: 55%; left: 90%; animation-duration: 27s; }
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0.3; }
+    25% { transform: translateY(-100px) translateX(50px) rotate(90deg); opacity: 0.6; }
+    50% { transform: translateY(-200px) translateX(-30px) rotate(180deg); opacity: 0.4; }
+    75% { transform: translateY(-150px) translateX(80px) rotate(270deg); opacity: 0.7; }
 }
 
-/* Dropdown với blur mạnh */
-.glass-dropdown {
-    background: linear-gradient(165deg, 
-        rgba(30, 27, 75, 0.98), 
-        rgba(15, 23, 42, 0.99));
-    border: 2px solid rgba(139, 92, 246, 0.5);
-    backdrop-filter: blur(25px) saturate(180%);
-    -webkit-backdrop-filter: blur(25px) saturate(180%);
-    box-shadow: 
-        0 25px 60px rgba(15, 23, 42, 0.95),
-        0 0 80px rgba(124, 58, 237, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.5; }
 }
 
-/* Cards với hiệu ứng mạnh mẽ */
+/* ==================== GLASS MORPHISM ADVANCED ==================== */
+.glass-header {
+    background: rgba(15, 52, 96, 0.75);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.125);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37),
+                0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+    transition: var(--transition-smooth);
+}
+
+.glass-header.scrolled {
+    background: rgba(15, 52, 96, 0.9);
+    padding: 0.75rem 0;
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.5);
+}
+
+.glass-sidebar {
+    background: linear-gradient(135deg, rgba(30, 60, 114, 0.8) 0%, rgba(42, 82, 152, 0.7) 100%);
+    backdrop-filter: blur(25px) saturate(200%);
+    -webkit-backdrop-filter: blur(25px) saturate(200%);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3),
+                inset -1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
 .glass-card-soft {
-    background: radial-gradient(circle at top left, 
-        rgba(139, 92, 246, 0.25), 
-        rgba(30, 27, 75, 0.9));
-    border: 2px solid rgba(139, 92, 246, 0.5);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    box-shadow:
-        0 15px 45px rgba(15, 23, 42, 0.7),
-        0 0 0 1px rgba(124, 58, 237, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    position: relative;
-    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: var(--transition-smooth);
 }
 
-.glass-card-soft::before {
-    content: "";
-    position: absolute;
-    inset: -50%;
-    background: conic-gradient(from 0deg at 50% 50%, 
-        transparent 0deg,
-        rgba(167, 139, 250, 0.3) 90deg,
-        transparent 180deg,
-        rgba(59, 130, 246, 0.3) 270deg,
-        transparent 360deg);
-    animation: card-rotate 8s linear infinite;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+.glass-card-soft:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(79, 172, 254, 0.4);
+    box-shadow: 0 8px 32px rgba(79, 172, 254, 0.2);
+    transform: translateY(-2px);
 }
 
-.glass-card-soft:hover::before {
-    opacity: 1;
+.glass-dropdown {
+    background: linear-gradient(135deg, rgba(30, 60, 114, 0.95) 0%, rgba(42, 82, 152, 0.9) 100%);
+    backdrop-filter: blur(30px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    animation: slideDownFade 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes card-rotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Neon title siêu mạnh */
-.neon-title {
-    letter-spacing: 0.05em;
-    background: linear-gradient(135deg, #a78bfa, #60a5fa, #ec4899, #a78bfa);
-    background-size: 300% 300%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: neon-gradient 8s ease infinite;
-    filter: drop-shadow(0 0 10px rgba(167, 139, 250, 0.9))
-            drop-shadow(0 0 25px rgba(59, 130, 246, 0.8))
-            drop-shadow(0 0 45px rgba(236, 72, 153, 0.7));
-}
-
-@keyframes neon-gradient {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-}
-
-/* Button glow siêu mạnh */
-.btn-glow {
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    background: linear-gradient(135deg, 
-        rgba(124, 58, 237, 0.2), 
-        rgba(59, 130, 246, 0.15));
-}
-
-.btn-glow::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at center, 
-        rgba(248, 250, 252, 0.8), 
-        transparent 70%);
-    opacity: 0;
-    transform: translate3d(-50%, -50%, 0) scale(0.5);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.btn-glow::after {
-    content: "";
-    position: absolute;
-    inset: -2px;
-    background: linear-gradient(135deg, 
-        rgba(167, 139, 250, 0.6),
-        rgba(59, 130, 246, 0.6),
-        rgba(236, 72, 153, 0.6));
-    border-radius: inherit;
-    opacity: 0;
-    z-index: -1;
-    filter: blur(10px);
-    transition: opacity 0.3s ease;
-}
-
-.btn-glow:hover::before {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-}
-
-.btn-glow:hover::after {
-    opacity: 1;
-}
-
-.btn-glow:hover {
-    transform: translateY(-2px) scale(1.03);
-    box-shadow:
-        0 15px 50px rgba(124, 58, 237, 0.8),
-        0 0 60px rgba(59, 130, 246, 0.9),
-        0 0 100px rgba(236, 72, 153, 0.6);
-}
-
-/* Card 3D siêu mạnh */
-.card-3d {
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    transform-style: preserve-3d;
-    perspective: 1000px;
-}
-
-.card-3d:hover {
-    transform: translateY(-4px) translateZ(20px) scale(1.02) 
-               rotateX(2deg) rotateY(-2deg);
-    box-shadow:
-        0 25px 60px rgba(124, 58, 237, 0.9),
-        0 0 80px rgba(59, 130, 246, 0.8),
-        0 0 120px rgba(236, 72, 153, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    border-color: rgba(167, 139, 250, 0.9);
-}
-
-/* Shimmer effect cực mạnh */
-.shimmer {
-    position: relative;
-    overflow: hidden;
-}
-
-.shimmer::after {
-    content: "";
-    position: absolute;
-    top: -150%;
-    left: -50%;
-    width: 100%;
-    height: 400%;
-    background: linear-gradient(
-        120deg,
-        transparent,
-        rgba(248, 250, 252, 0.1),
-        rgba(167, 139, 250, 0.7),
-        rgba(59, 130, 246, 0.7),
-        rgba(248, 250, 252, 0.1),
-        transparent
-    );
-    opacity: 0;
-    transform: skewX(-25deg);
-    transition: opacity 0.3s ease;
-}
-
-.shimmer:hover::after {
-    opacity: 1;
-    animation: shimmer-move 1.2s ease-in-out;
-}
-
-@keyframes shimmer-move {
-    0% { transform: translate3d(-100%, 0, 0) skewX(-25deg); }
-    100% { transform: translate3d(150%, 0, 0) skewX(-25deg); }
-}
-
-/* Badge ripple mạnh mẽ */
-.badge-ripple {
-    position: relative;
-    overflow: visible;
-}
-
-.badge-ripple::before,
-.badge-ripple::after {
-    content: "";
-    position: absolute;
-    inset: -3px;
-    border-radius: inherit;
-    border: 2px solid rgba(248, 113, 113, 0.9);
-    animation: badge-pulse 1.6s ease-out infinite;
-}
-
-.badge-ripple::after {
-    animation-delay: 0.8s;
-}
-
-@keyframes badge-pulse {
-    0% {
-        transform: scale(0.85);
-        opacity: 1;
-        border-width: 3px;
-    }
-    70% {
-        transform: scale(1.5);
-        opacity: 0;
-        border-width: 1px;
-    }
-    100% {
-        transform: scale(1.5);
-        opacity: 0;
-    }
-}
-
-/* Icon pulse với glow */
-.icon-soft-pulse {
-    animation: soft-pulse-glow 2.5s ease-in-out infinite;
-}
-
-@keyframes soft-pulse-glow {
-    0%, 100% { 
-        transform: scale(1); 
-        opacity: 0.9;
-        filter: drop-shadow(0 0 2px rgba(167, 139, 250, 0.5));
-    }
-    50% { 
-        transform: scale(1.12); 
-        opacity: 1;
-        filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.9))
-                drop-shadow(0 0 15px rgba(59, 130, 246, 0.7));
-    }
-}
-
-/* Scrollbar đẹp mắt */
-::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-}
-
-::-webkit-scrollbar-track {
-    background: linear-gradient(to bottom, 
-        rgba(30, 27, 75, 0.95), 
-        rgba(15, 23, 42, 0.95));
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, 
-        #7c3aed, 
-        #3b82f6, 
-        #06b6d4,
-        #ec4899);
-    border-radius: 10px;
-    border: 2px solid rgba(30, 27, 75, 0.5);
-    box-shadow: 
-        0 0 10px rgba(124, 58, 237, 0.8),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to bottom, 
-        #6d28d9, 
-        #2563eb, 
-        #0891b2,
-        #db2777);
-    box-shadow: 
-        0 0 20px rgba(124, 58, 237, 1),
-        0 0 40px rgba(59, 130, 246, 0.8),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-/* Backdrop blur mạnh */
-#sidebarBackdrop {
-    backdrop-filter: blur(8px) saturate(120%);
-    -webkit-backdrop-filter: blur(8px) saturate(120%);
-    background: rgba(15, 23, 42, 0.6);
-}
-
-/* Menu link với underline animation */
-.menu-link {
-    position: relative;
-    overflow: hidden;
-}
-
-.menu-link::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 0;
-    height: 3px;
-    border-radius: 999px;
-    background: linear-gradient(to right, 
-        #a78bfa, 
-        #60a5fa, 
-        #06b6d4,
-        #ec4899);
-    box-shadow: 0 0 10px rgba(167, 139, 250, 0.9);
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.menu-link:hover::before {
-    width: 100%;
-}
-
-.menu-link::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at center, 
-        rgba(167, 139, 250, 0.15), 
-        transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.menu-link:hover::after {
-    opacity: 1;
-}
-
-/* Hover tilt với glow */
-.hover-tilt {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hover-tilt:hover {
-    transform: translateY(-2px) rotateX(5deg) rotateY(-5deg);
-    filter: drop-shadow(0 8px 16px rgba(124, 58, 237, 0.6))
-            drop-shadow(0 0 25px rgba(59, 130, 246, 0.5));
-}
-
-/* Breadcrumb bar với glass */
-.glass-breadcrumb {
-    background: linear-gradient(to right, 
-        rgba(30, 27, 75, 0.9), 
-        rgba(15, 23, 42, 0.95),
-        rgba(30, 58, 138, 0.85));
-    border-top: 2px solid rgba(139, 92, 246, 0.6);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    box-shadow: 
-        0 -10px 30px rgba(124, 58, 237, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-/* Thêm glow cho các icon */
-.fas, .far, .fab {
-    filter: drop-shadow(0 0 4px currentColor);
-    transition: filter 0.3s ease;
-}
-
-.menu-link:hover .fas,
-.menu-link:hover .far,
-.menu-link:hover .fab {
-    filter: drop-shadow(0 0 8px currentColor)
-            drop-shadow(0 0 12px currentColor);
-}
-
-/* Input focus với glow mạnh */
-input:focus {
-    box-shadow: 
-        0 0 0 3px rgba(167, 139, 250, 0.3),
-        0 0 25px rgba(124, 58, 237, 0.6),
-        0 0 50px rgba(59, 130, 246, 0.4) !important;
-}
-
-/* Details/summary với animation */
-details summary {
-    transition: all 0.3s ease;
-}
-
-details[open] summary {
-    background: linear-gradient(135deg, 
-        rgba(124, 58, 237, 0.2), 
-        rgba(59, 130, 246, 0.15));
-    box-shadow: 
-        0 0 20px rgba(124, 58, 237, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-/* Thêm animation cho page load */
-@keyframes fadeInUp {
+@keyframes slideDownFade {
     from {
         opacity: 0;
-        transform: translateY(30px);
+        transform: translateY(-10px);
     }
     to {
         opacity: 1;
@@ -622,53 +130,585 @@ details[open] summary {
     }
 }
 
-.glass-header,
-.glass-sidebar,
-.glass-card-soft {
-    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+/* ==================== 3D CARD EFFECTS ==================== */
+.card-3d {
+    transform-style: preserve-3d;
+    transition: var(--transition-smooth);
+    position: relative;
 }
 
-.glass-header {
-    animation-delay: 0.1s;
+.card-3d::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(147, 51, 234, 0.1));
+    border-radius: inherit;
+    opacity: 0;
+    transition: var(--transition-smooth);
 }
 
-.glass-sidebar {
-    animation-delay: 0.2s;
+.card-3d:hover {
+    transform: none !important;
+    /* nếu muốn giữ shadow vẫn được */
+    box-shadow: 0 20px 40px rgba(79, 172, 254, 0.25);
 }
 
-.glass-card-soft {
-    animation-delay: 0.3s;
+.card-3d:hover::before {
+    opacity: 1;
 }
 
-/* Thêm glow cho avatar */
-.glass-header [class*="bg-gradient"] {
-    box-shadow: 
-        0 0 20px rgba(167, 139, 250, 0.8),
-        0 0 40px rgba(59, 130, 246, 0.6),
-        inset 0 2px 4px rgba(255, 255, 255, 0.3);
-    animation: avatar-glow 3s ease-in-out infinite;
+/* ==================== BUTTON GLOW & HOVER EFFECTS ==================== */
+.btn-glow {
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition-smooth);
 }
 
-@keyframes avatar-glow {
-    0%, 100% {
-        box-shadow: 
-            0 0 20px rgba(167, 139, 250, 0.8),
-            0 0 40px rgba(59, 130, 246, 0.6);
+.btn-glow::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, transparent, rgba(79, 172, 254, 0.3), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+}
+
+.btn-glow:hover::before {
+    transform: translateX(100%);
+}
+
+.btn-glow:hover {
+    box-shadow: 0 0 20px rgba(79, 172, 254, 0.6),
+                0 0 40px rgba(79, 172, 254, 0.4),
+                inset 0 0 10px rgba(79, 172, 254, 0.2);
+    transform: translateY(-2px);
+}
+
+.hover-tilt {
+    transition: var(--transition-smooth);
+}
+
+.hover-tilt:hover {
+    transform: perspective(500px) rotateX(5deg) rotateY(5deg);
+}
+
+/* ==================== SHIMMER EFFECT ==================== */
+.shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.3), 
+        transparent);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* ==================== ICON ANIMATIONS ==================== */
+.icon-soft-pulse {
+    animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+}
+
+/* ==================== NEON TITLE EFFECT ==================== */
+.neon-title {
+    text-shadow: 0 0 10px rgba(79, 172, 254, 0.8),
+                 0 0 20px rgba(79, 172, 254, 0.6),
+                 0 0 30px rgba(79, 172, 254, 0.4),
+                 0 0 40px rgba(79, 172, 254, 0.2);
+    animation: neonFlicker 3s ease-in-out infinite alternate;
+}
+
+@keyframes neonFlicker {
+    0%, 100% { 
+        text-shadow: 0 0 10px rgba(79, 172, 254, 0.8),
+                     0 0 20px rgba(79, 172, 254, 0.6),
+                     0 0 30px rgba(79, 172, 254, 0.4);
+    }
+    50% { 
+        text-shadow: 0 0 15px rgba(79, 172, 254, 1),
+                     0 0 30px rgba(79, 172, 254, 0.8),
+                     0 0 45px rgba(79, 172, 254, 0.6);
+    }
+}
+
+/* ==================== BADGE RIPPLE EFFECT ==================== */
+.badge-ripple {
+    animation: badgeRipple 1.5s ease-out infinite;
+}
+
+@keyframes badgeRipple {
+    0% {
+        box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7),
+                    0 0 0 0 rgba(244, 63, 94, 0.7);
     }
     50% {
-        box-shadow: 
-            0 0 30px rgba(167, 139, 250, 1),
-            0 0 60px rgba(59, 130, 246, 0.8),
-            0 0 90px rgba(236, 72, 153, 0.5);
+        box-shadow: 0 0 0 10px rgba(244, 63, 94, 0),
+                    0 0 0 20px rgba(244, 63, 94, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(244, 63, 94, 0),
+                    0 0 0 0 rgba(244, 63, 94, 0);
     }
 }
 
-/* Floating animation cho quick action buttons */
-.shimmer.card-3d {
-    animation: float-button 4s ease-in-out infinite;
+/* ==================== NOTIFICATION SHAKE ==================== */
+@keyframes notificationShake {
+    0%, 100% { transform: rotate(0deg); }
+    10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
+    20%, 40%, 60%, 80% { transform: rotate(10deg); }
 }
 
-@keyframes float-button {
-    0%, 100% { transform: translateY(0px); }
+.notification-shake {
+    animation: notificationShake 0.5s ease-in-out;
+}
+
+/* ==================== MENU LINK ENHANCED ==================== */
+.menu-link {
+    position: relative;
+    overflow: hidden;
+}
+
+.menu-link::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: linear-gradient(180deg, #4facfe 0%, #00f2fe 100%);
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.menu-link:hover::before {
+    transform: translateX(0);
+}
+
+.menu-link:hover {
+    background: rgba(79, 172, 254, 0.15);
+    padding-left: 1.25rem;
+}
+
+.menu-link:hover i {
+    animation: iconBounce 0.5s ease;
+}
+
+@keyframes iconBounce {
+    0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-5px); }
+}
+
+/* ==================== BREADCRUMB ANIMATION ==================== */
+.glass-breadcrumb {
+    background: rgba(15, 52, 96, 0.4);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-breadcrumb a {
+    position: relative;
+}
+
+.glass-breadcrumb a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #4facfe, #00f2fe);
+    transition: width 0.3s ease;
+}
+
+.glass-breadcrumb a:hover::after {
+    width: 100%;
+}
+
+/* ==================== COUNTER ANIMATION ==================== */
+@keyframes countUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.counter-animate {
+    animation: countUp 0.6s ease-out;
+}
+
+/* ==================== SEARCH BAR ENHANCED ==================== */
+.search-enhanced {
+    position: relative;
+    transition: var(--transition-smooth);
+}
+
+.search-enhanced:focus-within {
+    transform: scale(1.02);
+}
+
+.search-enhanced input:focus {
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.3),
+                0 10px 30px rgba(79, 172, 254, 0.2);
+}
+
+.search-enhanced svg {
+    animation: searchPulse 2s ease-in-out infinite;
+}
+
+@keyframes searchPulse {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* ==================== AVATAR ROTATING BORDER ==================== */
+.avatar-rotating-border {
+    position: relative;
+    animation: rotateBorder 3s linear infinite;
+}
+
+@keyframes rotateBorder {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.avatar-rotating-border::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #4facfe, #00f2fe, #4facfe);
+    z-index: -1;
+    animation: rotateBorder 3s linear infinite;
+}
+
+/* ==================== DROPDOWN STAGGERED ANIMATION ==================== */
+.dropdown-item {
+    animation: dropdownStagger 0.3s ease-out backwards;
+}
+
+.dropdown-item:nth-child(1) { animation-delay: 0.05s; }
+.dropdown-item:nth-child(2) { animation-delay: 0.1s; }
+.dropdown-item:nth-child(3) { animation-delay: 0.15s; }
+.dropdown-item:nth-child(4) { animation-delay: 0.2s; }
+.dropdown-item:nth-child(5) { animation-delay: 0.25s; }
+
+@keyframes dropdownStagger {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ==================== RIPPLE EFFECT ==================== */
+.ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.ripple:active::after {
+    width: 200%;
+    height: 200%;
+}
+
+/* ==================== MAGNETIC CURSOR EFFECT ==================== */
+.magnetic {
+    transition: transform 0.2s ease-out;
+}
+
+/* ==================== LOADING SKELETON ==================== */
+.skeleton {
+    background: linear-gradient(90deg, 
+        rgba(255, 255, 255, 0.05) 25%, 
+        rgba(255, 255, 255, 0.1) 50%, 
+        rgba(255, 255, 255, 0.05) 75%);
+    background-size: 200% 100%;
+    animation: skeletonLoading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonLoading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ==================== SCROLL EFFECTS ==================== */
+.fade-in-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in-on-scroll.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ==================== RESPONSIVE ADJUSTMENTS ==================== */
+@media (max-width: 768px) {
+    .card-3d:hover {
+        transform: translateY(-5px);
+    }
+    
+    .neon-title {
+        font-size: 1.25rem;
+    }
+}
+
+#sidebar details[open] > div {
+    display: block !important;
+    opacity: 1 !important;
+    max-height: 500px !important;
+    transition: all 0.3s ease;
+}
+
+#sidebar details > div {
+    display: none;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+}
+
+/* ===== Scrollbar cho sidebar ===== */
+#sidebar {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #38bdf8 #020617;
+}
+
+#sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+#sidebar::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.85);
+    border-radius: 9999px;
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #38bdf8, #6366f1);
+    border-radius: 9999px;
+}
+
+#sidebar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #0ea5e9, #4f46e5);
+}
+
+/* ===== Để particle không chặn click ===== */
+.particle {
+    pointer-events: none; /* RẤT QUAN TRỌNG */
+}
+.sidebar-group-toggle i.fas.fa-chevron-down {
+    transition: transform 0.2s ease-out;
+}
+.sidebar-group-toggle i.fas.fa-chevron-down.rotate-180 {
+    transform: rotate(180deg);
+}
+
+/* Đảm bảo các liên kết trong sidebar có thể nhấn */
+.sidebar-group-body a {
+    position: relative;
+    z-index: 10;
+    pointer-events: auto !important;
+}
+
+/* Ngăn chặn event bubbling từ toggle */
+.sidebar-group-toggle {
+    pointer-events: auto;
+}
+
+/* Hiệu ứng cho chevron khi mở */
+.sidebar-chevron.rotate-180 {
+    transform: rotate(180deg);
+}
+
+/* ========== ADMIN DASHBOARD – GLASS THEME BINDING ========== */
+
+/* Nền chính & spacing cho main */
+#mainContent {
+    min-height: calc(100vh - 6rem);
+}
+
+/* Card chứa bảng sách – đồng bộ với glass-card-soft nếu chưa dùng */
+#mainContent .glass-card-soft.card-3d {
+    background: rgba(15, 23, 42, 0.80);
+    backdrop-filter: blur(20px) saturate(170%);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+}
+
+/* Table header – gradient nhẹ + chữ sáng */
+#mainContent table thead {
+    background: linear-gradient(135deg,
+        rgba(79, 172, 254, 0.18),
+        rgba(129, 140, 248, 0.24)
+    );
+}
+
+#mainContent thead th {
+    color: #e5e7eb;
+    border-color: rgba(148, 163, 184, 0.3);
+    letter-spacing: 0.12em;
+    font-size: 0.7rem;
+}
+
+/* Body table trong nền tối */
+#mainContent tbody {
+    background: transparent;
+}
+
+#mainContent tbody tr {
+    transition: background 0.25s ease, transform 0.15s ease;
+}
+
+#mainContent tbody tr:hover {
+    background: rgba(15, 23, 42, 0.85);
+    transform: translateY(-1px);
+}
+
+#mainContent td {
+    border-color: rgba(30, 64, 175, 0.35);
+}
+
+/* Cột text – sáng cho dễ đọc trên nền glass */
+#mainContent td,
+#mainContent td span {
+    color: #e2e8f0;
+}
+
+/* Badge số lượng sách */
+#mainContent span.bg-blue-100.text-blue-800 {
+    background: rgba(56, 189, 248, 0.18) !important;
+    color: #e0f2fe !important;
+    border-radius: 9999px;
+    border: 1px solid rgba(56, 189, 248, 0.6);
+}
+
+/* Empty state – làm mờ nền, icon neon nhẹ */
+#mainContent .text-center.py-12 {
+    background: rgba(15, 23, 42, 0.85);
+    border-radius: 1.5rem;
+    border: 1px dashed rgba(148, 163, 184, 0.6);
+}
+
+#mainContent .text-center.py-12 i.fas.fa-book-open {
+    color: #38bdf8;
+    text-shadow: 0 0 15px rgba(56, 189, 248, 0.7);
+}
+
+/* Nút nổi "Đã xóa" – đồng bộ glow */
+#openDeletedModalBtn {
+    box-shadow:
+        0 0 20px rgba(248, 113, 113, 0.6),
+        0 0 40px rgba(248, 113, 113, 0.35);
+}
+
+/* Modal deleted – table & text */
+#deletedBooksModal table {
+    border-color: rgba(148, 163, 184, 0.35);
+}
+
+#deletedBooksModal thead {
+    background: rgba(15, 23, 42, 0.9);
+}
+
+#deletedBooksModal th {
+    color: #e5e7eb;
+}
+
+#deletedBooksModal td {
+    color: #e2e8f0;
+    border-color: rgba(30, 64, 175, 0.35);
+}
+
+/* Badge DELETED */
+#deletedBooksModal span.bg-red-100.text-red-700 {
+    background: rgba(248, 113, 113, 0.15) !important;
+    color: #fecaca !important;
+    border-radius: 9999px;
+    border: 1px solid rgba(248, 113, 113, 0.7);
+}
+
+/* Toast – luôn là glass floating */
+#toast {
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(18px) saturate(170%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+    border-radius: 9999px;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    box-shadow: 0 10px 35px rgba(15, 23, 42, 0.9);
+}
+
+/* Khi JS set background emerald/red thì vẫn giữ được feeling glass vì màu phủ lên nền tối */
+#toast.bg-emerald-600,
+#toast.bg-red-600 {
+    background-blend-mode: soft-light;
+}
+
+/* Pagination – bo tròn & glass */
+#mainContent .bg-white.px-4.py-3,
+#mainContent .bg-white.sm\\:px-6 {
+    background: transparent;
+}
+
+#mainContent nav[aria-label="Pagination"] span,
+#mainContent nav[aria-label="Pagination"] a {
+    border-radius: 9999px !important;
+}
+
+/* Trang hiện tại */
+#mainContent nav[aria-label="Pagination"] span.z-10 {
+    background: rgba(79, 172, 254, 0.3) !important;
+    border-color: rgba(79, 172, 254, 0.8) !important;
+    color: #e0f2fe !important;
+    box-shadow: 0 0 18px rgba(79, 172, 254, 0.45);
+}
+
+/* Các trang khác */
+#mainContent nav[aria-label="Pagination"] a {
+    background: rgba(15, 23, 42, 0.85);
+    border-color: rgba(51, 65, 85, 0.9);
+    color: #cbd5f5;
+}
+
+#mainContent nav[aria-label="Pagination"] a:hover {
+    background: rgba(30, 64, 175, 0.9);
+    border-color: rgba(59, 130, 246, 0.9);
+    color: #eff6ff;
 }

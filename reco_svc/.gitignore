@@ -1,1 +1,6 @@
-/dist/
+# ignore file môi trường
+reco_svc/.env
+.env
+.env.*
+**/.env
+**/.env.*

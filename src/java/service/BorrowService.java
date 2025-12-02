@@ -38,13 +38,16 @@ public class BorrowService {
         int days = (req.days > 0 ? req.days : DEFAULT_BORROW_DAYS);
 
         try (Connection conn = DBConnection.getConnection()) {
-            // 1) Giới hạn số lượng đang mượn
+            // 1) Không cho mượn trùng cùng ISBN đang mượn / đang chờ
+            ensureNotDuplicateBorrow(conn, req.userId, req.isbn.trim());
+
+            // 2) Giới hạn số lượng đang mượn
             String checkSql = """
                 SELECT COUNT(*) AS borrow_count
                 FROM borrow
                 WHERE user_id = ?
                   AND (status = 'Borrowed' OR status = 'Pending Approval')
-                """;
+            """;
             try (PreparedStatement ps = conn.prepareStatement(checkSql)) {
                 ps.setInt(1, req.userId);
                 try (ResultSet rs = ps.executeQuery()) {
@@ -54,7 +57,7 @@ public class BorrowService {
                 }
             }
 
-            // 2) Lấy 1 bản vật lý theo ISBN
+            // 3) Lấy 1 bản vật lý theo ISBN
             Integer bookItemId = null;
             String getBookItemSql = "SELECT book_item_id FROM bookitem WHERE book_isbn = ? LIMIT 1";
             try (PreparedStatement ps = conn.prepareStatement(getBookItemSql)) {
@@ -69,7 +72,7 @@ public class BorrowService {
                 throw new IllegalStateException("NO_COPY_AVAILABLE");
             }
 
-            // 3) Tạo phiếu mượn
+            // 4) Tạo phiếu mượn
             String borrowSql =
                 "INSERT INTO borrow (book_item_id, user_id, borrowed_date, due_date, status, extended) " +
                 "VALUES (?, ?, CURDATE(), DATE_ADD(CURDATE(), INTERVAL ? DAY), 'Pending Approval', 0)";
@@ -393,4 +396,26 @@ public class BorrowService {
 
         return out;
     }
+    private void ensureNotDuplicateBorrow(Connection conn, int userId, String isbn) throws SQLException {
+        String sql = """
+            SELECT COUNT(*) AS cnt
+            FROM borrow br
+            JOIN bookitem bi ON br.book_item_id = bi.book_item_id
+            WHERE br.user_id = ?
+              AND bi.book_isbn = ?
+              -- chỉ tính các trạng thái còn hiệu lực (đang mượn hoặc đang chờ duyệt)
+              AND br.status IN ('Borrowed', 'Pending Approval')
+        """;
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setString(2, isbn);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next() && rs.getInt("cnt") > 0) {
+                    throw new IllegalStateException("DUPLICATE_BORROW");
+                }
+            }
+        }
+    }
+
 }
