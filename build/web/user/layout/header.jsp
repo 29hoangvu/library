@@ -1,512 +1,503 @@
-<%@ page contentType="text/html; charset=UTF-8" language="java" %>
-<%@ page import="Data.Users, java.sql.*, java.util.*, Servlet.DBConnection" %>
-<%@ page contentType="text/html; charset=UTF-8" language="java" %>
-<%@ page import="java.sql.*" %>
-<%@ page import="java.net.URLEncoder" %>
+<%@ page contentType="text/html; charset=UTF-8" language="java"
+         buffer="64kb" autoFlush="true" %>
+<%@ page import="java.sql.*, java.util.*, java.net.URLEncoder" %>
+<%@ page import="Servlet.DBConnection" %>
 
-<header class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-lg sticky top-0 z-50 backdrop-blur-sm bg-opacity-95">
-    <!-- Header chính -->
-    <div class="container mx-auto px-4 py-3">
-        <div class="flex items-center justify-between">
-            
-            <!-- Logo và Title -->
-            <div class="flex items-center space-x-4">
-                <a href="${pageContext.request.contextPath}/index.jsp" class="flex items-center space-x-2 group">
-                    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                        <i class="fas fa-book text-indigo-600 text-xl"></i>
-                    </div>
-                    <h1 class="text-2xl font-bold text-white tracking-wide hover:text-yellow-300 transition-colors duration-300">
-                        LIBRARY
-                    </h1>
-                </a>
-            </div>
+<!-- HEADER: glass + gradient, 3-zone layout (logo – search – user) -->
+<header class="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-xl border-b border-white/10 shadow-[0_10px_35px_rgba(15,23,42,0.85)]">
+  <div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+    <div class="flex items-center justify-between gap-3 py-2.5 sm:py-3">
 
-            <!-- NHÚNG UI TÌM KIẾM -->
-            <% String endpoint = request.getContextPath() + "/api/search.jsp"; %>
-            <jsp:include page="/components/searchUI.jsp">
-              <jsp:param name="endpoint" value="<%= endpoint %>"/>
-            </jsp:include>
-            
-            <!-- User Menu và Filter Button -->
-            <div class="flex items-center space-x-4">
-                <!-- Filter toggle button -->
-                <button id="filterBarToggle" 
-                        class="text-white hover:text-yellow-300 transition-colors">
-                  <i class="fas fa-sliders-h"></i>
-                </button>
-                <!-- User Menu -->
-                <div class="relative">
-                    <%
-                        Users user = (Users) session.getAttribute("user");
-                        if (user != null) {
-                            String avatarUrl = "AvatarServlet?userId=" + user.getId();
-                            String defaultAvatar = "./images/default-avatar.png";
-                    %>
-                    <div class="relative">
-                        <img src="<%= avatarUrl%>" 
-                             onerror="this.onerror=null; this.src='<%= defaultAvatar%>';" 
-                             alt="Avatar" 
-                             class="w-10 h-10 rounded-full border-2 border-white/30 hover:border-white cursor-pointer transition-all duration-300 shadow-lg"
-                             onclick="toggleUserDropdown()">
-                        
-                        <!-- User Dropdown -->
-                        <div id="userDropdown" class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl py-2 hidden transform opacity-0 scale-95 transition-all duration-200 origin-top-right">
-                            <div class="px-4 py-3 border-b border-gray-200">
-                                <div class="flex items-center space-x-3">
-                                    <img src="<%= avatarUrl%>" 
-                                         onerror="this.onerror=null; this.src='<%= defaultAvatar%>';" 
-                                         alt="Avatar" 
-                                         class="w-12 h-12 rounded-full object-cover">
-                                    <div>
-                                        <p class="font-semibold text-gray-800"><%= user.getUsername()%></p>
-                                        <p class="text-sm text-gray-500">Thành viên</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <a href="${pageContext.request.contextPath}/user/profile.jsp" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
-                                <i class="fas fa-user mr-2"></i>Xem thông tin
-                            </a>
-                            <a href="${pageContext.request.contextPath}/user/borrowedBooks.jsp" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
-                                <i class="fas fa-book-reader mr-2"></i>Sách đã mượn
-                            </a>
-                            <a href="${pageContext.request.contextPath}/LogOutServlet" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
-                                <i class="fas fa-sign-out-alt mr-2"></i>Đăng xuất
-                            </a>
-                        </div>
-                    </div>
-                    <%
-                    } else {
-                    %>
-                    <a href="${pageContext.request.contextPath}/user/login.jsp" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-full transition-all duration-300 flex items-center space-x-2">
-                        <i class="fas fa-sign-in-alt"></i>
-                        <span class="hidden sm:inline">Đăng nhập</span>
-                    </a>
-                    <%
-                        }
-                    %>
-                </div>               
-                <!-- Mobile menu button -->
-                <button id="mobileMenuBtn" class="md:hidden text-white hover:text-yellow-300 transition-colors">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
-            </div>
+      <!-- Logo -->
+      <a href="<%=request.getContextPath()%>/index.jsp"
+         class="flex items-center gap-2 group rounded-full px-1.5 sm:px-2 py-1 hover:bg-white/5 transition-colors">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 bg-gradient-to-br from-amber-300 via-white to-blue-200 rounded-full flex items-center justify-center shadow-lg shadow-amber-500/25 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-amber-400/40 transition-transform duration-200 ease-out">
+          <i class="fas fa-book-open text-indigo-700 text-lg sm:text-xl"></i>
         </div>
+        <div class="flex flex-col leading-tight">
+          <span class="text-xs tracking-[0.2em] text-white/70 uppercase">Smart</span>
+          <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white group-hover:text-amber-300 transition-colors duration-200">
+            LIBRARY
+          </h1>
+        </div>
+      </a>
 
-        <!-- Mobile Search -->
-        <div id="mobileSearch" class="md:hidden mt-4 hidden">
-            <form action="index.jsp" method="get">
+      <!-- SEARCH (desktop/tablet) – giữ nguyên include, chỉ bọc layout -->
+      <div class="hidden md:flex flex-1 justify-center px-1 lg:px-8">
+        <!-- Outer ring + glass pill -->
+        <div class="w-full max-w-3xl">
+          <div class="relative rounded-full bg-gradient-to-r from-slate-100/10 via-slate-100/5 to-slate-100/10 p-[2px] shadow-[0_14px_45px_rgba(15,23,42,0.85)]">
+            <div class="rounded-full bg-slate-900/90 border border-white/10 px-4 py-1.5 backdrop-blur-xl flex items-center">
+              <% String endpoint = request.getContextPath() + "/api/search.jsp"; %>
+              <jsp:include page="/components/searchUI.jsp">
+                <jsp:param name="endpoint" value="<%= endpoint %>"/>
+              </jsp:include>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User + Filter -->
+      <div class="flex items-center gap-2 sm:gap-3">
+
+        <!-- Nút mở Modal Filter -->
+        <button id="filterOpenBtn"
+                class="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/80 shadow-lg shadow-slate-900/50 hover:bg-white/10 hover:text-amber-300 hover:border-amber-300/60 focus:outline-none focus:ring-2 focus:ring-amber-300/70 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all"
+                title="Bộ lọc">
+          <span class="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full bg-amber-400 text-[10px] font-semibold text-slate-900 px-1.5 py-[1px] shadow-md shadow-amber-500/50">
+            Lọc
+          </span>
+          <i class="fas fa-sliders-h text-sm"></i>
+        </button>
+
+        <!-- Nút login (ẩn khi đã đăng nhập) -->
+        <a id="loginBtn"
+           href="<%=request.getContextPath()%>/user/login.jsp"
+           class="hidden md:inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-900/50 hover:bg-white/20 hover:text-amber-200 border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300/70 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all">
+          <i class="fas fa-sign-in-alt text-xs"></i>
+          <span>Đăng nhập</span>
+        </a>
+
+        <!-- User menu (ẩn mặc định, hiện khi có token) -->
+        <div id="userMenu" class="hidden relative">
+          <button type="button"
+                  class="relative rounded-full ring-2 ring-emerald-300/60 ring-offset-2 ring-offset-slate-900 shadow-lg shadow-slate-900/70 hover:ring-emerald-200/90 hover:scale-[1.02] transition-all duration-200">
+            <img id="userAvatar"
+                 src="<%=request.getContextPath()%>/images/default-avatar.png"
+                 class="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover cursor-pointer"
+                 alt="Avatar"
+                 onclick="toggleUserDropdown()">
+          </button>
+
+          <!-- Dropdown -->
+          <div id="userDropdown"
+               class="absolute right-0 mt-3 w-72 origin-top-right bg-slate-900/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-slate-900/80 border border-white/10 py-2 hidden">
+            <div class="px-4 py-3 border-b border-white/10 bg-gradient-to-r from-slate-900/80 via-slate-900/60 to-slate-900/80 rounded-t-2xl">
+              <div class="flex items-center gap-3">
                 <div class="relative">
-                    <input type="text" 
-                           name="search" 
-                           placeholder="Tìm sách theo tên hoặc tác giả..." 
-                           value="<%= request.getParameter("search") != null ? request.getParameter("search") : ""%>"
-                           class="w-full px-4 py-2 pr-12 rounded-full border-2 border-white/20 bg-white/10 text-white placeholder-white/70 focus:outline-none focus:border-white focus:bg-white/20 transition-all duration-300">
-                    <button type="submit" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-white hover:text-yellow-300 transition-colors">
-                        <i class="fas fa-search"></i>
-                    </button>
+                  <img id="dropdownAvatar"
+                       src="<%=request.getContextPath()%>/images/default-avatar.png"
+                       class="w-12 h-12 rounded-full object-cover border border-emerald-400/60 shadow-md shadow-emerald-500/40"
+                       alt="Avatar">
+                  <span class="absolute -bottom-1 -right-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-400 text-[10px] text-slate-900 font-semibold shadow-md shadow-emerald-500/50">
+                    <i class="fas fa-check"></i>
+                  </span>
                 </div>
-            </form>
+                <div class="space-y-0.5">
+                  <p id="dropdownUsername" class="font-semibold text-white text-sm line-clamp-1">User</p>
+                  <p id="dropdownRole" class="text-xs text-emerald-300/90 font-medium">Thành viên</p>
+                </div>
+              </div>
+            </div>
+            <a href="<%=request.getContextPath()%>/user/profile.jsp"
+               class="block px-4 py-2.5 text-sm text-slate-100 hover:bg-white/5 flex items-center gap-2 transition-colors">
+              <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/5 text-emerald-300">
+                <i class="fas fa-user text-xs"></i>
+              </span>
+              <span>Thông tin cá nhân</span>
+            </a>
+            <a href="<%=request.getContextPath()%>/user/borrowedBooks.jsp"
+               class="block px-4 py-2.5 text-sm text-slate-100 hover:bg-white/5 flex items-center gap-2 transition-colors">
+              <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/5 text-indigo-300">
+                <i class="fas fa-book-reader text-xs"></i>
+              </span>
+              <span>Sách đã mượn</span>
+            </a>
+            <a href="#"
+               onclick="logout()"
+               class="block px-4 py-2.5 text-sm text-rose-300 hover:bg-rose-500/10 flex items-center gap-2 transition-colors rounded-b-2xl">
+              <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-rose-500/15 text-rose-300">
+                <i class="fas fa-sign-out-alt text-xs"></i>
+              </span>
+              <span>Đăng xuất</span>
+            </a>
+          </div>
         </div>
+
+        <!-- Mobile login button (chỉ icon) -->
+        <a id="loginBtnMobile"
+           href="<%=request.getContextPath()%>/user/login.jsp"
+           class="md:hidden hidden h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/90 border border-white/20 shadow-md shadow-slate-900/60 hover:bg-white/20 hover:text-amber-200 transition-all">
+          <i class="fas fa-sign-in-alt text-xs"></i>
+        </a>
+
+        <!-- Mobile search toggle -->
+        <button id="mobileMenuBtn"
+                class="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/5 border border-white/15 text-white/80 hover:bg-white/15 hover:text-amber-200 shadow-md shadow-slate-900/60 transition-all">
+          <i class="fas fa-search text-sm"></i>
+        </button>
+      </div>
     </div>
-     
-    <%
-        List<Map<String,String>> genres = new ArrayList<>();
-        try (Connection conn = DBConnection.getConnection();
-             Statement st = conn.createStatement();
-             ResultSet rs = st.executeQuery("SELECT id, name FROM genre ORDER BY name")) {
-            while (rs.next()) {
-                Map<String,String> g = new HashMap<>();
-                g.put("id", rs.getString("id"));
-                g.put("name", rs.getString("name"));
-                genres.add(g);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+
+    <!-- Mobile Search -->
+    <div id="mobileSearch" class="md:hidden mt-2 mb-2 hidden">
+      <form action="<%=request.getContextPath()%>/index.jsp" method="get">
+        <div class="relative">
+          <input type="text" name="search"
+                 placeholder="Tìm sách theo tên hoặc tác giả..."
+                 class="w-full rounded-full border border-white/20 bg-slate-900/80 px-4 py-2.5 pr-11 text-sm text-white placeholder-white/60 shadow-inner shadow-slate-900/40 focus:outline-none focus:ring-2 focus:ring-amber-300/70 focus:border-transparent focus:bg-slate-900/90 transition">
+          <button type="submit"
+                  class="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-amber-400 text-slate-900 shadow-md shadow-amber-500/60 hover:bg-amber-300 transition-colors">
+            <i class="fas fa-search text-sm"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</header>
+
+<script src="<%=request.getContextPath()%>/static/js/api.js"></script>
+<script>
+  // Khởi tạo UI user theo token + localStorage
+  (async () => {
+    try {
+      const loginBtn        = document.getElementById("loginBtn");
+      const loginBtnMobile  = document.getElementById("loginBtnMobile");
+      const userMenu        = document.getElementById("userMenu");
+      const userAvatar      = document.getElementById("userAvatar");
+      const dropdownAvatar  = document.getElementById("dropdownAvatar");
+      const dropdownUsername= document.getElementById("dropdownUsername");
+      const dropdownRole    = document.getElementById("dropdownRole");
+
+      let me = null;
+
+      // 1) Ưu tiên đọc user từ localStorage (nếu login đã lưu)
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        try {
+          me = JSON.parse(stored);
+          console.debug("[header] dùng user từ localStorage:", me);
+        } catch (e) {
+          console.warn("[header] parse localStorage.user lỗi:", e);
         }
-    %>
-                       
-<style>
-  .tab-btn.active { box-shadow: 0 4px 14px rgba(0,0,0,.12); }
-  #filterModal.open #filterOverlay { opacity: 1; }
-    #filterModal.open #filterDialog  { opacity: 1; transform: translateY(0); }
-    /* Trạng thái mặc định modal dialog */
-#filterDialog {
-  transform: scale(0.9);
-  opacity: 0;
-  transition: transform 0.25s ease, opacity 0.25s ease;
-}
+      }
 
-/* Khi modal mở */
-#filterModal.open #filterDialog {
-  transform: scale(1);
-  opacity: 1;
-}
+      // 2) Nếu chưa có mà vẫn còn token -> gọi /auth/me
+      if (!me && window.api && typeof api.currentUser === "function") {
+        const token = api.getToken && api.getToken();
+        if (token) {
+          try {
+            me = await api.currentUser();
+            console.debug("[header] dùng user từ api.currentUser():", me);
+            if (me) {
+              localStorage.setItem("user", JSON.stringify(me));
+            }
+          } catch (e) {
+            console.warn("[header] api.currentUser() lỗi:", e);
+          }
+        }
+      }
 
-</style>
-</header>              
-<!-- Modal: Filter -->
-<div id="filterModal" class="fixed inset-0 z-[80] hidden">  <!-- z cao hơn -->
-  <!-- Overlay -->
-  <div id="filterOverlay" class="absolute inset-0 bg-black/50 opacity-0 transition-opacity"></div>
+      if (me) {
+        // ==== ĐÃ ĐĂNG NHẬP ====
+        if (loginBtn) {
+          // Ẩn cả base + md
+          loginBtn.classList.add("hidden", "md:hidden");
+          loginBtn.classList.remove("md:inline-flex");
+        }
+        if (loginBtnMobile) {
+          loginBtnMobile.classList.add("hidden");
+        }
+        userMenu && userMenu.classList.remove("hidden");
 
-  <!-- Dialog container -->
-  <div class="absolute inset-0 flex items-start justify-center pt-6 md:pt-12 p-4 md:p-6 overflow-y-auto">
-    <div id="filterDialog"
-         class="w-11/12 md:w-11/12 lg:w-5/6 xl:w-5/6 max-w-7xl
-                bg-white/25 backdrop-blur-md shadow-2xl rounded-2xl
-                translate-y-4 opacity-0 transition-all duration-200">
-      
-      <!-- Header modal -->
-      <div class="flex items-center justify-between px-5 py-4 border-b border-white/20">
-        <h3 class="text-white text-xl font-semibold flex items-center gap-2">
-          <i class="fas fa-sliders-h"></i> Bộ lọc sách
-        </h3>
-        <button id="filterCloseBtn"
-                class="w-9 h-9 rounded-full hover:bg-white/20 text-white flex items-center justify-center"
-                aria-label="Đóng bộ lọc">
-          <i class="fas fa-times text-lg"></i>
+        const uid = me.uid ?? me.id;
+        const avatarUrl = "<%=request.getContextPath()%>/AvatarServlet?userId=" + encodeURIComponent(uid);
+
+        if (userAvatar)       userAvatar.src       = avatarUrl;
+        if (dropdownAvatar)   dropdownAvatar.src   = avatarUrl;
+        if (dropdownUsername) dropdownUsername.textContent = me.username ?? "User";
+        if (dropdownRole)     dropdownRole.textContent     = me.role ?? (me.roleName ?? "Thành viên");
+
+      } else {
+        // ==== CHƯA ĐĂNG NHẬP ====
+        if (loginBtn) {
+          loginBtn.classList.remove("hidden", "md:hidden");
+          loginBtn.classList.add("md:inline-flex");
+        }
+        if (loginBtnMobile) {
+          loginBtnMobile.classList.remove("hidden");
+        }
+        userMenu && userMenu.classList.add("hidden");
+      }
+    } catch (err) {
+      console.error("[header] init user UI error:", err);
+      document.getElementById("loginBtn")?.classList.remove("hidden", "md:hidden");
+      document.getElementById("loginBtnMobile")?.classList.remove("hidden");
+      document.getElementById("userMenu")?.classList.add("hidden");
+    }
+  })();
+
+  function toggleUserDropdown(){
+    const dd = document.getElementById("userDropdown");
+    dd?.classList.toggle("hidden");
+  }
+
+  // Đăng xuất (xoá token)
+  function logout(){
+    api.clearToken && api.clearToken();
+    localStorage.removeItem("user");
+
+    document.getElementById("userMenu")?.classList.add("hidden");
+
+    const loginBtn       = document.getElementById("loginBtn");
+    const loginBtnMobile = document.getElementById("loginBtnMobile");
+
+    if (loginBtn) {
+      loginBtn.classList.remove("hidden", "md:hidden");
+      loginBtn.classList.add("md:inline-flex");
+    }
+    if (loginBtnMobile) {
+      loginBtnMobile.classList.remove("hidden");
+    }
+
+    location.href = "<%=request.getContextPath()%>/index.jsp";
+  }
+
+  // Đóng dropdown khi click ngoài
+  document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('userDropdown');
+    const hitAvatar = e.target.closest('#userAvatar');
+    if (!hitAvatar && dropdown && !dropdown.contains(e.target)) {
+      dropdown.classList.add('hidden');
+    }
+  });
+</script>
+
+
+<%
+  // ===== Lấy danh sách thể loại cho Tab "Thể loại" =====
+  List<Map<String,String>> genres = new ArrayList<>();
+  try (Connection conn = DBConnection.getConnection();
+       Statement st = conn.createStatement();
+       ResultSet rs = st.executeQuery("SELECT id, name FROM genre ORDER BY name")) {
+    while (rs.next()) {
+      Map<String,String> g = new HashMap<>();
+      g.put("id", rs.getString("id"));
+      g.put("name", rs.getString("name"));
+      genres.add(g);
+    }
+  } catch (Exception e) {
+    e.printStackTrace();
+  }
+%>
+
+<!-- ============ Modal Filter (Portal) ============ -->
+<div id="filterModal"
+     class="fixed inset-0 z-[9999] hidden opacity-0 pointer-events-none transition-opacity duration-200 ease-out">
+  <!-- Overlay: tối, hơi blur, không bị trắng -->
+  <div id="filterOverlay"
+       class="absolute inset-0 bg-slate-950/90 backdrop-blur-[2px] opacity-0 transition-opacity duration-200 ease-out"></div>
+
+  <!-- Dialog (căn giữa tuyệt đối) -->
+  <div id="filterDialog"
+       class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
+              w-[min(92vw,1120px)] max-h-[85vh] overflow-auto
+              rounded-3xl shadow-[0_24px_80px_rgba(15,23,42,0.95)]
+              bg-gradient-to-br from-slate-900/98 via-slate-950 to-slate-900/98
+              border border-white/10
+              scale-95 opacity-0 transition-all duration-200 ease-out">
+    <!-- Header modal -->
+    <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-white/10 sticky top-0 bg-slate-950/95 backdrop-blur-xl rounded-t-3xl">
+      <div class="flex items-center gap-2">
+        <div class="h-9 w-9 flex items-center justify-center rounded-2xl bg-amber-400/15 border border-amber-300/60 text-amber-300 shadow-md shadow-amber-500/40">
+          <i class="fas fa-sliders-h text-sm"></i>
+        </div>
+        <div>
+          <h3 class="text-white text-lg sm:text-xl font-semibold">
+            Bộ lọc sách
+          </h3>
+          <p class="text-xs text-white/60 hidden sm:block">Chọn nhanh thể loại, năm xuất bản hoặc số trang phù hợp.</p>
+        </div>
+      </div>
+      <button id="filterCloseBtn"
+              class="w-9 h-9 rounded-full border border-white/10 bg-white/5 hover:bg-white/15 text-white flex items-center justify-center shadow-md shadow-slate-900/60 focus:outline-none focus:ring-2 focus:ring-amber-300/70 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all"
+              aria-label="Đóng bộ lọc">
+        <i class="fas fa-times text-sm"></i>
+      </button>
+    </div>
+
+    <!-- Nội dung -->
+    <div class="px-5 py-4">
+      <!-- Tabs header -->
+      <div class="flex flex-wrap gap-2 mb-4">
+        <button class="tab-btn active px-4 py-2 rounded-xl text-sm sm:text-base text-white font-semibold bg-indigo-600 shadow-md shadow-indigo-500/40 hover:bg-indigo-500 transition-all flex items-center gap-2"
+                data-tab="tab-genres">
+          <i class="fas fa-tags text-xs"></i><span>Thể loại</span>
+        </button>
+        <button class="tab-btn px-4 py-2 rounded-xl text-sm sm:text-base text-white font-semibold bg-emerald-600 shadow-md shadow-emerald-500/40 hover:bg-emerald-500 transition-all flex items-center gap-2"
+                data-tab="tab-years">
+          <i class="fas fa-calendar-alt text-xs"></i><span>Năm xuất bản</span>
+        </button>
+        <button class="tab-btn px-4 py-2 rounded-xl text-sm sm:text-base text-white font-semibold bg-purple-600 shadow-md shadow-purple-500/40 hover:bg-purple-500 transition-all flex items-center gap-2"
+                data-tab="tab-pages">
+          <i class="fas fa-file-alt text-xs"></i><span>Số trang</span>
         </button>
       </div>
 
-      <!-- Nội dung (giữ nguyên tabs + content của bạn) -->
-      <div class="px-5 py-4">
-        <!-- Tabs header -->
-        <div class="flex gap-2 md:gap-3">
-          <button class="tab-btn active px-4 py-2 rounded-lg text-white font-semibold bg-indigo-600 hover:bg-indigo-700"
-                  data-tab="tab-genres">
-            <i class="fas fa-tags mr-2"></i>Thể loại
-          </button>
-          <button class="tab-btn px-4 py-2 rounded-lg text-white font-semibold bg-green-600 hover:bg-green-700"
-                  data-tab="tab-years">
-            <i class="fas fa-calendar-alt mr-2"></i>Năm xuất bản
-          </button>
-          <button class="tab-btn px-4 py-2 rounded-lg text-white font-semibold bg-purple-600 hover:bg-purple-700"
-                  data-tab="tab-pages">
-            <i class="fas fa-file-alt mr-2"></i>Số trang
-          </button>
-        </div>
+      <div class="mt-2 space-y-6 text-sm">
 
-        <!-- Tabs content -->
-        <div class="mt-4 space-y-6">
-
-          <!-- Thể loại -->
-          <div id="tab-genres" class="tab-panel">
-            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
-              <a href="<%=request.getContextPath()%>/index.jsp"
-                 class="block text-center bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg font-medium">
-                Tất cả
+        <!-- Tab: Thể loại -->
+        <div id="tab-genres" class="tab-panel">
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2.5">
+            <a href="<%=request.getContextPath()%>/index.jsp"
+               class="block text-center bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl font-medium shadow-md shadow-indigo-500/40 transition">
+              Tất cả
+            </a>
+            <% for (Map<String,String> g : genres) { %>
+              <a href="<%=request.getContextPath()%>/filterBooks?genreId=<%=g.get("id")%>&genreName=<%=URLEncoder.encode(g.get("name"),"UTF-8")%>"
+                 class="block text-center bg-white/5 hover:bg-white/10 text-white/90 px-3 py-2 rounded-xl font-medium text-xs sm:text-sm border border-white/10 shadow-sm shadow-slate-900/60 transition">
+                <%= g.get("name") %>
               </a>
-              <% for (Map<String,String> g : genres) { %>
-                <a href="<%=request.getContextPath()%>/filterBooks?genreId=<%=g.get("id")%>&genreName=<%=URLEncoder.encode(g.get("name"),"UTF-8")%>"
-                   class="block text-center bg-white/20 hover:bg-white/30 text-white 
-                        px-3 py-2 rounded-md font-medium text-sm">
-                  <%= g.get("name") %>
-                </a>
-              <% } %>
-            </div>
+            <% } %>
           </div>
-
-          <!-- Năm xuất bản -->
-          <div id="tab-years" class="tab-panel hidden">
-            <div class="flex flex-wrap gap-2">
-              <a class="inline-block bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg font-medium" href="filterBooks?yearTo=1989">Trước 1990</a>
-              <a class="inline-block bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg font-medium" href="filterBooks?yearFrom=1990&yearTo=1999">1990–1999</a>
-              <a class="inline-block bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg font-medium" href="filterBooks?yearFrom=2000&yearTo=2009">2000–2009</a>
-              <a class="inline-block bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg font-medium" href="filterBooks?yearFrom=2010&yearTo=2019">2010–2019</a>
-              <a class="inline-block bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg font-medium" href="filterBooks?yearFrom=2020&yearTo=2022">2020–2022</a>
-              <a class="inline-block bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg font-medium" href="filterBooks?yearFrom=2023">2023–nay</a>
-              <a class="inline-block bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg font-medium" href="index.jsp">Xóa lọc</a>
-            </div>
-
-            <form action="index.jsp" method="get" class="mt-3 flex gap-2 items-center flex-wrap">
-              <input type="number" name="yearFrom" placeholder="Từ năm" class="w-28 border px-3 py-2 rounded">
-              <span class="text-white/90">—</span>
-              <input type="number" name="yearTo" placeholder="Đến năm" class="w-28 border px-3 py-2 rounded">
-              <button type="submit" class="px-4 py-2 rounded-lg text-white font-semibold bg-green-600 hover:bg-green-700">
-                Lọc
-              </button>
-            </form>
-          </div>
-
-          <!-- Số trang -->
-          <div id="tab-pages" class="tab-panel hidden">
-            <div class="flex flex-wrap gap-2">
-              <a class="inline-block bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg font-medium" href="filterBooks?pagesMin=500">≥ 500 trang</a>
-              <a class="inline-block bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg font-medium" href="filterBooks?pagesMin=400">≥ 400 trang</a>
-              <a class="inline-block bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg font-medium" href="filterBooks?pagesMin=300">≥ 300 trang</a>
-              <a class="inline-block bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg font-medium" href="filterBooks?pagesMin=200">≥ 200 trang</a>
-              <a class="inline-block bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg font-medium" href="filterBooks?pagesMin=100">≥ 100 trang</a>
-              <a class="inline-block bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg font-medium" href="index.jsp">Xóa lọc</a>
-            </div>
-
-            <form action="index.jsp" method="get" class="mt-3 flex gap-2 items-center flex-wrap">
-              <input type="number" name="pagesFrom" placeholder="Từ trang" class="w-28 border px-3 py-2 rounded">
-              <span class="text-white/90">—</span>
-              <input type="number" name="pagesTo" placeholder="Đến trang" class="w-28 border px-3 py-2 rounded">
-              <button type="submit" class="px-4 py-2 rounded-lg text-white font-semibold bg-purple-600 hover:bg-purple-700">
-                Lọc
-              </button>
-            </form>
-          </div>
-
         </div>
+
+        <!-- Tab: Năm xuất bản -->
+        <div id="tab-years" class="tab-panel hidden">
+          <div class="flex flex-wrap gap-2.5">
+            <a class="inline-block bg-white/5 hover:bg-white/10 text-white px-3 py-2 rounded-xl font-medium border border-white/10 shadow-sm shadow-slate-900/60 transition"
+               href="filterBooks?yearTo=1989">Trước 1990</a>
+            <a class="inline-block bg-white/5 hover:bg-white/10 text-white px-3 py-2 rounded-xl font-medium border border-white/10 shadow-sm shadow-slate-900/60 transition"
+               href="filterBooks?yearFrom=1990&yearTo=1999">1990–1999</a>
+            <a class="inline-block bg-white/5 hover:bg-white/10 text-white px-3 py-2 rounded-xl font-medium border border-white/10 shadow-sm shadow-slate-900/60 transition"
+               href="filterBooks?yearFrom=2000&yearTo=2009">2000–2009</a>
+            <a class="inline-block bg-white/5 hover:bg-white/10 text-white px-3 py-2 rounded-xl font-medium border border-white/10 shadow-sm shadow-slate-900/60 transition"
+               href="filterBooks?yearFrom=2010&yearTo=2019">2010–2019</a>
+            <a class="inline-block bg-white/5 hover:bg-white/10 text-white px-3 py-2 rounded-xl font-medium border border-white/10 shadow-sm shadow-slate-900/60 transition"
+               href="filterBooks?yearFrom=2020&yearTo=2022">2020–2022</a>
+            <a class="inline-block bg-white/5 hover:bg-white/10 text-white px-3 py-2 rounded-xl font-medium border border-white/10 shadow-sm shadow-slate-900/60 transition"
+               href="filterBooks?yearFrom=2023">2023–nay</a>
+            <a class="inline-block bg-rose-500/15 hover:bg-rose-500/25 text-rose-200 px-3 py-2 rounded-xl font-medium border border-rose-400/40 shadow-sm shadow-rose-500/40 transition"
+               href="index.jsp">Xóa lọc</a>
+          </div>
+        </div>
+
+        <!-- Tab: Số trang -->
+        <div id="tab-pages" class="tab-panel hidden">
+          <div class="flex flex-wrap gap-2.5">
+            <a class="inline-block bg-white/5 hover:bg-white/10 text-white px-3 py-2 rounded-xl font-medium border border-white/10 shadow-sm shadow-slate-900/60 transition"
+               href="filterBooks?pagesMin=500">≥ 500 trang</a>
+            <a class="inline-block bg-white/5 hover:bg-white/10 text-white px-3 py-2 rounded-xl font-medium border border-white/10 shadow-sm shadow-slate-900/60 transition"
+               href="filterBooks?pagesMin=400">≥ 400 trang</a>
+            <a class="inline-block bg-white/5 hover:bg-white/10 text-white px-3 py-2 rounded-xl font-medium border border-white/10 shadow-sm shadow-slate-900/60 transition"
+               href="filterBooks?pagesMin=300">≥ 300 trang</a>
+            <a class="inline-block bg-white/5 hover:bg-white/10 text-white px-3 py-2 rounded-xl font-medium border border-white/10 shadow-sm shadow-slate-900/60 transition"
+               href="filterBooks?pagesMin=200">≥ 200 trang</a>
+            <a class="inline-block bg-white/5 hover:bg-white/10 text-white px-3 py-2 rounded-xl font-medium border border-white/10 shadow-sm shadow-slate-900/60 transition"
+               href="filterBooks?pagesMin=100">≥ 100 trang</a>
+            <a class="inline-block bg-rose-500/15 hover:bg-rose-500/25 text-rose-200 px-3 py-2 rounded-xl font-medium border border-rose-400/40 shadow-sm shadow-rose-500/40 transition"
+               href="index.jsp">Xóa lọc</a>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 </div>
-<!-- JavaScript for interactions -->
+
+<style>
+  .tab-btn.active {
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.6);
+    transform: translateY(-1px);
+  }
+
+  /* Đảm bảo modal luôn ở top nhất */
+  #filterModal { position: fixed; inset: 0; z-index: 2147483647; }
+
+  /* Overlay & Dialog đã fixed trong code của bạn, giữ nguyên vị trí */
+  #filterOverlay { position: absolute; inset: 0; }
+  #filterDialog  { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+</style>
+
 <script>
-    (function(){
-        const btn = document.getElementById('filterBarToggle');
-        const bar = document.getElementById('mainFilterBar');
-        if (btn && bar) {
-          btn.addEventListener('click', () => {
-            bar.classList.toggle('hidden');
-          });
-        }
-      })();
+  // Mobile search toggle
+  document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+    document.getElementById('mobileSearch')?.classList.toggle('hidden');
+  });
 
-    // Toggle mobile menu
-    document.getElementById('mobileMenuBtn').addEventListener('click', function() {
-        const mobileSearch = document.getElementById('mobileSearch');
-        mobileSearch.classList.toggle('hidden');
-    });
-
-    // Toggle user dropdown
-    function toggleUserDropdown() {
-        const dropdown = document.getElementById('userDropdown');
-        if (dropdown.classList.contains('hidden')) {
-            dropdown.classList.remove('hidden');
-            setTimeout(() => {
-                dropdown.classList.remove('opacity-0', 'scale-95');
-                dropdown.classList.add('opacity-100', 'scale-100');
-            }, 10);
-        } else {
-            dropdown.classList.remove('opacity-100', 'scale-100');
-            dropdown.classList.add('opacity-0', 'scale-95');
-            setTimeout(() => {
-                dropdown.classList.add('hidden');
-            }, 200);
-        }
-    }
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(event) {
-        const userDropdown = document.getElementById('userDropdown');
-        const avatar = event.target.closest('img[onclick="toggleUserDropdown()"]');
-        
-        if (!avatar && !userDropdown.contains(event.target)) {
-            userDropdown.classList.remove('opacity-100', 'scale-100');
-            userDropdown.classList.add('opacity-0', 'scale-95');
-            setTimeout(() => {
-                userDropdown.classList.add('hidden');
-            }, 200);
-        }
-    });
-
-    // Filter functionality
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            // Remove active class from all buttons
-            document.querySelectorAll('.filter-btn').forEach(b => {
-                b.classList.remove('active', 'bg-white/20', 'text-white');
-                b.classList.add('bg-white/10', 'text-white/80');
-            });
-            
-            // Add active class to clicked button
-            this.classList.add('active', 'bg-white/20', 'text-white');
-            this.classList.remove('bg-white/10', 'text-white/80');
-            
-            // Filter logic here
-            const filter = this.getAttribute('data-filter');
-            filterBooksButtons(filter);
-        });
-    });
-
-    function filterBooksButtons(category) {
-        const bookCards = document.querySelectorAll('.book-card');
-        const categories = document.querySelectorAll('.category-section');
-        
-        if (category === 'all') {
-            categories.forEach(cat => cat.style.display = 'block');
-            bookCards.forEach(card => card.style.display = 'block');
-        } else {
-            categories.forEach(cat => {
-                if (cat.id === category + '-section') {
-                    cat.style.display = 'block';
-                } else {
-                    cat.style.display = 'none';
-                }
-            });
-        }
-    }
-    const input = document.getElementById('searchInput');
-    const suggestions = document.getElementById('suggestions');
-
-    input.addEventListener('input', () => {
-        const value = input.value.toLowerCase();
-        const items = suggestions.querySelectorAll('.suggestion-item');
-        let hasVisible = false;
-
-        items.forEach(item => {
-            const text = item.innerText.toLowerCase();
-            const match = text.includes(value);
-            item.style.display = match ? 'flex' : 'none';
-            if (match) hasVisible = true;
-        });
-
-        suggestions.style.display = (value && hasVisible) ? 'block' : 'none';
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!suggestions.contains(e.target) && e.target !== input) {
-            suggestions.style.display = 'none';
-        }
-    });
-    
-    //loc sách
-    (function () {
-        const ctx = '<%= request.getContextPath() %>';
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-          btn.addEventListener('click', function () {
-            const gid   = this.dataset.genreId || '';
-            const glabel= this.dataset.label   || 'Tất cả';
-            // chuyển hướng để index.jsp render kết quả từ DB
-            if (!gid) {
-              window.location.href = ctx + '/index.jsp';
-            } else {
-              window.location.href = ctx + '/index.jsp?genreId=' + encodeURIComponent(gid)
-                                                   + '&genreName=' + encodeURIComponent(glabel);
-            }
-          });
-        });
-      })();
-    (function () {
-        const btns = document.querySelectorAll('#mainFilterBar .tab-btn');
-        const panels = document.querySelectorAll('#mainFilterBar .tab-panel');
-        let activeTab = null;
-
-        function toggleTab(id) {
-          if (activeTab === id) {
-            // nếu đang mở cùng 1 tab => đóng lại
-            document.getElementById(id)?.classList.add('hidden');
-            document.querySelector(`#mainFilterBar .tab-btn[data-tab="${id}"]`)?.classList.remove('active');
-            activeTab = null;
-            localStorage.removeItem('lib_active_tab');
-          } else {
-            // đóng tất cả, mở tab mới
-            panels.forEach(p => p.classList.add('hidden'));
-            btns.forEach(b => b.classList.remove('active'));
-            document.getElementById(id)?.classList.remove('hidden');
-            document.querySelector(`#mainFilterBar .tab-btn[data-tab="${id}"]`)?.classList.add('active');
-            activeTab = id;
-            localStorage.setItem('lib_active_tab', id);
-          }
-        }
-
-        btns.forEach(b => {
-          b.addEventListener('click', () => toggleTab(b.dataset.tab));
-        });
-
-        // khởi tạo theo localStorage nếu có
-        const saved = localStorage.getItem('lib_active_tab');
-        if (saved) {
-          toggleTab(saved);
-        }
-      })();
-       // ===== Modal open/close =====
   (function(){
-    const openBtn   = document.getElementById('filterBarToggle');
+    const openBtn   = document.getElementById('filterOpenBtn');
     const modal     = document.getElementById('filterModal');
     const overlay   = document.getElementById('filterOverlay');
     const dialog    = document.getElementById('filterDialog');
     const closeBtn  = document.getElementById('filterCloseBtn');
 
+    let scrollPosition = 0;
+
+    function lockScroll(lock) {
+      if (lock) {
+        scrollPosition = window.pageYOffset;
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollPosition}px`;
+        document.body.style.width = '100%';
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollPosition);
+      }
+    }
+
     function openModal() {
+      // Reset modal position
+      modal.scrollTop = 0;
+      dialog.scrollTop = 0;
+
       modal.classList.remove('hidden');
-      // đảm bảo start state (opacity 0, translate-y-6) đã áp sẵn qua classes
+      modal.classList.remove('pointer-events-none');
+
       requestAnimationFrame(() => {
-        modal.classList.add('open');
-        document.documentElement.style.overflow = 'hidden'; // lock scroll
+        modal.classList.remove('opacity-0');
+        overlay.classList.remove('opacity-0');
+        dialog.classList.remove('opacity-0','scale-95');
       });
+
+      lockScroll(true);
     }
 
     function closeModal() {
-      modal.classList.remove('open');
-      document.documentElement.style.overflow = ''; // unlock
-      // chờ transition xong rồi mới ẩn
-      setTimeout(() => modal.classList.add('hidden'), 200);
+      modal.classList.add('opacity-0');
+      overlay.classList.add('opacity-0');
+      dialog.classList.add('opacity-0','scale-95');
+
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.add('pointer-events-none');
+        lockScroll(false);
+      }, 200);
     }
 
-    if (openBtn)   openBtn.addEventListener('click', openModal);
-    if (closeBtn)  closeBtn.addEventListener('click', closeModal);
-    if (overlay)   overlay.addEventListener('click', closeModal);
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal(); });
-  })();
-  (function(){
-    const openBtn   = document.getElementById('filterBarToggle');
-    const modal     = document.getElementById('filterModal');
-    const overlay   = document.getElementById('filterOverlay');
-    const dialog    = document.getElementById('filterDialog');
-    const closeBtn  = document.getElementById('filterCloseBtn');
-
-    function openModal() {
-        modal.classList.remove('hidden');
-        requestAnimationFrame(() => {
-          modal.classList.add('open');
-          document.documentElement.style.overflow = 'hidden'; // lock scroll
-        });
-      }
-
-      function closeModal() {
-        modal.classList.remove('open');
-        document.documentElement.style.overflow = ''; // unlock
-        setTimeout(() => modal.classList.add('hidden'), 250); // chờ hiệu ứng xong
-      }
-
-
-    if (openBtn)  openBtn.addEventListener('click', openModal);
-    if (closeBtn) closeBtn.addEventListener('click', closeModal);
-    if (overlay)  overlay.addEventListener('click', closeModal);
-
-    // Click vào vùng trống quanh dialog cũng đóng
-    modal.addEventListener('click', (e) => {
-      if (!dialog.contains(e.target)) closeModal();
-    });
-
+    openBtn?.addEventListener('click', openModal);
+    closeBtn?.addEventListener('click', closeModal);
+    overlay?.addEventListener('click', closeModal);
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
     });
-  })();
-  // ===== Tabs trong modal (giữ code cũ, chỉ đổi vùng chứa) =====
-  (function () {
+
+    // Tabs
     const root   = document.getElementById('filterDialog');
     const btns   = root.querySelectorAll('.tab-btn');
     const panels = root.querySelectorAll('.tab-panel');
-    let activeTab = null;
 
-    function toggleTab(id) {
-      if (activeTab === id) {
-        // đóng panel nếu bấm lại
-        root.querySelector('#' + id)?.classList.add('hidden');
-        root.querySelector(`.tab-btn[data-tab="${id}"]`)?.classList.remove('active');
-        activeTab = null;
-        localStorage.removeItem('lib_active_tab');
-      } else {
-        panels.forEach(p => p.classList.add('hidden'));
-        btns.forEach(b => b.classList.remove('active'));
-        root.querySelector('#' + id)?.classList.remove('hidden');
-        root.querySelector(`.tab-btn[data-tab="${id}"]`)?.classList.add('active');
-        activeTab = id;
-        localStorage.setItem('lib_active_tab', id);
-      }
+    function setActive(id){
+      panels.forEach(p => p.classList.add('hidden'));
+      btns.forEach(b => b.classList.remove('active'));
+      root.querySelector('#'+id)?.classList.remove('hidden');
+      root.querySelector(`.tab-btn[data-tab="${id}"]`)?.classList.add('active');
     }
-
-    btns.forEach(b => b.addEventListener('click', () => toggleTab(b.dataset.tab)));
-
-    // mở lại tab trước đó nếu có
-    const saved = localStorage.getItem('lib_active_tab');
-    if (saved && root.querySelector('#' + saved)) toggleTab(saved);
-    else toggleTab('tab-genres'); // mặc định mở "Thể loại"
+    btns.forEach(b => b.addEventListener('click', () => setActive(b.dataset.tab)));
+    setActive('tab-genres');
   })();
+</script>
+
+<script>
+  // === Biến Filter Modal thành portal gắn thẳng vào <body> ===
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('filterModal');
+    if (modal && modal.parentNode !== document.body) {
+      document.body.appendChild(modal);
+    }
+  });
 </script>

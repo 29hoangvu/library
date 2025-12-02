@@ -1,453 +1,624 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
-<%@ page import="java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.sql.SQLException" %>
-<%@ page import="java.util.List,java.util.Map,java.util.HashMap,java.util.ArrayList" %>
-<%@ page import="java.text.SimpleDateFormat" %>
-<%@ page import="Servlet.DBConnection, Data.Users" %>
-
-<%
-    Connection conn = DBConnection.getConnection();
-    if (conn == null) {
-        out.println("<p>Lỗi kết nối CSDL</p>");
-        return;
-    }
-
-    Users user = (Users) session.getAttribute("user");
-    if (user == null) {
-        response.sendRedirect("index.jsp");
-        return;
-    }
-
-    int userId = user.getId();
-    List<Map<String, String>> borrowedBooks = new ArrayList<>();
-
-    try {
-        String query = "SELECT br.borrow_id, b.isbn, b.title, br.borrowed_date, br.due_date, br.return_date, br.status " +
-                       "FROM borrow br " +
-                       "JOIN bookitem bi ON br.book_item_id = bi.book_item_id " +
-                       "JOIN book b ON bi.book_isbn = b.isbn " +
-                       "WHERE br.user_id = ?";
-        PreparedStatement stmt = conn.prepareStatement(query);
-        stmt.setInt(1, userId);
-        ResultSet rs = stmt.executeQuery();
-
-        SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-
-        while (rs.next()) {
-            Map<String, String> book = new HashMap<>();
-            book.put("borrow_id", rs.getString("borrow_id"));
-            book.put("isbn", rs.getString("isbn"));
-            book.put("title", rs.getString("title"));
-
-            java.sql.Date borrowedDate = rs.getDate("borrowed_date");
-            java.sql.Date dueDate     = rs.getDate("due_date");
-            java.sql.Date returnDate  = rs.getDate("return_date");
-
-            book.put("borrowed_date", borrowedDate != null ? df.format(new java.util.Date(borrowedDate.getTime())) : "");
-            book.put("due_date",     dueDate     != null ? df.format(new java.util.Date(dueDate.getTime()))       : "");
-            book.put("return_date",  returnDate  != null ? df.format(new java.util.Date(returnDate.getTime()))    : "Chưa trả");
-
-            book.put("status", rs.getString("status"));
-            borrowedBooks.add(book);
-        }
-
-        rs.close();
-        stmt.close();
-    } catch (SQLException e) {
-        out.println("<p>Lỗi truy vấn dữ liệu: " + e.getMessage() + "</p>");
-    }
-%>
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sách đã mượn - Thư viện Sách</title>
+  <meta charset="UTF-8">
+  <title>Sách đã mượn - Thư viện Sách</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'inter': ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        'primary': '#3b82f6',
-                        'secondary': '#64748b',
-                    }
-                }
-            }
-        }
-    </script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet"/>
 
-    <!-- Favicon -->
-    <link rel="icon" href="./images/reading-book.png" type="image/x-icon" />
+  <!-- Favicon -->
+  <link rel="icon" href="<%=request.getContextPath()%>/images/reading-book.png" type="image/x-icon"/>
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="home1.css"/>
-    <link rel="stylesheet" href="loading.css"/>
+  <!-- Global theme (dark, glass, shelf, profile, footer, ...) -->
+  <link rel="stylesheet" href="style1.css"/>
 
-    <style>
-        .page-container {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .main-content {
-            flex: 1;
-            padding-bottom: 4rem; /* Space for footer */
-        }
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
 
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.025em;
-        }
-        
-        .status-waiting {
-            background-color: #fef3c7;
-            color: #d97706;
-            border: 1px solid #f59e0b;
-        }
-        
-        .status-borrowed {
-            background-color: #dcfce7;
-            color: #16a34a;
-            border: 1px solid #22c55e;
-        }
-        
-        .status-overdue {
-            background-color: #fee2e2;
-            color: #dc2626;
-            border: 1px solid #ef4444;
-        }
-        
-        .status-returned {
-            background-color: #dbeafe;
-            color: #2563eb;
-            border: 1px solid #3b82f6;
-        }
+    /* Glass khối header chính */
+    .borrow-header {
+      border-radius: 1.75rem;
+      border: 1px solid rgba(148,163,184,0.55);
+      background:
+              radial-gradient(circle at top left, rgba(59,130,246,0.40), rgba(129,140,248,0.92)),
+              radial-gradient(circle at bottom right, rgba(15,23,42,0.98), rgba(15,23,42,1));
+      box-shadow: 0 28px 80px rgba(15,23,42,0.95);
+      position: relative;
+      overflow: hidden;
+    }
+    .borrow-header::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: radial-gradient(circle at top left, rgba(248,250,252,0.15), transparent 65%);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    .borrow-header-inner {
+      position: relative;
+      z-index: 1;
+    }
 
-        .table-hover tr:hover {
-            background-color: #f8fafc !important;
-            transition: background-color 0.2s ease;
-        }
+    /* Nút back nhỏ – đồng bộ style glass tròn */
+    .back-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.40rem 0.95rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(148,163,184,0.7);
+      background: radial-gradient(circle at top left, rgba(15,23,42,0.98), rgba(15,23,42,0.92));
+      color: #e5e7eb;
+      font-size: 0.85rem;
+      font-weight: 500;
+      box-shadow: 0 16px 40px rgba(15,23,42,0.9);
+      text-decoration: none;
+      transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out, background 0.2s ease-out;
+    }
+    .back-pill:hover {
+      transform: translateY(-1px) scale(1.02);
+      border-color: rgba(129,140,248,0.95);
+      background: radial-gradient(circle at top left, rgba(79,70,229,0.98), rgba(37,99,235,0.98));
+      box-shadow: 0 22px 55px rgba(37,99,235,0.9);
+    }
 
-        .cancel-btn {
-            transition: all 0.2s ease;
-        }
+    /* Stats card – dùng glass, đồng bộ profile-stat nhưng nhỏ hơn */
+    .borrow-stat-card {
+      border-radius: 1.25rem;
+      background: radial-gradient(circle at top left, rgba(15,23,42,0.98), rgba(15,23,42,0.92));
+      border: 1px solid rgba(148,163,184,0.45);
+      box-shadow: 0 18px 45px rgba(15,23,42,0.9);
+      padding: 1.1rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .borrow-stat-label {
+      font-size: 0.80rem;
+      color: #9ca3af;
+    }
+    .borrow-stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #f9fafb;
+    }
 
-        .cancel-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
-        }
+    /* Glass container cho table */
+    .borrow-table-wrap {
+      border-radius: 1.75rem;
+      background: radial-gradient(circle at top left, rgba(15,23,42,0.98), rgba(15,23,42,0.92));
+      border: 1px solid rgba(148,163,184,0.50);
+      box-shadow: 0 26px 70px rgba(15,23,42,0.95);
+      overflow: hidden;
+    }
 
-        .floating-elements {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-            opacity: 0.1;
-        }
+    .borrow-table-head {
+      background: radial-gradient(circle at top left, rgba(37,99,235,0.95), rgba(30,64,175,1));
+      box-shadow: inset 0 -1px 0 rgba(248,250,252,0.16);
+    }
 
-        .floating-book {
-            position: absolute;
-            animation: float 6s ease-in-out infinite;
-        }
+    /* Table row hover */
+    #borrowTable tbody tr {
+      transition: background 0.18s ease-out, transform 0.18s ease-out;
+    }
+    #borrowTable tbody tr:hover {
+      background: rgba(15,23,42,0.9);
+      transform: translateY(-1px);
+    }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-        }
+    /* Pagination glass */
+    .borrow-pagination-btn {
+      border-radius: 9999px;
+      border-width: 1px;
+      border-style: solid;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.2s ease-out;
+    }
 
-        .card-shadow {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        .card-shadow:hover {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            transition: box-shadow 0.3s ease;
-        }
-
-        @media (max-width: 768px) {
-            .table-container {
-                overflow-x: auto;
-            }
-            
-            .table-responsive {
-                min-width: 800px;
-            }
-        }
-    </style>
-
-    <script>
-        function confirmCancel(borrowId) {
-            if (confirm("Bạn có chắc chắn muốn hủy đăng ký mượn sách này?")) {
-                window.location.href = "${pageContext.request.contextPath}/CancelBorrowServlet?borrow_id=" + borrowId;
-            }
-        }
-    </script>
+    /* Đẩy footer xuống dưới chút */
+    main {
+      min-height: calc(100vh - 220px);
+    }
+  </style>
 </head>
 
-<body class="page-background font-inter page-container">
-    <!-- Floating Background Elements -->
-    <div class="floating-elements">
-        <i class="fas fa-book floating-book text-6xl text-blue-500" style="top: 10%; left: 85%; animation-delay: 0s;"></i>
-        <i class="fas fa-bookmark floating-book text-4xl text-purple-500" style="top: 20%; left: 10%; animation-delay: 2s;"></i>
-        <i class="fas fa-feather floating-book text-5xl text-green-500" style="top: 60%; left: 90%; animation-delay: 4s;"></i>
-        <i class="fas fa-scroll floating-book text-4xl text-orange-500" style="top: 80%; left: 5%; animation-delay: 6s;"></i>
+<body class="page-background">
+
+<!-- Floating Background Elements (nhẹ, đồng bộ các trang khác) -->
+<div class="floating-elements">
+  <i class="fas fa-book floating-book text-6xl text-blue-500"
+     style="top: 10%; left: 82%; animation-delay: 0s;"></i>
+  <i class="fas fa-bookmark floating-book text-5xl text-purple-500"
+     style="top: 18%; left: 8%; animation-delay: 2s;"></i>
+  <i class="fas fa-feather floating-book text-5xl text-emerald-500"
+     style="top: 55%; left: 88%; animation-delay: 4s;"></i>
+  <i class="fas fa-scroll floating-book text-4xl text-orange-500"
+     style="top: 78%; left: 6%; animation-delay: 6s;"></i>
+</div>
+
+<jsp:include page="layout/header.jsp"/>
+
+<main class="container-enhanced py-10">
+  <div id="app-content" class="space-y-8">
+
+    <!-- Back nhỏ trên cùng -->
+    <div class="flex justify-between items-center mb-3">
+      <a href="<%=request.getContextPath()%>/index.jsp" class="back-pill">
+        <i class="fas fa-arrow-left text-xs"></i>
+        <span>Quay lại trang chủ</span>
+      </a>
+      <!-- chừa chỗ nếu sau này muốn thêm nút gì đó bên phải -->
+      <div></div>
     </div>
 
-    <!-- Include Header -->
-    <jsp:include page="layout/header.jsp" />
+    <!-- Header glass chính -->
+    <section class="borrow-header px-6 py-6 md:px-8 md:py-7">
+      <div class="borrow-header-inner flex flex-col md:flex-row md:items-center gap-6">
+        <!-- Icon + Title -->
+        <div class="flex items-start gap-4 flex-1">
+          <div
+            class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-white/10 border border-blue-200/40 flex items-center justify-center shadow-2xl">
+            <i class="fas fa-book-open text-2xl md:text-3xl text-yellow-300"></i>
+          </div>
+          <div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-1">
+              Sách đã mượn
+            </h1>
+            <p class="text-slate-200 text-sm md:text-base max-w-xl">
+              Theo dõi trạng thái các sách bạn đã đăng ký mượn, đang mượn, quá hạn hoặc đã trả.
+            </p>
+            <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-200/80">
+              <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 border border-white/20">
+                <i class="fas fa-layer-group mr-2 text-amber-300"></i>
+                Tổng: <span id="totalBorrowCount" class="ml-1 font-semibold">0</span> lượt mượn
+              </span>
 
-    <div class="main-content">
-        <!-- Page Loader -->
-            <div id="page-loader" role="status" aria-live="polite">
-                <div class="spinner mb-6"></div>
-                <div class="text-center mb-6">
-                    <div class="loader-title text-xl">Đang tải dữ liệu…</div>
-                    <div class="loader-sub text-sm">Vui lòng chờ trong giây lát</div>
-                </div>
-
-                <!-- Skeleton: 1 hàng sách giả để người dùng có gì đó nhìn -->
-                <div class="shelf-skeleton px-6">
-                    <!-- lặp vài thẻ giả (5–7 cái) -->
-                    <div class="sk-card">
-                        <div class="sk-img shimmer"></div>
-                        <div class="p-4 space-y-3">
-                            <div class="sk-line w1 shimmer relative"></div>
-                            <div class="sk-line w2 shimmer relative"></div>
-                            <div class="sk-line w3 shimmer relative"></div>
-                        </div>
-                    </div>
-                    <div class="sk-card">
-                        <div class="sk-img shimmer"></div>
-                        <div class="p-4 space-y-3">
-                            <div class="sk-line w1 shimmer relative"></div>
-                            <div class="sk-line w2 shimmer relative"></div>
-                            <div class="sk-line w3 shimmer relative"></div>
-                        </div>
-                    </div>
-                    <div class="sk-card"><div class="sk-img shimmer"></div><div class="p-4 space-y-3"><div class="sk-line w1 shimmer relative"></div><div class="sk-line w2 shimmer relative"></div><div class="sk-line w3 shimmer relative"></div></div></div>
-                    <div class="sk-card"><div class="sk-img shimmer"></div><div class="p-4 space-y-3"><div class="sk-line w1 shimmer relative"></div><div class="sk-line w2 shimmer relative"></div><div class="sk-line w3 shimmer relative"></div></div></div>
-                    <div class="sk-card"><div class="sk-img shimmer"></div><div class="p-4 space-y-3"><div class="sk-line w1 shimmer relative"></div><div class="sk-line w2 shimmer relative"></div><div class="sk-line w3 shimmer relative"></div></div></div>
-                </div>
             </div>
-        <div id="app-content">
-        <div class="container mx-auto px-4 py-8 max-w-7xl">
-            <!-- Page Header -->
-            <div class="mb-8">
-                <div class="flex items-center mb-4">
-                    <i class="fas fa-book-open text-3xl text-primary mr-4"></i>
-                    <h1 class="text-3xl font-bold text-gray-800">Sách đã mượn</h1>
-                </div>
-                <p class="text-gray-600">Quản lý danh sách các sách bạn đã mượn từ thư viện</p>
-            </div>
-
-            <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <%
-                    int totalBooks = borrowedBooks.size();
-                    int pendingBooks = 0, borrowedCount = 0, overdueCount = 0, returnedCount = 0;
-                    
-                    for (Map<String, String> book : borrowedBooks) {
-                        String status = book.get("status");
-                        if ("Pending Approval".equals(status)) pendingBooks++;
-                        else if ("Borrowed".equals(status)) borrowedCount++;
-                        else if ("Overdue".equals(status)) overdueCount++;
-                        else if ("Returned".equals(status)) returnedCount++;
-                    }
-                %>
-                
-                <div class="bg-white rounded-xl p-6 card-shadow">
-                    <div class="flex items-center">
-                        <div class="p-3 bg-blue-100 rounded-lg">
-                            <i class="fas fa-books text-2xl text-blue-600"></i>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm text-gray-600">Tổng sách</p>
-                            <p class="text-2xl font-bold text-gray-800"><%= totalBooks %></p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl p-6 card-shadow">
-                    <div class="flex items-center">
-                        <div class="p-3 bg-yellow-100 rounded-lg">
-                            <i class="fas fa-clock text-2xl text-yellow-600"></i>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm text-gray-600">Chờ duyệt</p>
-                            <p class="text-2xl font-bold text-yellow-600"><%= pendingBooks %></p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl p-6 card-shadow">
-                    <div class="flex items-center">
-                        <div class="p-3 bg-green-100 rounded-lg">
-                            <i class="fas fa-book-reader text-2xl text-green-600"></i>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm text-gray-600">Đang mượn</p>
-                            <p class="text-2xl font-bold text-green-600"><%= borrowedCount %></p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl p-6 card-shadow">
-                    <div class="flex items-center">
-                        <div class="p-3 bg-red-100 rounded-lg">
-                            <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm text-gray-600">Quá hạn</p>
-                            <p class="text-2xl font-bold text-red-600"><%= overdueCount %></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Books Table -->
-            <div class="bg-white rounded-xl card-shadow overflow-hidden">
-                <div class="px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600">
-                    <h3 class="text-xl font-semibold text-white flex items-center">
-                        <i class="fas fa-list mr-2"></i>
-                        Danh sách sách đã mượn
-                    </h3>
-                </div>
-
-                <div class="table-container">
-                    <% if (borrowedBooks.isEmpty()) { %>
-                        <div class="text-center py-12">
-                            <i class="fas fa-book-open text-6xl text-gray-300 mb-4"></i>
-                            <p class="text-gray-500 text-lg">Bạn chưa mượn sách nào</p>
-                            <a href="${pageContext.request.contextPath}/index.jsp" class="inline-block mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                                Khám phá sách
-                            </a>
-                        </div>
-                    <% } else { %>
-                        <table class="table-responsive w-full">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        <i class="fas fa-barcode mr-2"></i>ISBN
-                                    </th>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        <i class="fas fa-book mr-2"></i>Tên sách
-                                    </th>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        <i class="fas fa-calendar-plus mr-2"></i>Ngày mượn
-                                    </th>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        <i class="fas fa-calendar-times mr-2"></i>Hạn trả
-                                    </th>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        <i class="fas fa-calendar-check mr-2"></i>Ngày trả
-                                    </th>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        <i class="fas fa-info-circle mr-2"></i>Trạng thái
-                                    </th>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        <i class="fas fa-cogs mr-2"></i>Hành động
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200 table-hover">
-                                <% for (Map<String, String> book : borrowedBooks) { 
-                                    String status = book.get("status");
-                                    String statusClass = "status-waiting";
-                                    String statusText = "Chờ duyệt";
-
-                                    if ("Pending Approval".equals(status)) {
-                                        statusClass = "status-waiting";
-                                        statusText = "Chờ duyệt";
-                                    } else if ("Borrowed".equals(status)) {
-                                        statusClass = "status-borrowed";
-                                        statusText = "Đang mượn";
-                                    } else if ("Overdue".equals(status)) {
-                                        statusClass = "status-overdue";
-                                        statusText = "Quá hạn";
-                                    } else if ("Returned".equals(status)) {
-                                        statusClass = "status-returned";
-                                        statusText = "Đã trả";
-                                    }
-                                %>
-                                    <tr class="hover:bg-gray-50 transition-colors">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
-                                            <%= book.get("isbn") %>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">
-                                            <div class="font-medium">
-                                                <%= book.get("title") %>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            <% if (!book.get("borrowed_date").isEmpty()) { %>
-                                                <i class="fas fa-calendar text-blue-500 mr-2"></i>
-                                            <% } %>
-                                            <%= book.get("borrowed_date") %>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            <% if (!book.get("due_date").isEmpty()) { %>
-                                                <i class="fas fa-calendar text-orange-500 mr-2"></i>
-                                            <% } %>
-                                            <%= book.get("due_date") %>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            <% if (!"Chưa trả".equals(book.get("return_date"))) { %>
-                                                <i class="fas fa-calendar-check text-green-500 mr-2"></i>
-                                            <% } %>
-                                            <%= book.get("return_date") %>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="status-badge <%= statusClass %>">
-                                                <%= statusText %>
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <% if ("Pending Approval".equals(status)) { %>
-                                                <button 
-                                                    class="cancel-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium flex items-center transition-all duration-200"
-                                                    onclick="confirmCancel('<%= book.get("borrow_id") %>')"
-                                                >
-                                                    <i class="fas fa-times mr-2"></i>
-                                                    Hủy
-                                                </button>
-                                            <% } else { %>
-                                                <span class="text-gray-400 text-sm">Không có</span>
-                                            <% } %>
-                                        </td>
-                                    </tr>
-                                <% } %>
-                            </tbody>
-                        </table>
-                    <% } %>
-                </div>
-            </div>
+          </div>
         </div>
-    </div>
 
-    <!-- Include Footer -->
-    <jsp:include page="layout/footer.jsp" />
+        <!-- Mini legend -->
+        <div class="grid grid-cols-2 gap-3 text-xs text-slate-100 md:w-64">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
+            <span>Chờ duyệt</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-green-400"></span>
+            <span>Đang mượn</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+            <span>Quá hạn</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
+            <span>Đã trả</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Thống kê -->
+    <section>
+      <div id="stats"
+           class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- JS sẽ render -->
+      </div>
+    </section>
+
+    <!-- Bảng danh sách mượn -->
+    <section class="borrow-table-wrap">
+      <!-- Header bảng -->
+      <div class="borrow-table-head px-6 py-4">
+        <h3 class="text-lg md:text-xl font-semibold text-white flex items-center gap-2">
+          <i class="fas fa-list-ul"></i>
+          <span>Danh sách sách đã mượn</span>
+        </h3>
+        <p class="text-xs md:text-sm text-blue-100/90 mt-1">
+          Bạn có thể hủy các yêu cầu <span class="font-semibold">chờ duyệt</span> trực tiếp tại đây.
+        </p>
+      </div>
+
+      <!-- Table -->
+      <div class="table-container overflow-x-auto bg-slate-950/40">
+        <table class="min-w-full text-sm text-left text-slate-100/90" id="borrowTable">
+          <thead class="bg-slate-900/90 text-xs uppercase tracking-wider text-slate-300">
+          <tr>
+            <th class="px-6 py-3 font-semibold">ISBN</th>
+            <th class="px-6 py-3 font-semibold">Tên sách</th>
+            <th class="px-6 py-3 font-semibold">Ngày mượn</th>
+            <th class="px-6 py-3 font-semibold">Hạn trả</th>
+            <th class="px-6 py-3 font-semibold">Ngày trả</th>
+            <th class="px-6 py-3 font-semibold">Trạng thái</th>
+            <th class="px-6 py-3 font-semibold text-center">Hành động</th>
+          </tr>
+          </thead>
+          <tbody id="borrowBody" class="divide-y divide-slate-800/80">
+          <!-- JS render -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Pagination -->
+    <section class="flex justify-center items-center mt-5 mb-10">
+      <div id="pagination"
+           class="inline-flex flex-wrap justify-center items-center gap-2">
+        <!-- JS render -->
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<jsp:include page="layout/footer.jsp"/>
+
+<script>window.CTX = '<%=request.getContextPath()%>';</script>
+
+<script>
+const PAGE_SIZE = 10;          // số bản ghi mỗi trang
+let allBorrowItems = [];       // mảng đầy đủ để phân trang
+let currentPage = 1;
+
+function statusBadge(status) {
+  if (status === "Pending Approval") return '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-500/15 text-yellow-300 border border-yellow-400/40"><span class="w-1.5 h-1.5 rounded-full bg-yellow-300 mr-2"></span>Chờ duyệt</span>';
+  if (status === "Borrowed")         return '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-400/40"><span class="w-1.5 h-1.5 rounded-full bg-emerald-300 mr-2"></span>Đang mượn</span>';
+  if (status === "Overdue")          return '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-500/15 text-red-300 border border-red-400/40"><span class="w-1.5 h-1.5 rounded-full bg-red-300 mr-2"></span>Quá hạn</span>';
+  if (status === "Returned")         return '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/15 text-sky-300 border border-sky-400/40"><span class="w-1.5 h-1.5 rounded-full bg-sky-300 mr-2"></span>Đã trả</span>';
+  return '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-500/20 text-slate-200 border border-slate-400/40">'+(status || 'Không rõ')+'</span>';
+}
+
+function fmt(d){
+  if (!d) return "—";
+  const t = new Date(d);
+  return t.toLocaleDateString("vi-VN");
+}
+
+function renderStats(items){
+  let pending=0, borrowed=0, overdue=0, returned=0;
+  items.forEach(it=>{
+    if(it.status==="Pending Approval") pending++;
+    else if(it.status==="Borrowed") borrowed++;
+    else if(it.status==="Overdue") overdue++;
+    else if(it.status==="Returned") returned++;
+  });
+  const total=items.length;
+
+  // cập nhật tổng trên header
+  const totalSpan = document.getElementById("totalBorrowCount");
+  if (totalSpan) totalSpan.textContent = total;
+
+  document.getElementById("stats").innerHTML = `
+    <div class="borrow-stat-card">
+      <p class="borrow-stat-label">Tổng số lượt mượn</p>
+      <p class="borrow-stat-value">${total}</p>
+      <p class="text-xs text-slate-400 mt-1 flex items-center gap-1">
+        <i class="fas fa-circle text-emerald-400 text-[6px]"></i>
+        Bao gồm tất cả trạng thái
+      </p>
     </div>
-    <script src="script.js"></script>
+    <div class="borrow-stat-card">
+      <p class="borrow-stat-label">Chờ duyệt</p>
+      <p class="borrow-stat-value text-amber-300">${pending}</p>
+      <p class="text-xs text-slate-400 mt-1">Yêu cầu đang đợi Admin xác nhận</p>
+    </div>
+    <div class="borrow-stat-card">
+      <p class="borrow-stat-label">Đang mượn</p>
+      <p class="borrow-stat-value text-emerald-300">${borrowed}</p>
+      <p class="text-xs text-slate-400 mt-1">Sách bạn đang giữ</p>
+    </div>
+    <div class="borrow-stat-card">
+      <p class="borrow-stat-label">Quá hạn</p>
+      <p class="borrow-stat-value text-red-300">${overdue}</p>
+      <p class="text-xs text-slate-400 mt-1">Cần trả hoặc gia hạn ngay</p>
+    </div>
+  `;
+}
+
+function normalizeItems(rawItems){
+  if (!Array.isArray(rawItems)) return [];
+  return rawItems.map(it => {
+    const borrowId = Number(
+      it.borrowId ?? it.borrow_id ?? it.id ?? it.BorrowId ?? it.borrowID ?? 0
+    );
+    return {
+      borrowId: Number.isFinite(borrowId) ? borrowId : 0,
+      isbn: it.isbn ?? "",
+      title: it.title ?? "",
+      borrowedDate: it.borrowedDate ?? it.borrowed_date ?? null,
+      dueDate:      it.dueDate ?? it.due_date ?? null,
+      returnDate:   it.returnDate ?? it.return_date ?? null,
+      status: (it.status ?? "").trim()
+    };
+  });
+}
+
+function renderTable(items){
+  const body = document.getElementById("borrowBody");
+  if(!Array.isArray(items) || items.length === 0){
+    body.innerHTML = `<tr>
+        <td colspan="7" class="text-center py-8 text-slate-400">
+          Bạn chưa mượn sách nào.
+        </td>
+      </tr>`;
+    return;
+  }
+
+  body.innerHTML = items.map(it => {
+    const bid = Number(
+      it.borrowId ?? it.borrow_id ?? it.id ?? it.BorrowId ?? it.borrowID ?? 0
+    );
+    const safeBid = Number.isInteger(bid) && bid > 0 ? bid : 0;
+
+    const actionHtml = (it.status === "Pending Approval" && safeBid > 0)
+      ? '<button class="btn-cancel px-3 py-1 rounded-full text-xs font-semibold bg-red-500/15 text-red-300 border border-red-400/60 hover:bg-red-500/30 transition" data-borrow-id="'+safeBid+'"><i class="fas fa-times mr-1"></i>Hủy</button>'
+      : '<span class="text-slate-500 text-xs">—</span>';
+
+    return `
+      <tr>
+        <td class="px-6 py-4 font-mono text-xs text-slate-300">\${it.isbn ?? ""}</td>
+        <td class="px-6 py-4 text-sm text-slate-100">\${it.title ?? ""}</td>
+        <td class="px-6 py-4 text-sm text-slate-200">\${fmt(it.borrowedDate)}</td>
+        <td class="px-6 py-4 text-sm text-slate-200">\${fmt(it.dueDate)}</td>
+        <td class="px-6 py-4 text-sm text-slate-200">\${it.returnDate ? fmt(it.returnDate) : 'Chưa trả'}</td>
+        <td class="px-6 py-4 text-sm">\${statusBadge(it.status)}</td>
+        <td class="px-6 py-4 text-center">\${actionHtml}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function renderPage(page) {
+  const total = allBorrowItems.length;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  if (total === 0) {
+    renderTable([]);
+    renderPagination(0);
+    return;
+  }
+
+  let p = page;
+  if (p < 1) p = 1;
+  if (p > totalPages) p = totalPages;
+  currentPage = p;
+
+  const start = (p - 1) * PAGE_SIZE;
+  const end   = start + PAGE_SIZE;
+  const pageItems = allBorrowItems.slice(start, end);
+
+  renderTable(pageItems);
+  renderPagination(total);
+}
+
+function renderPagination(totalItems) {
+  const container = document.getElementById("pagination");
+  if (!container) return;
+
+  if (!totalItems || totalItems <= 0) {
+    container.innerHTML = "";
+    return;
+  }
+
+  const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+  let html = "";
+
+  // Prev
+  const prevPage = currentPage - 1;
+  html += '<button data-page="' + prevPage + '" ' +
+    (currentPage === 1 ? 'disabled ' : '') +
+    'class="borrow-pagination-btn border-slate-600 bg-slate-800 text-slate-200 ' +
+    (currentPage === 1 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-700') +
+    '">&laquo;</button>';
+
+  // Page numbers
+  for (let p = 1; p <= totalPages; p++) {
+    html += '<button data-page="' + p + '" class="borrow-pagination-btn ' +
+      (p === currentPage
+        ? 'bg-blue-600 border-blue-400 text-white shadow-lg'
+        : 'bg-slate-800 border-slate-600 text-slate-200 hover:bg-slate-700'
+      ) +
+      '">' + p + '</button>';
+  }
+
+  // Next
+  const nextPage = currentPage + 1;
+  html += '<button data-page="' + nextPage + '" ' +
+    (currentPage === totalPages ? 'disabled ' : '') +
+    'class="borrow-pagination-btn border-slate-600 bg-slate-800 text-slate-200 ' +
+    (currentPage === totalPages ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-700') +
+    '">&raquo;</button>';
+
+  container.innerHTML = html;
+}
+
+// Click pagination
+document.getElementById("pagination").addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-page]");
+  if (!btn) return;
+
+  const page = parseInt(btn.dataset.page, 10);
+  const totalPages = Math.max(1, Math.ceil(allBorrowItems.length / PAGE_SIZE));
+
+  if (!Number.isInteger(page) || page < 1 || page > totalPages) return;
+  renderPage(page);
+});
+
+// Delegation cho nút Hủy
+document.getElementById("borrowBody").addEventListener("click", async (e) => {
+  const btn = e.target.closest(".btn-cancel");
+  if (!btn) return;
+
+  const raw = btn.dataset.borrowId ?? btn.getAttribute("data-borrow-id") ?? "";
+  const id  = parseInt(raw, 10);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    showToast("ID hủy không hợp lệ");
+    return;
+  }
+
+  const ok = await confirmPopup("Bạn có chắc muốn hủy mượn sách này?");
+  if (!ok) return;
+  await cancelBorrow(id);
+});
+
+// Cancel API
+async function cancelBorrow(borrowId) {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    showToast("Bạn cần đăng nhập");
+    setTimeout(()=>location.href = CTX + "/user/login.jsp", 1200);
+    return;
+  }
+  try {
+    const r = await fetch(CTX + "/api/borrow/cancel", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + token,
+        "Content-Type": "application/json; charset=UTF-8",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({ borrowId: Number(borrowId) })
+    });
+
+    const ct = r.headers.get("content-type") || "";
+    const data = ct.includes("application/json") ? await r.json() : { message: await r.text() };
+
+    if (!r.ok) { showToast(data.message || ("Hủy thất bại: " + r.status)); return; }
+    showToast(data.message || "Đã hủy yêu cầu mượn");
+    setTimeout(()=>location.reload(), 1200);
+  } catch (e) {
+    console.error(e);
+    showToast("Không thể gọi API hủy mượn");
+  }
+}
+
+// Init
+(async function(){
+  try{
+    const data = await api.apiGet('/borrowed');
+    const items = normalizeItems(data?.items);
+    allBorrowItems = items;
+    renderStats(items);
+    renderPage(1);
+  }catch(e){
+    console.error(e);
+    showToast("Không tải được dữ liệu mượn sách");
+  }
+})();
+</script>
+
+<!-- Confirm Modal -->
+<div id="confirmModal" class="fixed inset-0 z-[100] hidden opacity-0 transition-opacity duration-300">
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300" id="modalBackdrop"></div>
+  <div class="absolute inset-0 flex items-center justify-center p-4">
+    <div class="bg-slate-900/95 border border-slate-600/80 rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-transform duration-300"
+         id="modalContent">
+      <div class="px-5 py-4 border-b border-slate-700/80 flex items-center gap-2">
+        <span
+          class="w-8 h-8 rounded-full bg-red-500/15 border border-red-400/60 flex items-center justify-center text-red-300">
+          <i class="fas fa-exclamation"></i>
+        </span>
+        <h3 class="text-lg font-semibold text-slate-50">Xác nhận</h3>
+      </div>
+      <div class="px-5 py-4">
+        <p id="confirmMessage" class="text-slate-200 text-sm">
+          Bạn có chắc muốn hủy mượn sách này?
+        </p>
+      </div>
+      <div class="px-5 py-3 border-t border-slate-700/80 flex justify-end gap-2">
+        <button id="confirmCancelBtn"
+                class="px-4 py-2 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 text-sm transition-colors duration-200">
+          Hủy
+        </button>
+        <button id="confirmOkBtn"
+                class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm transition-colors duration-200">
+          Đồng ý
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"
+     class="fixed bottom-6 right-6 z-[110] hidden opacity-0 transform translate-x-4 transition-all duration-300">
+  <div id="toastCard"
+       class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-4 rounded-xl shadow-2xl border border-white/20 min-w-[300px] text-center flex items-center justify-center gap-3">
+    <i class="fas fa-info-circle text-xl"></i>
+    <span id="toastMessage" class="font-medium"></span>
+  </div>
+</div>
+
+<script>
+// Toast
+function showToast(message, ms=4000){
+  const wrap = document.getElementById('toast');
+  const msgSpan = document.getElementById('toastMessage');
+  msgSpan.textContent = message;
+  wrap.classList.remove('hidden');
+  setTimeout(() => {
+    wrap.classList.remove('opacity-0', 'translate-x-4');
+  }, 10);
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => {
+    wrap.classList.add('opacity-0', 'translate-x-4');
+    setTimeout(() => wrap.classList.add('hidden'), 300);
+  }, ms);
+}
+
+// Confirm popup Promise<boolean>
+function confirmPopup(message = "Bạn có chắc?") {
+  return new Promise(resolve => {
+    const modal = document.getElementById('confirmModal');
+    const backdrop = document.getElementById('modalBackdrop');
+    const content = document.getElementById('modalContent');
+    const msg   = document.getElementById('confirmMessage');
+    const btnOk = document.getElementById('confirmOkBtn');
+    const btnNo = document.getElementById('confirmCancelBtn');
+
+    function close(v){
+      modal.classList.add('opacity-0');
+      content.classList.add('scale-95');
+      backdrop.classList.add('opacity-0');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        btnOk.removeEventListener('click', onOk);
+        btnNo.removeEventListener('click', onNo);
+        resolve(v);
+      }, 300);
+    }
+    function onOk(){ close(true); }
+    function onNo(){ close(false); }
+
+    msg.textContent = message;
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+      modal.classList.remove('opacity-0');
+      content.classList.remove('scale-95');
+      backdrop.classList.remove('opacity-0');
+    }, 10);
+    btnOk.addEventListener('click', onOk);
+    btnNo.addEventListener('click', onNo);
+  });
+}
+</script>
+
 </body>
 </html>

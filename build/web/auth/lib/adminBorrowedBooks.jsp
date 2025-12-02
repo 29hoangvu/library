@@ -345,7 +345,7 @@
                             </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                <% if (fineAmount > 0) {%>
+                                <% if (fineAmount > 0) { %>
                             <span class="text-red-600 font-semibold">
                                 <%= String.format("%,.0f", fineAmount)%> VNĐ
                             </span>
@@ -354,7 +354,7 @@
                             <% } %>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <% if (status.equals("Borrowed") || status.equals("Overdue")) {%>
+                                <% if (status.equals("Borrowed") || status.equals("Overdue")) { %>
                             <button onclick="confirmReturn(<%= rs.getInt("borrow_id")%>)" 
                                     class="bg-green-600 hover:bg-green-700 text-white px-2 py-2 rounded-lg text-sm font-medium transition duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5">
                                 Xác nhận Trả
@@ -517,6 +517,8 @@
     </div>
 
 <script>
+  const ADMIN_BORROW_API = '<%=request.getContextPath()%>/api/admin/am-borrows';
+
   // ========== State ==========
   let originalRows = [];        // << thêm biến toàn cục lưu mọi dòng gốc
   let currentFilteredRows = []; // tập dòng sau khi lọc
@@ -746,24 +748,41 @@
     ['borrowedDateFrom','borrowedDateTo','dueDateFrom','dueDateTo']
       .forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
   });
-    function confirmReturn(borrowId) {
-            if (confirm("Bạn có chắc muốn xác nhận trả sách không?")) {
-                fetch('../../ReturnBookServlet', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: 'id=' + borrowId
-                })
-                        .then(response => response.json())
-                        .then(data => {
-                            alert(data.message);
-                            window.location.href = data.redirect;
-                        })
-                        .catch(err => {
-                            alert("Lỗi khi xác nhận trả sách.");
-                            console.error(err);
-                        });
-            }
-        }
+
+  function confirmReturn(borrowId) {
+    if (!confirm("Bạn có chắc muốn xác nhận trả sách không?")) return;
+    const token = localStorage.getItem('token');
+    if (!token) {
+      showModal('Lỗi', 'Không tìm thấy token đăng nhập. Vui lòng đăng nhập lại.');
+      return;
+    }
+    const body = new URLSearchParams();
+    body.append('action', 'return');
+    body.append('borrowId', borrowId);
+
+    fetch(ADMIN_BORROW_API, {
+      method: 'POST',
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "Authorization": "Bearer " + token
+      },
+      body: body.toString()
+    })
+    .then(response => response.json())
+    .then(d => {
+      if (d.ok) {
+        alert(d.message || "Xác nhận trả sách thành công");
+        window.location.reload();
+      } else {
+        alert(d.message || "Không thể xác nhận trả sách.");
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Lỗi khi xác nhận trả sách.");
+    });
+  }
 </script>
           
 </body>

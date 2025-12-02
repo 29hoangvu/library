@@ -274,7 +274,6 @@
           </div>
           <div>
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-              <!-- Prev -->
 <%
       if (pageNum > 1) {
 %>
@@ -363,6 +362,8 @@
 </div>
 
 <script>
+const ADMIN_BORROW_API = '<%=request.getContextPath()%>/api/admin/am-borrows';
+
 function searchBorrow() {
   const searchValue = document.getElementById('searchInput').value || '';
   const url = new URL(window.location);
@@ -370,10 +371,14 @@ function searchBorrow() {
   url.searchParams.set('page', '1'); // reset về trang 1
   window.location.href = url.toString();
 }
+
 function refreshData() {
   window.location.href = window.location.pathname;
 }
-document.getElementById('modalCloseBtn').addEventListener('click', ()=>document.getElementById('messageModal').classList.add('hidden'));
+
+document.getElementById('modalCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('messageModal').classList.add('hidden')
+});
 
 function showModal(title, message){
   const modal = document.getElementById('messageModal');
@@ -384,29 +389,77 @@ function showModal(title, message){
 
 function approveBorrow(borrowId, bookItemId) {
   if (!confirm('Bạn có chắc chắn muốn duyệt yêu cầu này?')) return;
-  fetch('../../ApproveBorrowServlet', {
-    method: 'POST',
-    headers: {'Content-Type':'application/x-www-form-urlencoded'},
 
-    body: 'action=approve&borrowId=' + borrowId + '&bookItemId=' + bookItemId
-  }).then(r=>r.json()).then(d=>{
-    if(d.success){ showModal('Thành công','Đã duyệt yêu cầu!'); setTimeout(()=>location.reload(),1200);}
-    else{ showModal('Lỗi', d.message || 'Không duyệt được');}
-  }).catch(()=>{ showModal('Lỗi','Không kết nối được server'); });
+  const token = localStorage.getItem('token');
+  if (!token) {
+    showModal('Lỗi', 'Không tìm thấy token đăng nhập. Vui lòng đăng nhập lại.');
+    return;
+  }
+
+  const body = new URLSearchParams();
+  body.append('action', 'approve');
+  body.append('borrowId', borrowId);
+  body.append('bookItemId', bookItemId);
+
+  fetch(ADMIN_BORROW_API, {
+    method: 'POST',
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      "Authorization": "Bearer " + token
+    },
+    body: body.toString()
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) {
+      showModal('Thành công', d.message || 'Đã duyệt yêu cầu!');
+      setTimeout(() => location.reload(), 1200);
+    } else {
+      showModal('Lỗi', d.message || 'Không duyệt được');
+    }
+  })
+  .catch(() => {
+    showModal('Lỗi', 'Không kết nối được server');
+  });
 }
 
 function rejectBorrow(borrowId){
   const reason = prompt('Vui lòng nhập lý do từ chối:');
   if(!reason || !reason.trim()) return;
-  fetch('../../ApproveBorrowServlet', {
+
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    showModal('Lỗi', 'Không tìm thấy token đăng nhập. Vui lòng đăng nhập lại.');
+    return;
+  }
+
+  const body = new URLSearchParams();
+  body.append('action', 'reject');
+  body.append('borrowId', borrowId);
+  body.append('reason', reason);
+
+  fetch(ADMIN_BORROW_API, {
     method: 'POST',
-    headers: {'Content-Type':'application/x-www-form-urlencoded'},
-    // Tránh EL: nối chuỗi thuần + encodeURIComponent
-    body: 'action=reject&borrowId=' + borrowId + '&reason=' + encodeURIComponent(reason)
-  }).then(r=>r.json()).then(d=>{
-    if(d.success){ showModal('Thành công','Đã từ chối yêu cầu!'); setTimeout(()=>location.reload(),1200);}
-    else{ showModal('Lỗi', d.message || 'Không từ chối được');}
-  }).catch(()=>{ showModal('Lỗi','Không kết nối được server'); });
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      "Authorization": "Bearer " + token
+    },
+    body: body.toString()
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) {
+      showModal('Thành công', d.message || 'Đã từ chối yêu cầu!');
+      setTimeout(() => location.reload(), 1200);
+    } else {
+      showModal('Lỗi', d.message || 'Không từ chối được');
+    }
+  })
+  .catch(() => {
+    showModal('Lỗi', 'Không kết nối được server');
+  });
 }
 </script>
 

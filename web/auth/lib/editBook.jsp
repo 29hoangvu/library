@@ -5,21 +5,13 @@
 <%@ page import="Data.Users, Servlet.DBConnection" %>
 
 <%
-    Users user = (Users) session.getAttribute("user");
-    if (user == null || (user.getRoleID() != 1 && user.getRoleID() != 2)) {
-        response.sendRedirect("index.jsp");
-        return;
-    }
-%>
-
-<%
     Connection conn = null;
     PreparedStatement ps = null;
     ResultSet rs = null;
 
     String isbn = request.getParameter("isbn");
     if (isbn == null || isbn.isEmpty()) {
-        response.sendRedirect("bookList.jsp");
+        response.sendRedirect("adminDashboard.jsp");
         return;
     }
 
@@ -58,7 +50,7 @@
             authorID = rs.getInt("authorID");
             status = rs.getString("status") != null ? rs.getString("status") : "ACTIVE";
         } else {
-            response.sendRedirect("bookList.jsp");
+            response.sendRedirect("adminDashboard.jsp");
             return;
         }
         rs.close();
@@ -347,7 +339,7 @@
                         </div>
                     </div>
 
-                    <form action="../../UpdateBookServlet" method="POST" class="space-y-8" enctype="multipart/form-data">
+                    <form id="bookForm" onsubmit="return submitUpdate(event)" class="space-y-8" enctype="multipart/form-data">
                         <input type="hidden" name="isbn" value="<%= isbn%>">
 
                         <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -588,10 +580,74 @@
                             </button>
                         </div>
                     </form>
+                    <!-- Toast nho nhỏ (nếu bạn chưa có hệ toast dùng chung) -->
+                <div id="toast" class="fixed bottom-6 right-6 z-[110] hidden opacity-0 transform translate-x-4 transition-all duration-300">
+                  <div id="toastCard" class="bg-gradient-to-r from-emerald-500 to-green-600 text-white px-6 py-4 rounded-xl shadow-2xl border border-white/20 min-w-[300px] text-center flex items-center justify-center gap-3">
+                    <i class="fas fa-info-circle text-xl"></i>
+                    <span id="toastMessage" class="font-medium"></span>
+                  </div>
+                </div>           
                 </div>
             </div>
         </div>
+        <script>
+            const CTX = '<%=request.getContextPath()%>';
 
+            function showToast(message, ms=3500){
+              const wrap = document.getElementById('toast');
+              const msgSpan = document.getElementById('toastMessage');
+              msgSpan.textContent = message;
+              wrap.classList.remove('hidden');
+              setTimeout(() => { wrap.classList.remove('opacity-0','translate-x-4'); }, 10);
+              clearTimeout(showToast._t);
+              showToast._t = setTimeout(() => {
+                wrap.classList.add('opacity-0','translate-x-4');
+                setTimeout(() => wrap.classList.add('hidden'), 300);
+              }, ms);
+            }
+
+            async function submitUpdate(e){
+              e.preventDefault();
+              const form = document.getElementById('bookForm');
+              const fd   = new FormData(form);
+
+              const isbn = '<%= isbn %>'; // đã có ở server
+              // Đảm bảo gửi cờ formatEditEnabled đúng trạng thái UI
+              // (nếu bạn đã set hidden input trong JS toggle thì không cần bước này)
+              // fd.set('formatEditEnabled', document.getElementById('formatEditEnabled')?.value || 'false');
+
+              // (tuỳ chọn) Nếu có JWT token:
+              const token = localStorage.getItem('token');
+
+              try {
+                const res = await fetch(CTX + '/api/books/update/' + encodeURIComponent(isbn), {
+                  method: 'PUT',
+                  headers: token ? { 'Authorization': 'Bearer ' + token } : undefined,
+                  body: fd
+                });
+
+                let data;
+                const ct = res.headers.get('content-type') || '';
+                if (ct.includes('application/json')) data = await res.json();
+                else data = { message: await res.text() };
+
+                if (!res.ok || !data.ok) {
+                  showToast(data.message || ('Cập nhật thất bại: ' + res.status), 4500);
+                  return false;
+                }
+
+                showToast(data.message || 'Cập nhật sách thành công!', 4000);
+                // TỰ REDIRECT SAU 4s
+                setTimeout(() => { window.location.href = CTX + '/auth/lib/adminDashboard.jsp'; }, 4000);
+                return true;
+
+              } catch (err) {
+                console.error(err);
+                showToast('Không thể gọi API cập nhật', 4500);
+                return false;
+              }
+            }
+          </script>                       
         <script>
             // Image preview function
             function previewImage(input) {

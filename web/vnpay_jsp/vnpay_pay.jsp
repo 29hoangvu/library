@@ -1,7 +1,10 @@
 <%@page import="java.net.URLEncoder"%>
 <%@ page import="java.sql.*, java.time.*, java.time.format.DateTimeFormatter" %>
 <%@ page import="Servlet.DBConnection, Servlet.PasswordHashing, Servlet.EmailUtility" %>
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %><%
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+
+<%
+    
     request.setCharacterEncoding("UTF-8");
 
     String username = request.getParameter("username");
@@ -12,7 +15,7 @@
 
     if (username == null || rawPwd == null || email == null || yearsStr == null
             || username.trim().isEmpty() || rawPwd.trim().isEmpty() || email.trim().isEmpty()) {
-        out.println("<script>alert('Vui lòng điền đầy đủ thông tin.'); history.back();</script>");
+        out.println("<script>showPopup('Vui lòng điền đầy đủ thông tin.'); history.back();</script>");
     } else {
         int years = 1;
         try {
@@ -32,7 +35,7 @@
                     ck.setString(1, username);
                     try (ResultSet rs = ck.executeQuery()) {
                         if (rs.next()) {
-                            out.println("<script>alert('Tên đăng nhập đã tồn tại, vui lòng chọn tên khác.'); history.back();</script>");
+                            out.println("<script>showPopup('Tên đăng nhập đã tồn tại, vui lòng chọn tên khác.'); history.back();</script>");
                             return; // dừng hẳn nhánh offline
                         }
                     }
@@ -92,7 +95,7 @@
                     mailEx.printStackTrace();
                 }
 
-                out.println("<script>alert('Đăng ký thành công! Vui lòng đến thư viện để nộp lệ phí trong 7 ngày để kích hoạt tài khoản.'); "
+                out.println("<script>showPopup('Đăng ký thành công! Vui lòng đến thư viện để nộp lệ phí trong 7 ngày để kích hoạt tài khoản.'); "
                         + "window.location='" + request.getContextPath() + "/user/login.jsp';</script>");
                 return;
             } catch (Exception e) {
@@ -117,3 +120,4 @@
         }
     }
 %>
+

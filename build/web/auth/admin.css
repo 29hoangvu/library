@@ -1,0 +1,674 @@
+:root {
+    --primary: #7c3aed;
+    --primary-soft: #a78bfa;
+    --secondary: #3b82f6;
+    --accent: #ec4899;
+    --cyan: #06b6d4;
+    --glass-bg: rgba(30, 27, 75, 0.8);
+    --glass-border: rgba(139, 92, 246, 0.5);
+}
+
+/* Background siêu mạnh với nhiều lớp gradient */
+body.admin-gradient {
+    min-height: 100vh;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(124, 58, 237, 0.5) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.5) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.3) 0%, transparent 50%),
+        linear-gradient(135deg, #1e1b4b 0%, #0f172a 25%, #1e1b4b 50%, #0f172a 75%, #1e1b4b 100%);
+    background-size: 400% 400%;
+    animation: gradient-shift 20s ease infinite;
+    color: #e5e7eb;
+    position: relative;
+    overflow-x: hidden;
+}
+
+@keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    25% { background-position: 50% 75%; }
+    50% { background-position: 100% 50%; }
+    75% { background-position: 50% 25%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Orbs phát sáng mạnh mẽ */
+body.admin-gradient::before,
+body.admin-gradient::after {
+    content: "";
+    position: fixed;
+    border-radius: 999px;
+    filter: blur(120px);
+    opacity: 0.85;
+    z-index: -2;
+    animation: float-orb 35s infinite alternate ease-in-out;
+}
+
+body.admin-gradient::before {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, #7c3aed, #3b82f6, #06b6d4);
+    top: -150px;
+    left: -120px;
+    box-shadow: 
+        0 0 200px rgba(124, 58, 237, 0.8),
+        0 0 400px rgba(59, 130, 246, 0.6);
+}
+
+body.admin-gradient::after {
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, #ec4899, #a78bfa, #7c3aed);
+    bottom: -180px;
+    right: -140px;
+    box-shadow: 
+        0 0 200px rgba(236, 72, 153, 0.8),
+        0 0 400px rgba(167, 139, 250, 0.6);
+}
+
+@keyframes float-orb {
+    0% { 
+        transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+        opacity: 0.85;
+    }
+    33% { 
+        transform: translate3d(60px, -50px, 0) scale(1.15) rotate(120deg);
+        opacity: 0.95;
+    }
+    66% { 
+        transform: translate3d(-40px, 60px, 0) scale(0.95) rotate(240deg);
+        opacity: 0.9;
+    }
+    100% { 
+        transform: translate3d(30px, -30px, 0) scale(1.1) rotate(360deg);
+        opacity: 0.85;
+    }
+}
+
+/* Particles phát sáng */
+.particle {
+    position: fixed;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(167, 139, 250, 0.7), rgba(59, 130, 246, 0.5), transparent);
+    filter: blur(60px);
+    opacity: 0.7;
+    pointer-events: none;
+    z-index: -1;
+    animation: particle-float 30s ease-in-out infinite;
+    box-shadow: 
+        0 0 80px rgba(124, 58, 237, 0.9),
+        0 0 150px rgba(59, 130, 246, 0.7);
+}
+
+.particle.p1 { 
+    width: 180px; 
+    height: 180px; 
+    top: 15%; 
+    left: 5%;
+    animation-delay: 0s;
+}
+.particle.p2 { 
+    width: 140px;  
+    height: 140px;  
+    top: 65%; 
+    left: 18%; 
+    animation-duration: 35s;
+    animation-delay: -5s;
+}
+.particle.p3 { 
+    width: 160px; 
+    height: 160px; 
+    top: 30%; 
+    right: 8%;
+    animation-duration: 32s;
+    animation-delay: -10s;
+}
+.particle.p4 { 
+    width: 100px;  
+    height: 100px;  
+    bottom: 12%; 
+    right: 25%;
+    animation-duration: 38s;
+    animation-delay: -15s;
+}
+
+@keyframes particle-float {
+    0%, 100%   { 
+        transform: translate3d(0, 0, 0) scale(1); 
+        opacity: 0.5; 
+    }
+    20%  { 
+        transform: translate3d(30px, -40px, 0) scale(1.15); 
+        opacity: 0.7; 
+    }
+    40%  { 
+        transform: translate3d(-25px, 50px, 0) scale(0.95); 
+        opacity: 0.8; 
+    }
+    60%  { 
+        transform: translate3d(40px, 30px, 0) scale(1.1); 
+        opacity: 0.6; 
+    }
+    80%  { 
+        transform: translate3d(-35px, -25px, 0) scale(0.9); 
+        opacity: 0.75; 
+    }
+}
+
+/* Header với gradient siêu mạnh */
+.glass-header {
+    background: linear-gradient(135deg, 
+        rgba(124, 58, 237, 0.95), 
+        rgba(59, 130, 246, 0.9), 
+        rgba(6, 182, 212, 0.95),
+        rgba(167, 139, 250, 0.9));
+    background-size: 400% 400%;
+    animation: header-gradient 15s ease infinite;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 2px solid rgba(167, 139, 250, 0.6);
+    box-shadow: 
+        0 20px 60px rgba(124, 58, 237, 0.6),
+        0 0 100px rgba(59, 130, 246, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.glass-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+@keyframes header-gradient {
+    0%   { background-position: 0% 50%; }
+    25%  { background-position: 50% 100%; }
+    50%  { background-position: 100% 50%; }
+    75%  { background-position: 50% 0%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Sidebar với glass effect mạnh */
+.glass-sidebar {
+    background: linear-gradient(165deg, 
+        rgba(30, 27, 75, 0.95), 
+        rgba(15, 23, 42, 0.98),
+        rgba(30, 58, 138, 0.92));
+    border-right: 2px solid rgba(139, 92, 246, 0.6);
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    box-shadow:
+        0 0 0 1px rgba(124, 58, 237, 0.3),
+        20px 0 60px rgba(30, 27, 75, 0.95),
+        0 0 100px rgba(124, 58, 237, 0.4);
+}
+
+.glass-sidebar::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom, 
+        transparent,
+        rgba(167, 139, 250, 0.8),
+        rgba(59, 130, 246, 0.8),
+        rgba(236, 72, 153, 0.8),
+        transparent);
+    animation: sidebar-glow 3s ease-in-out infinite;
+}
+
+@keyframes sidebar-glow {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* Dropdown với blur mạnh */
+.glass-dropdown {
+    background: linear-gradient(165deg, 
+        rgba(30, 27, 75, 0.98), 
+        rgba(15, 23, 42, 0.99));
+    border: 2px solid rgba(139, 92, 246, 0.5);
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    box-shadow: 
+        0 25px 60px rgba(15, 23, 42, 0.95),
+        0 0 80px rgba(124, 58, 237, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Cards với hiệu ứng mạnh mẽ */
+.glass-card-soft {
+    background: radial-gradient(circle at top left, 
+        rgba(139, 92, 246, 0.25), 
+        rgba(30, 27, 75, 0.9));
+    border: 2px solid rgba(139, 92, 246, 0.5);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow:
+        0 15px 45px rgba(15, 23, 42, 0.7),
+        0 0 0 1px rgba(124, 58, 237, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-card-soft::before {
+    content: "";
+    position: absolute;
+    inset: -50%;
+    background: conic-gradient(from 0deg at 50% 50%, 
+        transparent 0deg,
+        rgba(167, 139, 250, 0.3) 90deg,
+        transparent 180deg,
+        rgba(59, 130, 246, 0.3) 270deg,
+        transparent 360deg);
+    animation: card-rotate 8s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.glass-card-soft:hover::before {
+    opacity: 1;
+}
+
+@keyframes card-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Neon title siêu mạnh */
+.neon-title {
+    letter-spacing: 0.05em;
+    background: linear-gradient(135deg, #a78bfa, #60a5fa, #ec4899, #a78bfa);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: neon-gradient 8s ease infinite;
+    filter: drop-shadow(0 0 10px rgba(167, 139, 250, 0.9))
+            drop-shadow(0 0 25px rgba(59, 130, 246, 0.8))
+            drop-shadow(0 0 45px rgba(236, 72, 153, 0.7));
+}
+
+@keyframes neon-gradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Button glow siêu mạnh */
+.btn-glow {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(135deg, 
+        rgba(124, 58, 237, 0.2), 
+        rgba(59, 130, 246, 0.15));
+}
+
+.btn-glow::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, 
+        rgba(248, 250, 252, 0.8), 
+        transparent 70%);
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) scale(0.5);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-glow::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(135deg, 
+        rgba(167, 139, 250, 0.6),
+        rgba(59, 130, 246, 0.6),
+        rgba(236, 72, 153, 0.6));
+    border-radius: inherit;
+    opacity: 0;
+    z-index: -1;
+    filter: blur(10px);
+    transition: opacity 0.3s ease;
+}
+
+.btn-glow:hover::before {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+}
+
+.btn-glow:hover::after {
+    opacity: 1;
+}
+
+.btn-glow:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow:
+        0 15px 50px rgba(124, 58, 237, 0.8),
+        0 0 60px rgba(59, 130, 246, 0.9),
+        0 0 100px rgba(236, 72, 153, 0.6);
+}
+
+/* Card 3D siêu mạnh */
+.card-3d {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+.card-3d:hover {
+    transform: translateY(-4px) translateZ(20px) scale(1.02) 
+               rotateX(2deg) rotateY(-2deg);
+    box-shadow:
+        0 25px 60px rgba(124, 58, 237, 0.9),
+        0 0 80px rgba(59, 130, 246, 0.8),
+        0 0 120px rgba(236, 72, 153, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border-color: rgba(167, 139, 250, 0.9);
+}
+
+/* Shimmer effect cực mạnh */
+.shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.shimmer::after {
+    content: "";
+    position: absolute;
+    top: -150%;
+    left: -50%;
+    width: 100%;
+    height: 400%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(248, 250, 252, 0.1),
+        rgba(167, 139, 250, 0.7),
+        rgba(59, 130, 246, 0.7),
+        rgba(248, 250, 252, 0.1),
+        transparent
+    );
+    opacity: 0;
+    transform: skewX(-25deg);
+    transition: opacity 0.3s ease;
+}
+
+.shimmer:hover::after {
+    opacity: 1;
+    animation: shimmer-move 1.2s ease-in-out;
+}
+
+@keyframes shimmer-move {
+    0% { transform: translate3d(-100%, 0, 0) skewX(-25deg); }
+    100% { transform: translate3d(150%, 0, 0) skewX(-25deg); }
+}
+
+/* Badge ripple mạnh mẽ */
+.badge-ripple {
+    position: relative;
+    overflow: visible;
+}
+
+.badge-ripple::before,
+.badge-ripple::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: inherit;
+    border: 2px solid rgba(248, 113, 113, 0.9);
+    animation: badge-pulse 1.6s ease-out infinite;
+}
+
+.badge-ripple::after {
+    animation-delay: 0.8s;
+}
+
+@keyframes badge-pulse {
+    0% {
+        transform: scale(0.85);
+        opacity: 1;
+        border-width: 3px;
+    }
+    70% {
+        transform: scale(1.5);
+        opacity: 0;
+        border-width: 1px;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Icon pulse với glow */
+.icon-soft-pulse {
+    animation: soft-pulse-glow 2.5s ease-in-out infinite;
+}
+
+@keyframes soft-pulse-glow {
+    0%, 100% { 
+        transform: scale(1); 
+        opacity: 0.9;
+        filter: drop-shadow(0 0 2px rgba(167, 139, 250, 0.5));
+    }
+    50% { 
+        transform: scale(1.12); 
+        opacity: 1;
+        filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.9))
+                drop-shadow(0 0 15px rgba(59, 130, 246, 0.7));
+    }
+}
+
+/* Scrollbar đẹp mắt */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: linear-gradient(to bottom, 
+        rgba(30, 27, 75, 0.95), 
+        rgba(15, 23, 42, 0.95));
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, 
+        #7c3aed, 
+        #3b82f6, 
+        #06b6d4,
+        #ec4899);
+    border-radius: 10px;
+    border: 2px solid rgba(30, 27, 75, 0.5);
+    box-shadow: 
+        0 0 10px rgba(124, 58, 237, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, 
+        #6d28d9, 
+        #2563eb, 
+        #0891b2,
+        #db2777);
+    box-shadow: 
+        0 0 20px rgba(124, 58, 237, 1),
+        0 0 40px rgba(59, 130, 246, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Backdrop blur mạnh */
+#sidebarBackdrop {
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    background: rgba(15, 23, 42, 0.6);
+}
+
+/* Menu link với underline animation */
+.menu-link {
+    position: relative;
+    overflow: hidden;
+}
+
+.menu-link::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 3px;
+    border-radius: 999px;
+    background: linear-gradient(to right, 
+        #a78bfa, 
+        #60a5fa, 
+        #06b6d4,
+        #ec4899);
+    box-shadow: 0 0 10px rgba(167, 139, 250, 0.9);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.menu-link:hover::before {
+    width: 100%;
+}
+
+.menu-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, 
+        rgba(167, 139, 250, 0.15), 
+        transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.menu-link:hover::after {
+    opacity: 1;
+}
+
+/* Hover tilt với glow */
+.hover-tilt {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-tilt:hover {
+    transform: translateY(-2px) rotateX(5deg) rotateY(-5deg);
+    filter: drop-shadow(0 8px 16px rgba(124, 58, 237, 0.6))
+            drop-shadow(0 0 25px rgba(59, 130, 246, 0.5));
+}
+
+/* Breadcrumb bar với glass */
+.glass-breadcrumb {
+    background: linear-gradient(to right, 
+        rgba(30, 27, 75, 0.9), 
+        rgba(15, 23, 42, 0.95),
+        rgba(30, 58, 138, 0.85));
+    border-top: 2px solid rgba(139, 92, 246, 0.6);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: 
+        0 -10px 30px rgba(124, 58, 237, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Thêm glow cho các icon */
+.fas, .far, .fab {
+    filter: drop-shadow(0 0 4px currentColor);
+    transition: filter 0.3s ease;
+}
+
+.menu-link:hover .fas,
+.menu-link:hover .far,
+.menu-link:hover .fab {
+    filter: drop-shadow(0 0 8px currentColor)
+            drop-shadow(0 0 12px currentColor);
+}
+
+/* Input focus với glow mạnh */
+input:focus {
+    box-shadow: 
+        0 0 0 3px rgba(167, 139, 250, 0.3),
+        0 0 25px rgba(124, 58, 237, 0.6),
+        0 0 50px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* Details/summary với animation */
+details summary {
+    transition: all 0.3s ease;
+}
+
+details[open] summary {
+    background: linear-gradient(135deg, 
+        rgba(124, 58, 237, 0.2), 
+        rgba(59, 130, 246, 0.15));
+    box-shadow: 
+        0 0 20px rgba(124, 58, 237, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Thêm animation cho page load */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.glass-header,
+.glass-sidebar,
+.glass-card-soft {
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+.glass-header {
+    animation-delay: 0.1s;
+}
+
+.glass-sidebar {
+    animation-delay: 0.2s;
+}
+
+.glass-card-soft {
+    animation-delay: 0.3s;
+}
+
+/* Thêm glow cho avatar */
+.glass-header [class*="bg-gradient"] {
+    box-shadow: 
+        0 0 20px rgba(167, 139, 250, 0.8),
+        0 0 40px rgba(59, 130, 246, 0.6),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    animation: avatar-glow 3s ease-in-out infinite;
+}
+
+@keyframes avatar-glow {
+    0%, 100% {
+        box-shadow: 
+            0 0 20px rgba(167, 139, 250, 0.8),
+            0 0 40px rgba(59, 130, 246, 0.6);
+    }
+    50% {
+        box-shadow: 
+            0 0 30px rgba(167, 139, 250, 1),
+            0 0 60px rgba(59, 130, 246, 0.8),
+            0 0 90px rgba(236, 72, 153, 0.5);
+    }
+}
+
+/* Floating animation cho quick action buttons */
+.shimmer.card-3d {
+    animation: float-button 4s ease-in-out infinite;
+}
+
+@keyframes float-button {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+}

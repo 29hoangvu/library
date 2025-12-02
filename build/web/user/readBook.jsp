@@ -71,12 +71,15 @@
       background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
       min-height: 100vh;
     }
-    
+
     .toolbar-glass {
-      backdrop-filter: blur(20px);
-      background: rgba(15, 23, 42, 0.85);
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(20px);
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        /* Kéo dài thanh toolbar */
+        width: min(90vw, 960px);   /* chiếm tối đa 90% chiều rộng, nhưng không quá 960px */
+        justify-content: flex-start;
     }
     
     .control-btn {

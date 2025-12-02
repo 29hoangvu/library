@@ -10,6 +10,10 @@
         <error-code>404</error-code>
         <location>/404.jsp</location>
     </error-page>
+    <error-page>
+        <exception-type>java.lang.Throwable</exception-type>
+        <location>/error.jsp</location>
+    </error-page>
     <!-- Filter mã hóa -->
     <filter>
         <filter-name>encodingFilter</filter-name>
@@ -107,64 +111,16 @@
     </servlet>
     <!-- App servlets -->
     <servlet>
-        <servlet-name>AdminServlet</servlet-name>
-        <servlet-class>Servlet.AdminServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>AddUserServlet</servlet-name>
-        <servlet-class>Servlet.AddUserServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>BookItemServlet</servlet-name>
-        <servlet-class>Servlet.BookItemServlet</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>PasswordHashing</servlet-name>
         <servlet-class>Servlet.PasswordHashing</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>RegisterServlet</servlet-name>
-        <servlet-class>Servlet.RegisterServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>LoginServlet</servlet-name>
-        <servlet-class>Servlet.LoginServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>ApproveUserServlet</servlet-name>
-        <servlet-class>Servlet.ApproveUserServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>RenewServlet</servlet-name>
         <servlet-class>Servlet.RenewServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>UpdateBookServlet</servlet-name>
-        <servlet-class>Servlet.UpdateBookServlet</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>DeleteBookServlet</servlet-name>
         <servlet-class>Servlet.DeleteBookServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>LogOutServlet</servlet-name>
-        <servlet-class>Servlet.LogOutServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>BorrowBookServlet</servlet-name>
-        <servlet-class>Servlet.BorrowBookServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>ApproveBorrowServlet</servlet-name>
-        <servlet-class>Servlet.ApproveBorrowServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>CancelBorrowServlet</servlet-name>
-        <servlet-class>Servlet.CancelBorrowServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>ReturnBookServlet</servlet-name>
-        <servlet-class>Servlet.ReturnBookServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>RestoreBookServlet</servlet-name>
@@ -173,14 +129,6 @@
     <servlet-mapping>
         <servlet-name>CheckAvailabilityServlet</servlet-name>
         <url-pattern>/CheckAvailabilityServlet</url-pattern>
-    </servlet-mapping>
-    <servlet>
-        <servlet-name>UpdateProfileServlet</servlet-name>
-        <servlet-class>Servlet.UpdateProfileServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>UpdateProfileServlet</servlet-name>
-        <url-pattern>/UpdateProfileServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>PaymentReturnServlet</servlet-name>
@@ -199,63 +147,15 @@
         <url-pattern>/vnpayrefund/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>AddUserServlet</servlet-name>
-        <url-pattern>/AddUserServlet</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>BookItemServlet</servlet-name>
-        <url-pattern>/BookItemServlet</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
         <servlet-name>PasswordHashing</servlet-name>
         <url-pattern>/PasswordHashing</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>RegisterServlet</servlet-name>
-        <url-pattern>/RegisterServlet</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>LoginServlet</servlet-name>
-        <url-pattern>/LoginServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>RenewServlet</servlet-name>
         <url-pattern>/RenewServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>UpdateBookServlet</servlet-name>
-        <url-pattern>/UpdateBookServlet</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
         <servlet-name>DeleteBookServlet</servlet-name>
         <url-pattern>/DeleteBookServlet</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>LogOutServlet</servlet-name>
-        <url-pattern>/LogOutServlet</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>BorrowBookServlet</servlet-name>
-        <url-pattern>/BorrowBookServlet</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>AdminServlet</servlet-name>
-        <url-pattern>/AdminServlet</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ApproveUserServlet</servlet-name>
-        <url-pattern>/ApproveUserServlet</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ApproveBorrowServlet</servlet-name>
-        <url-pattern>/ApproveBorrowServlet</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>CancelBorrowServlet</servlet-name>
-        <url-pattern>/CancelBorrowServlet</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ReturnBookServlet</servlet-name>
-        <url-pattern>/ReturnBookServlet</url-pattern>
     </servlet-mapping>
 </web-app>

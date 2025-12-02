@@ -1,5 +1,6 @@
-<%@ page contentType="text/html; charset=UTF-8" language="java" %>
-<%@ page import="java.sql.*, java.util.*, Servlet.DBConnection, Data.Users, Servlet.RecoClient" %>
+<%@ page contentType="text/html; charset=UTF-8" language="java"
+         buffer="64kb" autoFlush="true" errorPage="/error.jsp" %>
+<%@ page import="java.sql.*, java.util.*, Servlet.DBConnection, java.text.Normalizer" %>
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -20,62 +21,9 @@
         <link rel="icon" href="./images/reading-book.png" type="image/x-icon" />
 
         <!-- Custom CSS -->
-        <link rel="stylesheet" href="user/home1.css"/>
         <link rel="stylesheet" href="user/banner.css"/>
-        <link rel="stylesheet" href="user/loading.css"/>
-        <style>
-            /* Thanh kệ ngang */
-            .shelf {
-                display: flex;
-                gap: 1.25rem;           /* ~20px */
-                overflow-x: auto;
-                overflow-y: hidden;
-                scroll-behavior: smooth;
-                padding-bottom: .25rem; /* tránh cắt bóng đổ */
-            }
-            .shelf::-webkit-scrollbar {
-                height: 10px;
-            }
-            .shelf::-webkit-scrollbar-thumb {
-                background: #c7d2fe;
-                border-radius: 9999px;
-            }
-            .shelf::-webkit-scrollbar-track {
-                background: transparent;
-            }
+        <link rel="stylesheet" href="user/style1.css"/>
 
-            /* Card cố định bề rộng để xếp hàng ngang đẹp */
-            .book-card.w-fixed {
-                min-width: 200px;
-                max-width: 200px;
-            }
-            @media (min-width: 768px) {
-                .book-card.w-fixed {
-                    min-width: 220px;
-                    max-width: 220px;
-                }
-            }
-
-            /* Nút điều hướng trái/phải (nếu muốn) */
-            .shelf-nav {
-                position: relative;
-            }
-            .shelf-btn {
-                position: absolute;
-                top: 40%;
-                z-index: 10;
-                background: rgba(255,255,255,.85);
-                border: 1px solid #e5e7eb;
-                box-shadow: 0 6px 14px rgba(0,0,0,.08);
-            }
-            .shelf-btn.left  {
-                left: -8px;
-            }
-            .shelf-btn.right {
-                right: -8px;
-            }
-        </style>
-        
         <script>
             // Wheel -> scroll ngang cho mọi .shelf
             document.addEventListener('DOMContentLoaded', () => {
@@ -127,126 +75,60 @@
 
     </head>
 
-    <body class="page-background">
+    <body class="page-background min-h-screen text-slate-50">
         <!-- Page Loader -->
-        <div id="page-loader" role="status" aria-live="polite">
-            <div class="spinner mb-6"></div>
-            <div class="text-center mb-6">
-                <div class="loader-title text-xl">Đang tải dữ liệu…</div>
-                <div class="loader-sub text-sm">Vui lòng chờ trong giây lát</div>
-            </div>
+        <div id="page-loader" role="status" aria-live="polite" class="flex flex-col items-center justify-center text-center px-4">
+            <div class="flex flex-col items-center justify-center bg-slate-900/70 border border-slate-500/60 rounded-3xl px-8 py-10 shadow-2xl max-w-xl w-full">
+                <div class="spinner mb-6"></div>
+                <div class="text-center mb-6">
+                    <div class="loader-title text-xl mb-1">Đang tải dữ liệu…</div>
+                    <div class="loader-sub text-sm">Vui lòng chờ trong giây lát</div>
+                </div>
 
-            <!-- Skeleton: 1 hàng sách giả để người dùng có gì đó nhìn -->
-            <div class="shelf-skeleton px-6">
-                <!-- lặp vài thẻ giả (5–7 cái) -->
-                <div class="sk-card">
-                    <div class="sk-img shimmer"></div>
-                    <div class="p-4 space-y-3">
-                        <div class="sk-line w1 shimmer relative"></div>
-                        <div class="sk-line w2 shimmer relative"></div>
-                        <div class="sk-line w3 shimmer relative"></div>
+                <!-- Skeleton: 1 hàng sách giả để người dùng có gì đó nhìn -->
+                <div class="shelf-skeleton px-1">
+                    <!-- lặp vài thẻ giả (5–7 cái) -->
+                    <div class="sk-card">
+                        <div class="sk-img shimmer"></div>
+                        <div class="p-4 space-y-3">
+                            <div class="sk-line w1 shimmer relative"></div>
+                            <div class="sk-line w2 shimmer relative"></div>
+                            <div class="sk-line w3 shimmer relative"></div>
+                        </div>
                     </div>
-                </div>
-                <div class="sk-card">
-                    <div class="sk-img shimmer"></div>
-                    <div class="p-4 space-y-3">
-                        <div class="sk-line w1 shimmer relative"></div>
-                        <div class="sk-line w2 shimmer relative"></div>
-                        <div class="sk-line w3 shimmer relative"></div>
+                    <div class="sk-card">
+                        <div class="sk-img shimmer"></div>
+                        <div class="p-4 space-y-3">
+                            <div class="sk-line w1 shimmer relative"></div>
+                            <div class="sk-line w2 shimmer relative"></div>
+                            <div class="sk-line w3 shimmer relative"></div>
+                        </div>
                     </div>
+                    <div class="sk-card"><div class="sk-img shimmer"></div><div class="p-4 space-y-3"><div class="sk-line w1 shimmer relative"></div><div class="sk-line w2 shimmer relative"></div><div class="sk-line w3 shimmer relative"></div></div></div>
+                    <div class="sk-card"><div class="sk-img shimmer"></div><div class="p-4 space-y-3"><div class="sk-line w1 shimmer relative"></div><div class="sk-line w2 shimmer relative"></div><div class="sk-line w3 shimmer relative"></div></div></div>
+                    <div class="sk-card"><div class="sk-img shimmer"></div><div class="p-4 space-y-3"><div class="sk-line w1 shimmer relative"></div><div class="sk-line w2 shimmer relative"></div><div class="sk-line w3 shimmer relative"></div></div></div>
                 </div>
-                <div class="sk-card"><div class="sk-img shimmer"></div><div class="p-4 space-y-3"><div class="sk-line w1 shimmer relative"></div><div class="sk-line w2 shimmer relative"></div><div class="sk-line w3 shimmer relative"></div></div></div>
-                <div class="sk-card"><div class="sk-img shimmer"></div><div class="p-4 space-y-3"><div class="sk-line w1 shimmer relative"></div><div class="sk-line w2 shimmer relative"></div><div class="sk-line w3 shimmer relative"></div></div></div>
-                <div class="sk-card"><div class="sk-img shimmer"></div><div class="p-4 space-y-3"><div class="sk-line w1 shimmer relative"></div><div class="sk-line w2 shimmer relative"></div><div class="sk-line w3 shimmer relative"></div></div></div>
             </div>
         </div>
 
         <!-- Bọc toàn bộ nội dung trang trong app-content để áp hiệu ứng reveal -->
-        <div id="app-content">
+        <div id="app-content" class="opacity-0 transition-opacity duration-300 ease-out">
 
             <!-- Floating Background Elements -->
             <div class="floating-elements">
-                <i class="fas fa-book floating-book text-8xl text-blue-500" style="top: 5%; left: 80%; animation-delay: 0s;"></i>
-                <i class="fas fa-bookmark floating-book text-6xl text-purple-500" style="top: 15%; left: 5%; animation-delay: 2s;"></i>
-                <i class="fas fa-feather floating-book text-7xl text-green-500" style="top: 50%; left: 85%; animation-delay: 4s;"></i>
-                <i class="fas fa-scroll floating-book text-5xl text-orange-500" style="top: 75%; left: 10%; animation-delay: 6s;"></i>
-                <i class="fas fa-glasses floating-book text-6xl text-pink-500" style="top: 35%; left: 90%; animation-delay: 8s;"></i>
+                <i class="fas fa-book floating-book text-7xl md:text-8xl text-blue-500/80" style="top: 5%; left: 80%; animation-delay: 0s;"></i>
+                <i class="fas fa-bookmark floating-book text-5xl md:text-6xl text-purple-500/80" style="top: 15%; left: 5%; animation-delay: 2s;"></i>
+                <i class="fas fa-feather floating-book text-6xl md:text-7xl text-green-500/80" style="top: 50%; left: 85%; animation-delay: 4s;"></i>
+                <i class="fas fa-scroll floating-book text-4xl md:text-5xl text-orange-500/80" style="top: 75%; left: 10%; animation-delay: 6s;"></i>
+                <i class="fas fa-glasses floating-book text-5xl md:text-6xl text-pink-500/80" style="top: 35%; left: 90%; animation-delay: 8s;"></i>
             </div>
 
             <!-- Include Header với Search Component -->
             <jsp:include page="user/layout/header.jsp" />
             
             <!-- Main Content -->
-            <main class="container-enhanced py-12">
-                <%                
-                    Users me = (Users) session.getAttribute("user");                
-                    // ===== 1) Lấy đề xuất (nếu đã login) =====
-                    List<Map<String, Object>> recBooks = new ArrayList<>();
-                    if (me != null) {
-                        try (Connection connRec = DBConnection.getConnection()) {
-                            List<String> recIsbns = RecoClient.getIsbnForUser(me.getId());
-                            if (recIsbns != null && !recIsbns.isEmpty()) {
-                                // Khử trùng lặp theo thứ tự
-                                List<String> uniq = new ArrayList<>();
-                                Set<String> seen = new HashSet<>();
-                                for (String s : recIsbns) {
-                                    if (s != null && seen.add(s)) {
-                                        uniq.add(s);
-                                    }
-                                }
-                                recIsbns = uniq;
-
-                                String placeholders = String.join(",", Collections.nCopies(recIsbns.size(), "?"));
-                                String orderBy = String.join(",", recIsbns.stream().map(s -> "?").toArray(String[]::new));
-
-                                String sqlRec
-                                        = "SELECT b.isbn, b.title, a.name AS author, b.publicationYear, b.format, b.coverImage "
-                                        + "FROM book b "
-                                        + "LEFT JOIN author a ON b.authorId = a.id "
-                                        + "WHERE b.isbn IN (" + placeholders + ") "
-                                        + // LỌC: không lấy sách user đã mượn
-                                        "AND NOT EXISTS ( "
-                                        + "  SELECT 1 FROM borrow br "
-                                        + "  JOIN bookitem bi ON bi.book_item_id = br.book_item_id "
-                                        + "  WHERE br.user_id = ? "
-                                        + "    AND br.status IN ('Borrowed','Returned','Overdue') "
-                                        + "    AND bi.book_isbn = b.isbn "
-                                        + ") "
-                                        + "ORDER BY FIELD(b.isbn, " + orderBy + ")";
-
-                                try (PreparedStatement psRec = connRec.prepareStatement(sqlRec)) {
-                                    int i = 1;
-                                    // IN (...)
-                                    for (String s : recIsbns) {
-                                        psRec.setString(i++, s);
-                                    }
-                                    // user_id cho NOT EXISTS
-                                    psRec.setInt(i++, me.getId());
-                                    // FIELD(...)
-                                    for (String s : recIsbns) {
-                                        psRec.setString(i++, s);
-                                    }
-
-                                    try (ResultSet rs = psRec.executeQuery()) {
-                                        while (rs.next()) {
-                                            Map<String, Object> m = new HashMap<>();
-                                            m.put("isbn", rs.getString("isbn"));
-                                            m.put("title", rs.getString("title"));
-                                            m.put("author", rs.getString("author"));
-                                            m.put("publishedYear", rs.getInt("publicationYear"));
-                                            m.put("format", rs.getString("format"));
-                                            m.put("coverImage",rs.getString("coverImage"));
-                                            recBooks.add(m);
-                                        }
-                                    }
-                                }
-                            }
-                        } catch (Exception ex) {
-                            System.err.println("Recommendation error: " + ex.getMessage());
-                            // bỏ qua để trang vẫn chạy
-                        }
-                    }
-
+            <main class="container-enhanced py-10 lg:py-14 space-y-10 lg:space-y-12">
+                <%
                     // ===== 2) Lấy tất cả sách / tìm kiếm =====
                     List<Map<String, Object>> allBooks = new ArrayList<>();
                     List<Map<String, Object>> searchResults = new ArrayList<>();
@@ -276,38 +158,21 @@
                             }
                         }
 
-                        // tìm kiếm (nếu có)
+                        // tìm kiếm (nếu có) – fuzzy + không dấu dựa trên allBooks
                         if (isSearching) {
-                            String[] keywords = searchQuery.trim().toLowerCase().split("\\s+");
-                            StringBuilder where = new StringBuilder(" WHERE ");
-                            for (int i = 0; i < keywords.length; i++) {
-                                if (i > 0) {
-                                    where.append(" AND ");
-                                }
-                                where.append("(LOWER(b.title) LIKE ? OR LOWER(a.name) LIKE ?)");
-                            }
-                            String searchSql = baseSql + where.toString();
-                            try (PreparedStatement psSearch = connList.prepareStatement(searchSql)) {
-                                int idx = 1;
-                                for (String kw : keywords) {
-                                    String p = "%" + kw + "%";
-                                    psSearch.setString(idx++, p);
-                                    psSearch.setString(idx++, p);
-                                }
-                                try (ResultSet rs = psSearch.executeQuery()) {
-                                    while (rs.next()) {
-                                        Map<String, Object> book = new HashMap<>();
-                                        book.put("isbn", rs.getString("isbn"));
-                                        book.put("title", rs.getString("title"));
-                                        book.put("author", rs.getString("author"));
-                                        book.put("publishedYear", rs.getInt("publicationYear"));
-                                        book.put("format", rs.getString("format"));
-                                        book.put("coverImage", rs.getString("coverImage"));
-                                        searchResults.add(book);
-                                    }
+                            String qraw = searchQuery.trim();
+
+                            for (Map<String, Object> book : allBooks) {
+                                String title  = book.get("title")  == null ? "" : String.valueOf(book.get("title"));
+                                String author = book.get("author") == null ? "" : String.valueOf(book.get("author"));
+                                String text   = title + " " + author;
+
+                                if (fuzzyMatch(text, qraw)) {
+                                    searchResults.add(book);
                                 }
                             }
-                        }                      
+                        }
+                      
                         // ===== 3) Sách mới thêm (dựa vào bookitem.date_of_purchase) ====
                         {
                             // Lấy ISBN có lần nhập gần nhất, rồi join ra thông tin sách
@@ -437,8 +302,8 @@
                         }
                     } catch (SQLException e) {
                         e.printStackTrace();
-                        out.println("<div class='glass-effect border border-red-300 text-red-800 px-6 py-4 rounded-2xl mb-6'>"
-                                + "<p class='flex items-center'><i class='fas fa-exclamation-triangle mr-3 text-xl'></i>"
+                        out.println("<div class='glass-effect border border-red-300 text-red-200 px-6 py-4 rounded-2xl mb-6'>" 
+                                + "<p class='flex items-center'><i class='fas fa-exclamation-triangle mr-3 text-xl text-red-300'></i>" 
                                 + "Lỗi khi lấy dữ liệu sách: " + e.getMessage() + "</p></div>");
                     }
                 %>
@@ -450,6 +315,72 @@
                     Integer pagesMin = (Integer) request.getAttribute("pagesMin");
                     String genreId   = (String) request.getAttribute("genreId");
                     String genreName = request.getParameter("genreName");
+                    
+                    // ===== Phân trang KẾT QUẢ LỌC =====
+                    int filterPageSize = 12; // đổi số này nếu muốn nhiều/ít hơn
+                    int filterCurrentPage = 1;
+                    int filterTotal = 0;
+                    int filterTotalPages = 1;
+
+                    if (filteredBooks != null) {
+                        filterTotal = filteredBooks.size();
+                        String filterPageParam = request.getParameter("pageFilter");
+                        if (filterPageParam != null) {
+                            try {
+                                filterCurrentPage = Integer.parseInt(filterPageParam);
+                            } catch (NumberFormatException ignore) {}
+                        }
+                        if (filterCurrentPage < 1) filterCurrentPage = 1;
+                        filterTotalPages = (int) Math.ceil(filterTotal / (double) filterPageSize);
+                        if (filterTotalPages == 0) filterTotalPages = 1;
+                        if (filterCurrentPage > filterTotalPages) filterCurrentPage = filterTotalPages;
+                    }
+
+                    int filterStartIndex = (filterCurrentPage - 1) * filterPageSize;
+                    int filterEndIndex = Math.min(filterStartIndex + filterPageSize, filterTotal);
+
+                    // build base URL giữ nguyên điều kiện lọc
+                    StringBuilder filterBaseUrl = new StringBuilder("index.jsp?");
+                    if (genreId != null && !genreId.isBlank()) {
+                        filterBaseUrl.append("genreId=").append(genreId).append("&");
+                    }
+                    if (genreName != null && !genreName.isBlank()) {
+                        filterBaseUrl.append("genreName=").append(java.net.URLEncoder.encode(genreName, "UTF-8")).append("&");
+                    }
+                    if (yearFrom != null) {
+                        filterBaseUrl.append("yearFrom=").append(yearFrom).append("&");
+                    }
+                    if (yearTo != null) {
+                        filterBaseUrl.append("yearTo=").append(yearTo).append("&");
+                    }
+                    if (pagesMin != null) {
+                        filterBaseUrl.append("pagesMin=").append(pagesMin).append("&");
+                    }
+
+                    // ===== Phân trang KẾT QUẢ TÌM KIẾM =====
+                    int searchPageSize = 12;
+                    int searchCurrentPage = 1;
+                    int searchTotal = searchResults != null ? searchResults.size() : 0;
+                    int searchTotalPages = 1;
+                    String baseSearchUrl = null;
+
+                    if (isSearching && searchResults != null) {
+                        String searchPageParam = request.getParameter("pageSearch");
+                        if (searchPageParam != null) {
+                            try {
+                                searchCurrentPage = Integer.parseInt(searchPageParam);
+                            } catch (NumberFormatException ignore) {}
+                        }
+                        if (searchCurrentPage < 1) searchCurrentPage = 1;
+                        searchTotalPages = (int) Math.ceil(searchTotal / (double) searchPageSize);
+                        if (searchTotalPages == 0) searchTotalPages = 1;
+                        if (searchCurrentPage > searchTotalPages) searchCurrentPage = searchTotalPages;
+
+                        baseSearchUrl = "index.jsp?search=" + java.net.URLEncoder.encode(searchQuery, "UTF-8") + "&";
+                    }
+
+                    int searchStartIndex = (searchCurrentPage - 1) * searchPageSize;
+                    int searchEndIndex = Math.min(searchStartIndex + searchPageSize, searchTotal);
                 %>
                 <%
                     // Chỉ hiển thị khi có dữ liệu lọc
@@ -457,10 +388,10 @@
                 %>
                 <section id="filter-results" class="category-section mb-10">
                     <div class="category-header">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between gap-4 flex-wrap">
                             <div class="flex items-center space-x-4">
                                 <div class="w-2 h-12 bg-gradient-to-b from-amber-500 to-orange-600 rounded-full"></div>
-                                <h2 class="text-4xl font-bold category-title">
+                                <h2 class="text-3xl md:text-4xl font-bold category-title">
                                     Kết quả lọc
                                     <% if (genreName != null) { %> – Thể loại: <%= genreName %> <% } %>
                                     <% if (yearFrom != null || yearTo != null) { %>
@@ -470,48 +401,113 @@
                                       – Số trang: ≥ <%= pagesMin %>
                                     <% } %>
                                 </h2>
-                                <a href="index.jsp" class="expand-button text-blue-700 hover:text-blue-900 font-semibold transition-all duration-300 flex items-center space-x-3 no-underline">Bỏ lọc</a>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-sm text-slate-300 hidden md:inline">
+                                    Trang <span class="font-semibold"><%= filterCurrentPage %></span>/<span><%= filterTotalPages %></span>
+                                    • Tổng <span class="font-semibold"><%= filterTotal %></span> sách
+                                </span>
+                                <a href="index.jsp" class="expand-button text-blue-100 hover:text-white font-semibold transition-all duration-300 flex items-center space-x-3 no-underline">
+                                    <span>Bỏ lọc</span>
+                                    <i class="fas fa-xmark text-sm"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                        <% for (Map<String,Object> b : filteredBooks) { %>
+
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 md:gap-6">
+                        <% 
+                           if (filteredBooks != null) {
+                             for (int i = filterStartIndex; i < filterEndIndex; i++) {
+                               Map<String,Object> b = filteredBooks.get(i);
+                        %>
                           <div class="book-card rounded-3xl shadow-lg hover:shadow-2xl group shine-effect">
-                            <a href="./user/bookDetails.jsp?isbn=<%= b.get("isbn")%>" class="block">
+                            <a href="./user/bookDetails.jsp?isbn=<%= b.get("isbn")%>" class="block h-full">
                               <div class="book-image-container">
                                 <img src="<%= request.getContextPath() + "/" + b.get("coverImage") %>"
                                             alt="<%= b.get("title")%>"
                                             onerror="this.onerror=null; this.src='<%= request.getContextPath() %>/images/default-cover.jpg'"
-                                            class="w-full h-auto rounded-xl shadow-lg border border-gray-200 object-cover" />
+                                            class="w-full h-full rounded-xl object-cover" />
                                 <div class="book-overlay">
-                                  <i class="fas fa-eye text-white text-3xl transform group-hover:scale-110 transition-transform duration-300"></i>
+                                  <i class="fas fa-eye text-white text-2xl md:text-3xl transform group-hover:scale-110 transition-transform duration-300 ease-out"></i>
                                 </div>
                               </div>
                               <div class="book-info">
-                                <h3 class="book-title group-hover:text-blue-600 transition-colors line-clamp-2">
+                                <h3 class="book-title group-hover:text-blue-300 transition-colors duration-200 ease-out line-clamp-2">
                                   <%= b.get("title")%>
                                 </h3>
                                 <div class="book-meta">
-                                  <i class="fas fa-user-edit text-blue-500"></i>
+                                  <i class="fas fa-user-edit text-blue-400"></i>
                                   <span><%= b.get("author")%></span>
                                 </div>
                                 <div class="book-meta">
-                                  <i class="fas fa-calendar text-blue-500"></i>
+                                  <i class="fas fa-calendar text-blue-400"></i>
                                   <span><%= b.get("publicationYear")%></span>
                                 </div>
                                 <div class="book-meta">
-                                <i class="fas fa-file-alt text-blue-500"></i>
-                                <span><%= b.get("numberOfPages") %> trang</span>
-                              </div>
+                                  <i class="fas fa-file-alt text-blue-400"></i>
+                                  <span><%= b.get("numberOfPages") %> trang</span>
+                                </div>
                               </div>                             
                             </a>
                           </div>
-                        <% } %>
-                      </div>
+                        <% 
+                             } // end for
+                           } // end if
+                        %>
+                    </div>
+
+                    <% if (filterTotalPages > 1) { %>
+                    <div class="mt-6 flex justify-center">
+                        <nav class="inline-flex items-center space-x-1 bg-slate-900/70 border border-slate-600/80 rounded-full px-2 py-1 shadow-lg">
+                            <!-- Prev -->
+                            <% if (filterCurrentPage > 1) { %>
+                            <a href="<%= filterBaseUrl.toString() %>pageFilter=<%= filterCurrentPage - 1 %>" 
+                               class="px-3 py-1.5 text-xs md:text-sm rounded-full text-slate-100 hover:bg-slate-700/80 transition-colors duration-200 flex items-center gap-1">
+                                <i class="fas fa-chevron-left text-[10px]"></i>
+                                <span class="hidden sm:inline">Trước</span>
+                            </a>
+                            <% } else { %>
+                            <span class="px-3 py-1.5 text-xs md:text-sm rounded-full text-slate-500 cursor-default flex items-center gap-1">
+                                <i class="fas fa-chevron-left text-[10px]"></i>
+                                <span class="hidden sm:inline">Trước</span>
+                            </span>
+                            <% } %>
+
+                            <!-- page numbers -->
+                            <%
+                               int filterStartPage = Math.max(1, filterCurrentPage - 2);
+                               int filterEndPage = Math.min(filterTotalPages, filterCurrentPage + 2);
+                               for (int p = filterStartPage; p <= filterEndPage; p++) {
+                            %>
+                                <a href="<%= filterBaseUrl.toString() %>pageFilter=<%= p %>"
+                                   class="px-3 py-1.5 text-xs md:text-sm rounded-full <%= (p == filterCurrentPage ? "bg-slate-100 text-slate-900 font-semibold" : "text-slate-200 hover:bg-slate-700/80") %> transition-colors duration-200">
+                                    <%= p %>
+                                </a>
+                            <% } %>
+
+                            <!-- Next -->
+                            <% if (filterCurrentPage < filterTotalPages) { %>
+                            <a href="<%= filterBaseUrl.toString() %>pageFilter=<%= filterCurrentPage + 1 %>" 
+                               class="px-3 py-1.5 text-xs md:text-sm rounded-full text-slate-100 hover:bg-slate-700/80 transition-colors duration-200 flex items-center gap-1">
+                                <span class="hidden sm:inline">Sau</span>
+                                <i class="fas fa-chevron-right text-[10px]"></i>
+                            </a>
+                            <% } else { %>
+                            <span class="px-3 py-1.5 text-xs md:text-sm rounded-full text-slate-500 cursor-default flex items-center gap-1">
+                                <span class="hidden sm:inline">Sau</span>
+                                <i class="fas fa-chevron-right text-[10px]"></i>
+                            </span>
+                            <% } %>
+                        </nav>
+                    </div>
+                    <% } %>
                 </section>
                 <%
                     } else {
                 %>
+
+                    <% if (!isSearching) { %>
                 <div class="hero-banner">
                     <!-- Slide 1: Sách Mới -->
                     <div class="banner-slide active gradient-overlay-1">
@@ -683,7 +679,7 @@
                                 </div>
                                 <h1 class="banner-title">Gợi Ý<br/>Thông Minh</h1>
                                 <p class="banner-description">
-                                    Hệ thống AI của chúng tôi gợi ý sách phù hợp với sở thích của bạn. 
+                                    Hệ thống của chúng tôi gợi ý sách phù hợp với sở thích của bạn. 
                                     Khám phá những cuốn sách bạn sẽ yêu thích!
                                 </p>
                                 <div class="banner-stats">
@@ -737,14 +733,15 @@
                         <div class="nav-dot" onclick="goToSlide(3)"></div>
                     </div>
                 </div>
+                <% } %>
                 <!-- Search Results Info -->
                 <% if (isSearching) {%>
-                <div class="mb-10 p-6 glass-effect border border-blue-300 rounded-2xl">
-                    <div class="flex items-center justify-center">
-                        <i class="fas fa-search text-blue-600 mr-4 text-xl"></i>
-                        <p class="text-blue-900 text-lg font-medium">
-                            Kết quả tìm kiếm cho: <strong>"<%= searchQuery%>"</strong> 
-                            (<%= searchResults.size()%> kết quả được tìm thấy)
+                <div class="mb-10 p-5 md:p-6 glass-effect border border-blue-300 rounded-2xl">
+                    <div class="flex flex-col md:flex-row items-center justify-center gap-3 text-center md:text-left">
+                        <i class="fas fa-search text-blue-300 mr-0 md:mr-4 text-xl md:text-2xl"></i>
+                        <p class="text-blue-100 text-base md:text-lg font-medium">
+                            Kết quả tìm kiếm cho: <strong class="text-white">"<%= searchQuery%>"</strong> 
+                            (<span class="text-blue-200"><%= searchResults.size()%></span> kết quả được tìm thấy)
                         </p>
                     </div>
                 </div>
@@ -753,77 +750,126 @@
                 <!-- Search Results Section -->
                 <% if (isSearching) { %>
                 <section id="search-results" class="category-section mb-16">
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                        <% for (Map<String, Object> book : searchResults) {%>
+                    <div class="category-header mb-4">
+                        <div class="flex items-center justify-between gap-4 flex-wrap">
+                            <h2 class="text-2xl md:text-3xl font-semibold text-slate-100">
+                                Kết quả tìm kiếm
+                            </h2>
+                            <span class="text-sm text-slate-300">
+                                Trang <span class="font-semibold"><%= searchCurrentPage %></span>/<span><%= searchTotalPages %></span>
+                                • Tổng <span class="font-semibold"><%= searchTotal %></span> sách
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 md:gap-6">
+                        <%
+                           if (searchResults != null) {
+                             for (int i = searchStartIndex; i < searchEndIndex; i++) {
+                               Map<String, Object> book = searchResults.get(i);
+                        %>
                         <div class="book-card rounded-3xl shadow-lg hover:shadow-2xl group shine-effect">
-                            <a href="./user/bookDetails.jsp?isbn=<%= book.get("isbn")%>" class="block">
+                            <a href="./user/bookDetails.jsp?isbn=<%= book.get("isbn")%>" class="block h-full">
                                 <div class="book-image-container">
-                                    <img src="<%= book.get("coverImage")%>" alt="<%= book.get("title")%>"
-                                         onerror="this.onerror=null; this.src='images/default-cover.jpg'"
-                                         class="book-image" />
+                                    <img src="<%= request.getContextPath() + "/" + book.get("coverImage") %>"
+                                            alt="<%= book.get("title")%>"
+                                            onerror="this.onerror=null; this.src='<%= request.getContextPath() %>/images/default-cover.jpg'"
+                                            class="w-full h-full rounded-xl object-cover" />
                                     <div class="book-overlay">
-                                        <i class="fas fa-eye text-white text-3xl transform group-hover:scale-110 transition-transform duration-300"></i>
+                                        <i class="fas fa-eye text-white text-2xl md:text-3xl transform group-hover:scale-110 transition-transform duration-300 ease-out"></i>
                                     </div>
                                 </div>
                                 <div class="book-info">
-                                    <h3 class="book-title group-hover:text-blue-600 transition-colors line-clamp-2">
+                                    <h3 class="book-title group-hover:text-blue-300 transition-colors duration-200 ease-out line-clamp-2">
                                         <%= book.get("title")%>
                                     </h3>
                                     <div class="book-meta">
-                                        <i class="fas fa-user-edit text-blue-500"></i>
+                                        <i class="fas fa-user-edit text-blue-400"></i>
                                         <span><%= book.get("author")%></span>
                                     </div>
                                     <div class="book-meta">
-                                        <i class="fas fa-calendar text-blue-500"></i>
+                                        <i class="fas fa-calendar text-blue-400"></i>
                                         <span><%= book.get("publishedYear")%></span>
                                     </div>
                                 </div>
                             </a>
                         </div>
-                        <% } %>
-                    </div>
-                </section>
-                <!--Đề xuất sách-->
-                <% } %>
-                <% if (me != null && !recBooks.isEmpty()) {%>
-                <section id="recommend-section" class="category-section mb-16">
-                    <div class="category-header">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-4">
-                                <div class="w-2 h-12 bg-gradient-to-b from-amber-500 to-orange-600 rounded-full"></div>
-                                <h2 class="text-4xl font-bold category-title">Gợi ý cho bạn</h2>
-                                <span class="count-badge text-amber-800 text-sm font-semibold px-4 py-2 rounded-full">
-                                    <%= recBooks.size()%> đề xuất
-                                </span>
-                            </div>
-                        </div>
+                        <%
+                             } // end for
+                           } // end if
+                        %>
                     </div>
 
-                    <div class="shelf-nav">
-                        <button type="button" class="shelf-btn left rounded-full p-2" data-shelf-prev><i class="fas fa-chevron-left"></i></button>
-                        <button type="button" class="shelf-btn right rounded-full p-2" data-shelf-next><i class="fas fa-chevron-right"></i></button>
-
-                        <div class="shelf">
-                            <% for (Map<String, Object> book : recBooks) {%>
-                            <div class="book-card w-fixed rounded-3xl shadow-lg hover:shadow-2xl group shine-effect">
-                                <a href="./user/bookDetails.jsp?isbn=<%= book.get("isbn")%>" class="block">
-                                    <div class="book-image-container">
-                                        <img src="<%= request.getContextPath() + "/" + book.get("coverImage") %>"
-                                            alt="<%= book.get("title")%>"
-                                            onerror="this.onerror=null; this.src='<%= request.getContextPath() %>/images/default-cover.jpg'"
-                                            class="w-full h-auto rounded-xl shadow-lg border border-gray-200 object-cover" />
-                                    </div>
-                                    <div class="book-info">
-                                        <h3 class="book-title group-hover:text-amber-600 transition-colors line-clamp-2"><%= book.get("title")%></h3>
-                                        <div class="book-meta"><i class="fas fa-user-edit text-amber-500"></i><span><%= book.get("author")%></span></div>
-                                        <div class="book-meta"><i class="fas fa-calendar text-amber-500"></i><span><%= book.get("publishedYear")%></span></div>
-                                    </div>
-                                </a>
-                            </div>
+                    <% if (searchTotalPages > 1) { %>
+                    <div class="mt-6 flex justify-center">
+                        <nav class="inline-flex items-center space-x-1 bg-slate-900/70 border border-slate-600/80 rounded-full px-2 py-1 shadow-lg">
+                            <!-- Prev -->
+                            <% if (searchCurrentPage > 1) { %>
+                            <a href="<%= baseSearchUrl %>pageSearch=<%= searchCurrentPage - 1 %>" 
+                               class="px-3 py-1.5 text-xs md:text-sm rounded-full text-slate-100 hover:bg-slate-700/80 transition-colors duration-200 flex items-center gap-1">
+                                <i class="fas fa-chevron-left text-[10px]"></i>
+                                <span class="hidden sm:inline">Trước</span>
+                            </a>
+                            <% } else { %>
+                            <span class="px-3 py-1.5 text-xs md:text-sm rounded-full text-slate-500 cursor-default flex items-center gap-1">
+                                <i class="fas fa-chevron-left text-[10px]"></i>
+                                <span class="hidden sm:inline">Trước</span>
+                            </span>
                             <% } %>
-                        </div>
-                    </div>
 
+                            <!-- page numbers -->
+                            <%
+                               int searchStartPage = Math.max(1, searchCurrentPage - 2);
+                               int searchEndPage = Math.min(searchTotalPages, searchCurrentPage + 2);
+                               for (int p = searchStartPage; p <= searchEndPage; p++) {
+                            %>
+                                <a href="<%= baseSearchUrl %>pageSearch=<%= p %>"
+                                   class="px-3 py-1.5 text-xs md:text-sm rounded-full <%= (p == searchCurrentPage ? "bg-slate-100 text-slate-900 font-semibold" : "text-slate-200 hover:bg-slate-700/80") %> transition-colors duration-200">
+                                    <%= p %>
+                                </a>
+                            <% } %>
+
+                            <!-- Next -->
+                            <% if (searchCurrentPage < searchTotalPages) { %>
+                            <a href="<%= baseSearchUrl %>pageSearch=<%= searchCurrentPage + 1 %>" 
+                               class="px-3 py-1.5 text-xs md:text-sm rounded-full text-slate-100 hover:bg-slate-700/80 transition-colors duration-200 flex items-center gap-1">
+                                <span class="hidden sm:inline">Sau</span>
+                                <i class="fas fa-chevron-right text-[10px]"></i>
+                            </a>
+                            <% } else { %>
+                            <span class="px-3 py-1.5 text-xs md:text-sm rounded-full text-slate-500 cursor-default flex items-center gap-1">
+                                <span class="hidden sm:inline">Sau</span>
+                                <i class="fas fa-chevron-right text-[10px]"></i>
+                            </span>
+                            <% } %>
+                        </nav>
+                    </div>
+                    <% } %>
+                </section>
+                <% } %>
+
+
+                <% if (!isSearching) { %>
+                <!-- Recommendations (render bằng JS sau khi có JWT) -->
+                <section id="recommend-section" class="category-section mb-16 hidden">
+                  <div class="category-header">
+                    <div class="flex items-center justify-between gap-4 flex-wrap">
+                      <div class="flex items-center space-x-4">
+                        <div class="w-2 h-12 bg-gradient-to-b from-amber-500 to-orange-600 rounded-full"></div>
+                        <h2 class="text-3xl md:text-4xl font-bold category-title">Gợi ý cho bạn</h2>
+                        <span id="recommend-count" class="count-badge text-amber-100 text-sm font-semibold px-4 py-2 rounded-full">0 đề xuất</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="shelf-nav">
+                    <button type="button" class="shelf-btn left" data-shelf-prev><i class="fas fa-chevron-left text-xs"></i></button>
+                    <button type="button" class="shelf-btn right" data-shelf-next><i class="fas fa-chevron-right text-xs"></i></button>
+
+                    <div id="recommend-shelf" class="shelf">
+                      <!-- JS sẽ đổ card vào đây -->
+                    </div>
+                  </div>
                 </section>
                 <% } %>
 
@@ -833,11 +879,11 @@
                 <!-- Sách Bìa Cứng -->
                 <section id="hardcover-section" class="category-section mb-16">
                     <div class="category-header">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between gap-4 flex-wrap">
                             <div class="flex items-center space-x-4">
                                 <div class="w-2 h-12 bg-gradient-to-b from-amber-500 to-orange-600 rounded-full"></div>
-                                <h2 class="text-4xl font-bold category-title">Sách Bìa Cứng</h2>
-                                <span class="count-badge text-blue-800 text-sm font-semibold px-4 py-2 rounded-full">
+                                <h2 class="text-3xl md:text-4xl font-bold category-title">Sách Bìa Cứng</h2>
+                                <span class="count-badge text-blue-100 text-sm font-semibold px-4 py-2 rounded-full">
                                     <%
                                         int hardcoverCount = 0;
                                         for (Map<String, Object> book : allBooks) {
@@ -849,33 +895,33 @@
                                     <%= hardcoverCount%> cuốn sách
                                 </span>
                             </div>
-                            <a href="./user/booksByCategory.jsp?category=HARDCOVER" class="expand-button text-blue-700 hover:text-blue-900 font-semibold transition-all duration-300 flex items-center space-x-3 no-underline">
+                            <a href="./user/booksByCategory.jsp?category=HARDCOVER" class="expand-button text-blue-100 hover:text-white font-semibold transition-all duration-300 flex items-center space-x-3 no-underline">
                                     <span>Xem thêm</span>
-                                <i class="fas fa-arrow-right transition-transform duration-300 group-hover:translate-x-1"></i>
+                                <i class="fas fa-arrow-right text-xs"></i>
                             </a>
                         </div>
                     </div>
 
                     <div class="shelf-nav">
-                        <button type="button" class="shelf-btn left rounded-full p-2" data-shelf-prev><i class="fas fa-chevron-left"></i></button>
-                        <button type="button" class="shelf-btn right rounded-full p-2" data-shelf-next><i class="fas fa-chevron-right"></i></button>
+                        <button type="button" class="shelf-btn left" data-shelf-prev><i class="fas fa-chevron-left text-xs"></i></button>
+                        <button type="button" class="shelf-btn right" data-shelf-next><i class="fas fa-chevron-right text-xs"></i></button>
 
                         <div class="shelf">
                             <% for (Map<String, Object> book : allBooks) {
                               if ("HARDCOVER".equals(book.get("format"))) {%>
                             <div class="book-card w-fixed rounded-3xl shadow-lg hover:shadow-2xl group shine-effect">
-                                <a href="./user/bookDetails.jsp?isbn=<%= book.get("isbn")%>" class="block">
+                                <a href="./user/bookDetails.jsp?isbn=<%= book.get("isbn")%>" class="block h-full">
                                     <div class="book-image-container">
                                         <img src="<%= request.getContextPath() + "/" + book.get("coverImage") %>"
                                             alt="<%= book.get("title")%>"
                                             onerror="this.onerror=null; this.src='<%= request.getContextPath() %>/images/default-cover.jpg'"
-                                            class="w-full h-auto rounded-xl shadow-lg border border-gray-200 object-cover" />
-                                        <div class="book-overlay"><i class="fas fa-eye text-white text-3xl transform group-hover:scale-110 transition-transform"></i></div>
+                                            class="w-full h-full rounded-xl object-cover" />
+                                        <div class="book-overlay"><i class="fas fa-eye text-white text-2xl md:text-3xl transform group-hover:scale-110 transition-transform duration-300 ease-out"></i></div>
                                     </div>
                                     <div class="book-info">
-                                        <h3 class="book-title group-hover:text-blue-600 transition-colors line-clamp-2"><%= book.get("title")%></h3>
-                                        <div class="book-meta"><i class="fas fa-user-edit text-blue-500"></i><span><%= book.get("author")%></span></div>
-                                        <div class="book-meta"><i class="fas fa-calendar text-blue-500"></i><span><%= book.get("publishedYear")%></span></div>
+                                        <h3 class="book-title group-hover:text-blue-300 transition-colors duration-200 ease-out line-clamp-2"><%= book.get("title")%></h3>
+                                        <div class="book-meta"><i class="fas fa-user-edit text-blue-400"></i><span><%= book.get("author")%></span></div>
+                                        <div class="book-meta"><i class="fas fa-calendar text-blue-400"></i><span><%= book.get("publishedYear")%></span></div>
                                     </div>
                                 </a>
                             </div>
@@ -889,11 +935,11 @@
                 <!-- Sách Bìa Mềm -->
                 <section id="paperback-section" class="category-section mb-16">
                     <div class="category-header">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between gap-4 flex-wrap">
                             <div class="flex items-center space-x-4">
                                 <div class="w-2 h-12 bg-gradient-to-b from-green-500 to-teal-600 rounded-full"></div>
-                                <h2 class="text-4xl font-bold category-title">Sách Bìa Mềm</h2>
-                                <span class="count-badge text-green-800 text-sm font-semibold px-4 py-2 rounded-full">
+                                <h2 class="text-3xl md:text-4xl font-bold category-title">Sách Bìa Mềm</h2>
+                                <span class="count-badge text-green-100 text-sm font-semibold px-4 py-2 rounded-full">
                                     <%
                                         int paperbackCount = 0;
                                         for (Map<String, Object> book : allBooks) {
@@ -905,34 +951,37 @@
                                     <%= paperbackCount%> cuốn sách
                                 </span>
                             </div>
-                            <a href="./user/booksByCategory.jsp?category=PAPERBACK" class="expand-button text-green-700 hover:text-green-900 font-semibold transition-all duration-300 flex items-center space-x-3 no-underline">
+                            <a href="./user/booksByCategory.jsp?category=PAPERBACK" class="expand-button text-green-100 hover:text-white font-semibold transition-all duration-300 flex items-center space-x-3 no-underline">
                                 <span>Xem thêm</span>
-                                <i class="fas fa-arrow-right transition-transform duration-300 group-hover:translate-x-1"></i>
+                                <i class="fas fa-arrow-right text-xs"></i>
                             </a>
                         </div>
                     </div>
 
                     <div class="shelf-nav">
-                        <button type="button" class="shelf-btn left rounded-full p-2" data-shelf-prev><i class="fas fa-chevron-left"></i></button>
-                        <button type="button" class="shelf-btn right rounded-full p-2" data-shelf-next><i class="fas fa-chevron-right"></i></button>
+                        <button type="button" class="shelf-btn left" data-shelf-prev><i class="fas fa-chevron-left text-xs"></i></button>
+                        <button type="button" class="shelf-btn right" data-shelf-next><i class="fas fa-chevron-right text-xs"></i></button>
 
                         <div class="shelf">
                             <% for (Map<String, Object> book : allBooks) {
                               if ("PAPERBACK".equals(book.get("format"))) {%>
                             <div class="book-card w-fixed rounded-3xl shadow-lg hover:shadow-2xl group shine-effect">
-                                <a href="./user/bookDetails.jsp?isbn=<%= book.get("isbn")%>" class="block">
+                                <a href="./user/bookDetails.jsp?isbn=<%= book.get("isbn")%>" class="block h-full">
                                     <div class="book-image-container">
                                        <img src="<%= request.getContextPath() + "/" + book.get("coverImage") %>"
                                             alt="<%= book.get("title")%>"
                                             onerror="this.onerror=null; this.src='<%= request.getContextPath() %>/images/default-cover.jpg'"
-                                            class="w-full h-auto rounded-xl shadow-lg border border-gray-200 object-cover" />
 
-                                        <div class="book-overlay"><i class="fas fa-eye text-white text-3xl transform group-hover:scale-110 transition-transform"></i></div>
+
+
+                                            class="w-full h-full rounded-xl object-cover" />
+
+                                        <div class="book-overlay"><i class="fas fa-eye text-white text-2xl md:text-3xl transform group-hover:scale-110 transition-transform duration-300 ease-out"></i></div>
                                     </div>
                                     <div class="book-info">
-                                        <h3 class="book-title group-hover:text-green-600 transition-colors line-clamp-2"><%= book.get("title")%></h3>
-                                        <div class="book-meta"><i class="fas fa-user-edit text-green-500"></i><span><%= book.get("author")%></span></div>
-                                        <div class="book-meta"><i class="fas fa-calendar text-green-500"></i><span><%= book.get("publishedYear")%></span></div>
+                                        <h3 class="book-title group-hover:text-green-300 transition-colors duration-200 ease-out line-clamp-2"><%= book.get("title")%></h3>
+                                        <div class="book-meta"><i class="fas fa-user-edit text-green-400"></i><span><%= book.get("author")%></span></div>
+                                        <div class="book-meta"><i class="fas fa-calendar text-green-400"></i><span><%= book.get("publishedYear")%></span></div>
                                     </div>
                                 </a>
                             </div>
@@ -945,11 +994,11 @@
                 <!-- Ebook -->
                 <section id="ebook-section" class="category-section mb-16">
                     <div class="category-header">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between gap-4 flex-wrap">
                             <div class="flex items-center space-x-4">
                                 <div class="w-2 h-12 bg-gradient-to-b from-purple-500 to-pink-600 rounded-full"></div>
-                                <h2 class="text-4xl font-bold category-title">Ebook</h2>
-                                <span class="count-badge text-purple-800 text-sm font-semibold px-4 py-2 rounded-full">
+                                <h2 class="text-3xl md:text-4xl font-bold category-title">Ebook</h2>
+                                <span class="count-badge text-purple-100 text-sm font-semibold px-4 py-2 rounded-full">
                                     <%
                                         int ebookCount = 0;
                                         for (Map<String, Object> book : allBooks) {
@@ -961,35 +1010,35 @@
                                     <%= ebookCount%> cuốn sách
                                 </span>
                             </div>
-                            <a href="./user/booksByCategory.jsp?category=EBOOK" class="expand-button text-purple-700 hover:text-purple-900 font-semibold transition-all duration-300 flex items-center space-x-3 no-underline">
+                            <a href="./user/booksByCategory.jsp?category=EBOOK" class="expand-button text-purple-100 hover:text-white font-semibold transition-all duration-300 flex items-center space-x-3 no-underline">
                                 <span>Xem thêm</span>
-                                <i class="fas fa-arrow-right transition-transform duration-300 group-hover:translate-x-1"></i>
+                                <i class="fas fa-arrow-right text-xs"></i>
                             </a>
                         </div>
                     </div>
 
                     <div class="shelf-nav">
-                        <button type="button" class="shelf-btn left rounded-full p-2" data-shelf-prev><i class="fas fa-chevron-left"></i></button>
-                        <button type="button" class="shelf-btn right rounded-full p-2" data-shelf-next><i class="fas fa-chevron-right"></i></button>
+                        <button type="button" class="shelf-btn left" data-shelf-prev><i class="fas fa-chevron-left text-xs"></i></button>
+                        <button type="button" class="shelf-btn right" data-shelf-next><i class="fas fa-chevron-right text-xs"></i></button>
 
                         <div class="shelf">
                             <% for (Map<String, Object> book : allBooks) {
                               if ("EBOOK".equals(book.get("format"))) {%>
                             <div class="book-card w-fixed rounded-3xl shadow-lg hover:shadow-2xl group shine-effect">
-                                <a href="./user/bookDetails.jsp?isbn=<%= book.get("isbn")%>" class="block">
+                                <a href="./user/bookDetails.jsp?isbn=<%= book.get("isbn")%>" class="block h-full">
                                     <div class="book-image-container">
                                         <img src="<%= request.getContextPath() + "/" + book.get("coverImage") %>"
                                         alt="<%= book.get("title")%>"
                                         onerror="this.onerror=null; this.src='<%= request.getContextPath() %>/images/default-cover.jpg'"
-                                        class="w-full h-auto rounded-xl shadow-lg border border-gray-200 object-cover" />
+                                        class="w-full h-full rounded-xl object-cover" />
 
-                                        <div class="book-overlay"><i class="fas fa-eye text-white text-3xl transform group-hover:scale-110 transition-transform"></i></div>
+                                        <div class="book-overlay"><i class="fas fa-eye text-white text-2xl md:text-3xl transform group-hover:scale-110 transition-transform duration-300 ease-out"></i></div>
                                         <div class="absolute top-3 right-3 digital-badge"><i class="fas fa-download"></i><span>Digital</span></div>
                                     </div>
                                     <div class="book-info">
-                                        <h3 class="book-title group-hover:text-purple-600 transition-colors line-clamp-2"><%= book.get("title")%></h3>
-                                        <div class="book-meta"><i class="fas fa-user-edit text-purple-500"></i><span><%= book.get("author")%></span></div>
-                                        <div class="book-meta"><i class="fas fa-calendar text-purple-500"></i><span><%= book.get("publishedYear")%></span></div>
+                                        <h3 class="book-title group-hover:text-purple-300 transition-colors duration-200 ease-out line-clamp-2"><%= book.get("title")%></h3>
+                                        <div class="book-meta"><i class="fas fa-user-edit text-purple-400"></i><span><%= book.get("author")%></span></div>
+                                        <div class="book-meta"><i class="fas fa-calendar text-purple-400"></i><span><%= book.get("publishedYear")%></span></div>
                                     </div>
                                 </a>
                             </div>
@@ -1001,11 +1050,11 @@
                 <% if (!recentBooks.isEmpty()) {%>
                 <section id="recent-section" class="category-section mb-16">
                     <div class="category-header">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between gap-4 flex-wrap">
                             <div class="flex items-center space-x-4">
                                 <div class="w-2 h-12 bg-gradient-to-b from-indigo-500 to-blue-600 rounded-full"></div>
-                                <h2 class="text-4xl font-bold category-title">Sách mới</h2>
-                                <span class="count-badge text-indigo-800 text-sm font-semibold px-4 py-2 rounded-full">
+                                <h2 class="text-3xl md:text-4xl font-bold category-title">Sách mới</h2>
+                                <span class="count-badge text-indigo-100 text-sm font-semibold px-4 py-2 rounded-full">
                                     <%= recentBooks.size()%> cuốn
                                 </span>
                             </div>
@@ -1014,27 +1063,27 @@
 
                     <div class="shelf-nav">
                         <!-- Nút điều hướng tùy chọn -->
-                        <button type="button" class="shelf-btn left rounded-full p-2" data-shelf-prev><i class="fas fa-chevron-left"></i></button>
-                        <button type="button" class="shelf-btn right rounded-full p-2" data-shelf-next><i class="fas fa-chevron-right"></i></button>
+                        <button type="button" class="shelf-btn left" data-shelf-prev><i class="fas fa-chevron-left text-xs"></i></button>
+                        <button type="button" class="shelf-btn right" data-shelf-next><i class="fas fa-chevron-right text-xs"></i></button>
 
                         <div class="shelf">
                             <% for (Map<String, Object> book : recentBooks) {%>
                             <div class="book-card w-fixed rounded-3xl shadow-lg hover:shadow-2xl group shine-effect">
-                                <a href="./user/bookDetails.jsp?isbn=<%= book.get("isbn")%>" class="block">
+                                <a href="./user/bookDetails.jsp?isbn=<%= book.get("isbn")%>" class="block h-full">
                                     <div class="book-image-container">
                                         <img src="<%= request.getContextPath() + "/" + book.get("coverImage") %>"
                                             alt="<%= book.get("title")%>"
                                             onerror="this.onerror=null; this.src='<%= request.getContextPath() %>/images/default-cover.jpg'"
-                                            class="w-full h-auto rounded-xl shadow-lg border border-gray-200 object-cover" />
+                                            class="w-full h-full rounded-xl object-cover" />
 
                                         <div class="book-overlay">
-                                            <i class="fas fa-bolt text-yellow-300 text-3xl transform group-hover:scale-110 transition-transform"></i>
+                                            <i class="fas fa-bolt text-yellow-300 text-2xl md:text-3xl transform group-hover:scale-110 transition-transform duration-300 ease-out"></i>
                                         </div>
                                     </div>
                                     <div class="book-info">
-                                        <h3 class="book-title group-hover:text-indigo-600 transition-colors line-clamp-2"><%= book.get("title")%></h3>
-                                        <div class="book-meta"><i class="fas fa-user-edit text-indigo-500"></i><span><%= book.get("author")%></span></div>
-                                        <div class="book-meta"><i class="fas fa-calendar text-indigo-500"></i><span><%= book.get("publishedYear")%></span></div>
+                                        <h3 class="book-title group-hover:text-indigo-300 transition-colors duration-200 ease-out line-clamp-2"><%= book.get("title")%></h3>
+                                        <div class="book-meta"><i class="fas fa-user-edit text-indigo-400"></i><span><%= book.get("author")%></span></div>
+                                        <div class="book-meta"><i class="fas fa-calendar text-indigo-400"></i><span><%= book.get("publishedYear")%></span></div>
                                     </div>
                                 </a>
                             </div>
@@ -1047,11 +1096,11 @@
                 <% if (!hotBorrowBooks.isEmpty()) {%>
                 <section id="hot-borrow-section" class="category-section mb-16">
                     <div class="category-header">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between gap-4 flex-wrap">
                             <div class="flex items-center space-x-4">
                                 <div class="w-2 h-12 bg-gradient-to-b from-rose-500 to-red-600 rounded-full"></div>
-                                <h2 class="text-4xl font-bold category-title">Sách được mượn nhiều</h2>
-                                <span class="count-badge text-rose-800 text-sm font-semibold px-4 py-2 rounded-full">
+                                <h2 class="text-3xl md:text-4xl font-bold category-title">Sách được mượn nhiều</h2>
+                                <span class="count-badge text-rose-100 text-sm font-semibold px-4 py-2 rounded-full">
                                     <%= hotBorrowBooks.size()%> tựa sách
                                 </span>
                             </div>
@@ -1059,25 +1108,25 @@
                     </div>
 
                     <div class="shelf-nav">
-                        <button type="button" class="shelf-btn left rounded-full p-2" data-shelf-prev><i class="fas fa-chevron-left"></i></button>
-                        <button type="button" class="shelf-btn right rounded-full p-2" data-shelf-next><i class="fas fa-chevron-right"></i></button>
+                        <button type="button" class="shelf-btn left" data-shelf-prev><i class="fas fa-chevron-left text-xs"></i></button>
+                        <button type="button" class="shelf-btn right" data-shelf-next><i class="fas fa-chevron-right text-xs"></i></button>
 
                         <div class="shelf">
                             <% for (Map<String, Object> book : hotBorrowBooks) {%>
                             <div class="book-card w-fixed rounded-3xl shadow-lg hover:shadow-2xl group shine-effect">
-                                <a href="./user/bookDetails.jsp?isbn=<%= book.get("isbn")%>" class="block">
+                                <a href="./user/bookDetails.jsp?isbn=<%= book.get("isbn")%>" class="block h-full">
                                     <div class="book-image-container">
                                         <img src="<%= request.getContextPath() + "/" + book.get("coverImage") %>"
                                             alt="<%= book.get("title")%>"
                                             onerror="this.onerror=null; this.src='<%= request.getContextPath() %>/images/default-cover.jpg'"
-                                            class="w-full h-auto rounded-xl shadow-lg border border-gray-200 object-cover" />
+                                            class="w-full h-full rounded-xl object-cover" />
 
-                                        <div class="book-overlay"><i class="fas fa-fire text-orange-300 text-3xl transform group-hover:scale-110 transition-transform"></i></div>
+                                        <div class="book-overlay"><i class="fas fa-fire text-orange-300 text-2xl md:text-3xl transform group-hover:scale-110 transition-transform duration-300 ease-out"></i></div>
                                     </div>
                                     <div class="book-info">
-                                        <h3 class="book-title group-hover:text-rose-600 transition-colors line-clamp-2"><%= book.get("title")%></h3>
-                                        <div class="book-meta"><i class="fas fa-user-edit text-rose-500"></i><span><%= book.get("author")%></span></div>
-                                        <div class="book-meta"><i class="fas fa-calendar text-rose-500"></i><span><%= book.get("publishedYear")%></span></div>
+                                        <h3 class="book-title group-hover:text-rose-300 transition-colors duration-200 ease-out line-clamp-2"><%= book.get("title")%></h3>
+                                        <div class="book-meta"><i class="fas fa-user-edit text-rose-400"></i><span><%= book.get("author")%></span></div>
+                                        <div class="book-meta"><i class="fas fa-calendar text-rose-400"></i><span><%= book.get("publishedYear")%></span></div>
                                     </div>
                                 </a>
                             </div>
@@ -1088,7 +1137,7 @@
                 </section>
                 <% } %>
                 <% if (!genreSections.isEmpty()) { %>
-                <section id="genres-sections" class="space-y-16">
+                <section id="genres-sections" class="space-y-12 lg:space-y-16">
                     <% for (Map.Entry<String, List<Map<String, Object>>> en : genreSections.entrySet()) {
                             String gname = en.getKey();
                             List<Map<String, Object>> glist = en.getValue();
@@ -1097,42 +1146,42 @@
                     %>
                     <div class="category-section">
                         <div class="category-header">
-                            <div class="flex items-center justify-between">
+                            <div class="flex items-center justify-between gap-4 flex-wrap">
                                 <div class="flex items-center space-x-4">
                                     <div class="w-2 h-12 bg-gradient-to-b from-emerald-500 to-teal-600 rounded-full"></div>
-                                    <h2 class="text-4xl font-bold category-title"><%= gname%></h2>
-                                    <span class="count-badge text-emerald-800 text-sm font-semibold px-4 py-2 rounded-full">
+                                    <h2 class="text-3xl md:text-4xl font-bold category-title"><%= gname%></h2>
+                                    <span class="count-badge text-emerald-100 text-sm font-semibold px-4 py-2 rounded-full">
                                         <%= glist.size()%> cuốn
                                     </span>
                                 </div>
                                 <a href="./user/booksByGenre.jsp?name=<%= java.net.URLEncoder.encode(gname, "UTF-8")%>"
-                                   class="expand-button text-emerald-700 hover:text-emerald-900 font-semibold transition-all duration-300 flex items-center space-x-3 no-underline">
+                                   class="expand-button text-emerald-100 hover:text-white font-semibold transition-all duration-300 flex items-center space-x-3 no-underline">
                                     <span>Xem thêm</span>
-                                    <i class="fas fa-arrow-right transition-transform duration-300 group-hover:translate-x-1"></i>
+                                    <i class="fas fa-arrow-right text-xs"></i>
                                 </a>
                             </div>
                         </div>
 
                         <div class="shelf-nav">
-                            <button type="button" class="shelf-btn left rounded-full p-2" data-shelf-prev><i class="fas fa-chevron-left"></i></button>
-                            <button type="button" class="shelf-btn right rounded-full p-2" data-shelf-next><i class="fas fa-chevron-right"></i></button>
+                            <button type="button" class="shelf-btn left" data-shelf-prev><i class="fas fa-chevron-left text-xs"></i></button>
+                            <button type="button" class="shelf-btn right" data-shelf-next><i class="fas fa-chevron-right text-xs"></i></button>
 
                             <div class="shelf">
                                 <% for (Map<String, Object> book : glist) {%>
                                 <div class="book-card w-fixed rounded-3xl shadow-lg hover:shadow-2xl group shine-effect">
-                                    <a href="./user/bookDetails.jsp?isbn=<%= book.get("isbn")%>" class="block">
+                                    <a href="./user/bookDetails.jsp?isbn=<%= book.get("isbn")%>" class="block h-full">
                                         <div class="book-image-container">
                                             <img src="<%= request.getContextPath() + "/" + book.get("coverImage") %>"
                                             alt="<%= book.get("title")%>"
                                             onerror="this.onerror=null; this.src='<%= request.getContextPath() %>/images/default-cover.jpg'"
-                                            class="w-full h-auto rounded-xl shadow-lg border border-gray-200 object-cover" />
+                                            class="w-full h-full rounded-xl object-cover" />
 
-                                            <div class="book-overlay"><i class="fas fa-tags text-white text-3xl transform group-hover:scale-110 transition-transform"></i></div>
+                                            <div class="book-overlay"><i class="fas fa-tags text-white text-2xl md:text-3xl transform group-hover:scale-110 transition-transform duration-300 ease-out"></i></div>
                                         </div>
                                         <div class="book-info">
-                                            <h3 class="book-title group-hover:text-emerald-600 transition-colors line-clamp-2"><%= book.get("title")%></h3>
-                                            <div class="book-meta"><i class="fas fa-user-edit text-emerald-500"></i><span><%= book.get("author")%></span></div>
-                                            <div class="book-meta"><i class="fas fa-calendar text-emerald-500"></i><span><%= book.get("publishedYear")%></span></div>
+                                            <h3 class="book-title group-hover:text-emerald-300 transition-colors duration-200 ease-out line-clamp-2"><%= book.get("title")%></h3>
+                                            <div class="book-meta"><i class="fas fa-user-edit text-emerald-400"></i><span><%= book.get("author")%></span></div>
+                                            <div class="book-meta"><i class="fas fa-calendar text-emerald-400"></i><span><%= book.get("publishedYear")%></span></div>
                                         </div>
                                     </a>
                                 </div>
@@ -1255,10 +1304,15 @@
                                   from { opacity: 0; transform: translateY(30px); }
                                   to { opacity: 1; transform: translateY(0); }
                                 }
-                                @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+                                @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.03)} }
                                 .line-clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
                                 .rotate-180 { transform: rotate(180deg); }
-                                .book-card:hover { animation: pulse 2s infinite; }
+                                .book-card {
+                                  transition: transform 0.28s ease-out, box-shadow 0.28s ease-out, background 0.28s ease-out, border-color 0.28s ease-out;
+                                }
+                                .book-card:hover {
+                                  transform: translateY(-4px) scale(1.02);
+                                }
                               `;
                     const style = document.createElement('style');
                     style.textContent = css;
@@ -1269,14 +1323,14 @@
                 window.addEventListener('scroll', function () {
                     const scrolled = window.pageYOffset;
                     document.querySelectorAll('.floating-book').forEach((el, i) => {
-                        const speed = 0.5 + (i * 0.1);
-                        el.style.transform = `translateY(${scrolled * speed}px) rotate(${scrolled * 0.1}deg)`;
+                        const speed = 0.25 + (i * 0.05);
+                        el.style.transform = `translateY(${scrolled * speed}px) rotate(${scrolled * 0.06}deg)`;
                     });
                 });
 
                 // Lazy/async for images
                 (function enableLazyForImages() {
-                    document.querySelectorAll('img.book-image').forEach(img => {
+                    document.querySelectorAll('img.book-image, .book-image-container img').forEach(img => {
                         if (!img.hasAttribute('loading'))
                             img.setAttribute('loading', 'lazy');
                         if (!img.hasAttribute('decoding'))
@@ -1302,6 +1356,7 @@
                             loader.style.display = 'none';
                         }, 260);
                         app.classList.add('loaded'); // lớp này nằm trong loading.css bạn đã link
+                        app.style.opacity = '1';
                     }
 
                     // 1) Ẩn khi toàn trang load xong (CSS/JS/ảnh trên-fold)
@@ -1396,6 +1451,183 @@
                     if (e.key === 'ArrowRight') nextSlide();
                 });
             </script>
+<script>
+(function () {
+  const CTX = '<%=request.getContextPath()%>';          // /Library
+  const DEFAULT_COVER = CTX + '/images/default-cover.jpg';
+
+  async function loadRecommendations() {
+    try {
+      const userRaw = localStorage.getItem('user');
+      const token   = localStorage.getItem('token');
+
+      if (!userRaw || !token) {
+        console.debug('[recommend] no user/token -> skip');
+        return;
+      }
+
+      let me = null;
+      try { me = JSON.parse(userRaw); } catch (e) {}
+      if (!me || !me.uid) {
+        console.debug('[recommend] invalid user in localStorage');
+        return;
+      }
+
+      const resp = await fetch(CTX + '/api/recommendations', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ' + token
+        }
+      });
+
+      if (!resp.ok) {
+        console.error('[recommend] HTTP', resp.status);
+        return;
+      }
+
+      const data = await resp.json();
+      console.log('[recommend] response:', data);
+
+      if (!data || !Array.isArray(data.items) || data.items.length === 0) {
+        console.debug('[recommend] empty items');
+        return;
+      }
+
+      const section = document.getElementById('recommend-section');
+      const shelf   = document.getElementById('recommend-shelf');
+      const countEl = document.getElementById('recommend-count');
+      if (!section || !shelf || !countEl) return;
+
+      shelf.innerHTML = '';
+
+      data.items.forEach((book, idx) => {
+        console.log('[recommend] item', idx, book);
+
+        const isbn   = book.isbn || '';
+        const title  = book.title || '';
+        const author = book.author || '';
+        const year   = book.publishedYear || book.publicationYear || '';
+
+        if (!isbn) {
+          console.warn('[recommend] missing isbn for item', book);
+        }
+
+        let coverImage = book.coverImage || 'images/default-cover.jpg';
+        if (coverImage.startsWith('/')) {
+          coverImage = CTX + coverImage;      // /Library/images/...
+        } else {
+          coverImage = CTX + '/' + coverImage;
+        }
+
+        // ==== Tạo DOM thủ công, không dùng template literal ====
+        const card = document.createElement('div');
+        card.className = 'book-card w-fixed rounded-3xl shadow-lg hover:shadow-2xl group shine-effect';
+
+        const link = document.createElement('a');
+        link.className = 'block h-full';
+        link.href = CTX + '/user/bookDetails.jsp?isbn=' + encodeURIComponent(isbn);
+
+        const imgContainer = document.createElement('div');
+        imgContainer.className = 'book-image-container';
+
+        const img = document.createElement('img');
+        img.src = coverImage;
+        img.alt = title;
+        img.className = 'w-full h-full rounded-xl shadow-lg border border-gray-200 object-cover book-image';
+        img.onerror = function () {
+          this.onerror = null;
+          this.src = DEFAULT_COVER;
+        };
+
+        const overlay = document.createElement('div');
+        overlay.className = 'book-overlay';
+        overlay.innerHTML = '<i class="fas fa-eye text-white text-3xl transform group-hover:scale-110 transition-transform duration-300 ease-out"></i>';
+
+        imgContainer.appendChild(img);
+        imgContainer.appendChild(overlay);
+
+        const info = document.createElement('div');
+        info.className = 'book-info';
+
+        const h3 = document.createElement('h3');
+        h3.className = 'book-title group-hover:text-amber-300 transition-colors duration-200 ease-out line-clamp-2';
+        h3.textContent = title;
+
+        const metaAuthor = document.createElement('div');
+        metaAuthor.className = 'book-meta';
+        metaAuthor.innerHTML = '<i class="fas fa-user-edit text-amber-400"></i> ';
+        const spanAuthor = document.createElement('span');
+        spanAuthor.textContent = author;
+        metaAuthor.appendChild(spanAuthor);
+
+        const metaYear = document.createElement('div');
+        metaYear.className = 'book-meta';
+        metaYear.innerHTML = '<i class="fas fa-calendar text-amber-400"></i> ';
+        const spanYear = document.createElement('span');
+        spanYear.textContent = year;
+        metaYear.appendChild(spanYear);
+
+        info.appendChild(h3);
+        info.appendChild(metaAuthor);
+        info.appendChild(metaYear);
+
+        link.appendChild(imgContainer);
+        link.appendChild(info);
+
+        card.appendChild(link);
+        shelf.appendChild(card);
+      });
+
+      countEl.textContent = data.items.length + ' đề xuất';
+      section.classList.remove('hidden');
+    } catch (e) {
+      console.error('recommendations error:', e);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', loadRecommendations);
+})();
+<%!
+    // Chuẩn hoá tiếng Việt: bỏ dấu + map đ/Đ -> d, rồi lower-case
+    private String normalizeVi(String s) {
+        if (s == null) return "";
+        String r = Normalizer.normalize(s, Normalizer.Form.NFD);
+        // bỏ toàn bộ dấu (combining marks)
+        r = r.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+        // đ/Đ -> d
+        r = r.replace('đ', 'd').replace('Đ', 'D');
+        return r.toLowerCase(java.util.Locale.ROOT);
+    }
+
+    /**
+     * fuzzyMatch: các "từ" trong query phải xuất hiện
+     * theo thứ tự trong text (sau khi normalizeVi)
+     * Ví dụ:
+     *   text:  "Đắc Nhân Tâm Dale Carnegie"
+     *   query: "dac nhan"  -> true
+     *   query: "nhan tam dale" -> true
+     *   query: "tam nhan" -> vẫn true (vì theo thứ tự trong chuỗi normalize)
+     */
+    private boolean fuzzyMatch(String text, String q) {
+        text = normalizeVi(text);
+        q    = normalizeVi(q);
+
+        if (q.isEmpty()) return true;
+
+        String[] parts = q.split("\\s+");
+        int pos = 0;
+        for (String part : parts) {
+            if (part.isEmpty()) continue;
+            pos = text.indexOf(part, pos);
+            if (pos == -1) return false;
+            pos += part.length();
+        }
+        return true;
+    }
+%>
+
+</script>
         </div>
     </body>
 </html>

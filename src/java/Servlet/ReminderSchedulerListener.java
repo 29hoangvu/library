@@ -15,31 +15,19 @@ public class ReminderSchedulerListener implements ServletContextListener {
     public void contextInitialized(ServletContextEvent sce) {
         scheduler = Executors.newSingleThreadScheduledExecutor();
 
-        ZoneId zone = ZoneId.of("Asia/Ho_Chi_Minh");
-        LocalTime runAt = LocalTime.of(8, 0); // 08:00 hằng ngày
-
-        long initialDelay = computeInitialDelay(zone, runAt);
-        long period = TimeUnit.DAYS.toSeconds(1);
-
-        scheduler.scheduleAtFixedRate(() -> {
+        // Chạy ngay lúc start (delay 0), sau đó mỗi 30s
+        scheduler.scheduleWithFixedDelay(() -> {
             try {
-                // Gọi servlet job nội bộ
-                // Cách đơn giản: hit URL bằng HTTP client local
-                // Hoặc tách ReminderJob thành class tĩnh rồi gọi trực tiếp
-                // Ở đây demo: gọi URL nội bộ
+                // GỌI SERVLET ReminderJobServlet QUA HTTP
                 java.net.URL url = new java.net.URL("http://localhost:8080/Library/cron/reminders");
-                try (java.io.InputStream is = url.openStream()) { /* fire & read */ }
+                try (java.io.InputStream is = url.openStream()) {
+                    // đọc cho đủ, hoặc bỏ trống cũng được
+                }
+                System.out.println("[ReminderScheduler] executed at " + java.time.LocalTime.now());
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }, initialDelay, period, TimeUnit.SECONDS);
-    }
-
-    private long computeInitialDelay(ZoneId zone, LocalTime runAt) {
-        ZonedDateTime now = ZonedDateTime.now(zone);
-        ZonedDateTime next = now.withHour(runAt.getHour()).withMinute(runAt.getMinute()).withSecond(0).withNano(0);
-        if (!next.isAfter(now)) next = next.plusDays(1);
-        return Duration.between(now, next).getSeconds();
+        }, 0, 30, TimeUnit.SECONDS);   // 0 = chạy ngay, 30 = delay sau khi job trước kết thúc
     }
 
     @Override
@@ -47,4 +35,3 @@ public class ReminderSchedulerListener implements ServletContextListener {
         if (scheduler != null) scheduler.shutdownNow();
     }
 }
-

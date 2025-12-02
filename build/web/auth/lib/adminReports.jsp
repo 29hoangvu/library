@@ -37,11 +37,6 @@
 
 <%
     request.setAttribute("pageTitle", "Thống kê & Báo cáo");
-    Users user = (Users) session.getAttribute("user");
-    if (user == null || (user.getRoleID() != 1 && user.getRoleID() != 2)) {
-        response.sendRedirect("../../index.jsp");
-        return;
-    }
 %>
 
 <!DOCTYPE html>
