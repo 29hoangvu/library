@@ -8,7 +8,10 @@ import os, re, json, asyncio, logging
 import httpx
 
 from dotenv import load_dotenv
-load_dotenv()
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR / ".env")
 
 from db import get_conn
 from reco import recommend_user_cf
@@ -20,12 +23,19 @@ logger = logging.getLogger("reco_svc")
 
 # ========== Keys ==========
 GOOGLE_BOOKS_KEY = os.getenv("GOOGLE_BOOKS_KEY", "")
-GEMINI_KEY = os.getenv("GOOGLE_API_KEY", "")
+
+# Ưu tiên GEMINI_API_KEY, fallback GOOGLE_API_KEY nếu bạn lỡ đặt tên cũ
+GEMINI_KEY = (os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY", "")).strip()
+# logger.info("ENV GEMINI_API_KEY raw: %r", os.getenv("GEMINI_API_KEY"))
+# logger.info("GEMINI_KEY prefix: %r", GEMINI_KEY[:10])
 
 # ========== Gemini ==========
 import google.generativeai as genai
 if GEMINI_KEY:
     genai.configure(api_key=GEMINI_KEY)
+else:
+    logger.error("Gemini API key not configured!")
+
 
 # Ưu tiên các model mới hỗ trợ vision + generateContent (SDK tự map đúng API version)
 PREFERRED_MODELS = [
@@ -70,11 +80,15 @@ def _pick_gemini_model() -> str:
 GEMINI_MODEL = _pick_gemini_model()
 logger.info("Selected Gemini model: %s", GEMINI_MODEL)
 
-def _build_gemini_prompt() -> str:
+def _build_gemini_prompt_strict() -> str:
+    """
+    Prompt CHÍNH XÁC: chỉ đọc từ ảnh, không đoán bừa.
+    Dùng cho phase 1 (ưu tiên dữ liệu thật).
+    """
     return (
         "Bạn là trợ lý trích xuất metadata sách từ ảnh bìa. "
         "Hãy đọc TẤT CẢ chữ trên ảnh (kể cả gáy/cạnh) và trả về CHỈ JSON hợp lệ.\n\n"
-        "Yêu cầu các khóa JSON (có thể null nếu không chắc):\n"
+        "Yêu cầu các khóa JSON (có thể null nếu không chắc chắn, KHÔNG được đoán bừa):\n"
         "isbn, title, authorName, publisher, publicationYear, numberOfPages, format, language, confidence, notes\n\n"
         "Quy tắc:\n"
         "- ISBN: ưu tiên ISBN-13 (978/979); nếu không chắc để null.\n"
@@ -82,9 +96,51 @@ def _build_gemini_prompt() -> str:
         "- numberOfPages: chỉ điền số nếu ảnh có ghi rõ; không đoán.\n"
         "- format: một trong [EBOOK, HARDCOVER, PAPERBACK] nếu thấy dấu hiệu; không thì null.\n"
         "- language: vi/en/... nếu nhận diện được; không thì null.\n"
-        "- confidence: số thực 0..1 tổng thể.\n"
-        "- notes: giải thích ngắn nguồn suy luận.\n"
+        "- confidence: số thực 0..1 tổng thể, phản ánh mức tin cậy dữ liệu đọc được từ ảnh.\n"
+        "- notes: giải thích ngắn nguồn suy luận (ví dụ: 'đọc từ bìa trước', 'đọc từ gáy sách').\n\n"
+        "Quan trọng: Chỉ sử dụng thông tin thấy được trên ảnh; nếu không chắc thì để null, "
+        "không dùng kiến thức bên ngoài để đoán ở giai đoạn này.\n"
+        "Luôn trả về MỘT đối tượng JSON duy nhất, không kèm text giải thích bên ngoài.\n"
     )
+
+
+def _build_gemini_prompt_guess() -> str:
+    """
+    Prompt FALLBACK: cho phép dùng kiến thức + ước lượng hợp lý để điền thiếu.
+    Dùng cho phase 2 khi mọi nguồn bên ngoài đều không tìm được.
+    """
+    return (
+        "Bạn là trợ lý trích xuất metadata sách từ ảnh bìa và CÓ THỂ sử dụng cả kiến thức tổng quát "
+        "về sách để điền thông tin còn thiếu.\n\n"
+        "Nhiệm vụ của bạn:\n"
+        "1) Đọc TẤT CẢ chữ trên ảnh (kể cả gáy/cạnh) để lấy thông tin chính xác nhất có thể.\n"
+        "2) Nếu bạn nhận ra cuốn sách này (từ kiến thức của bạn), hãy dùng kiến thức đó để bổ sung "
+        "các trường còn thiếu.\n"
+        "3) Nếu vẫn thiếu thông tin, bạn được phép ƯỚC LƯỢNG HỢP LÝ (ví dụ số trang, năm xuất bản, format) "
+        "dựa trên nội dung, phong cách bìa, loại sách, ngữ cảnh... miễn là đánh dấu rõ trong 'notes' "
+        "và giảm 'confidence'.\n\n"
+        "Hãy TRẢ VỀ CHỈ DUY NHẤT MỘT JSON HỢP LỆ, với các khóa sau (có thể null nếu hoàn toàn không suy luận được):\n"
+        "- isbn: chuỗi ISBN-13 (ưu tiên 978/979) hoặc ISBN-10; nếu không chắc chắn thì để null.\n"
+        "- title: tiêu đề sách.\n"
+        "- authorName: tên tác giả chính.\n"
+        "- publisher: nhà xuất bản.\n"
+        "- publicationYear: năm xuất bản dạng số nguyên YYYY.\n"
+        "- numberOfPages: số trang, dạng số nguyên.\n"
+        "- format: một trong [\"EBOOK\", \"HARDCOVER\", \"PAPERBACK\"].\n"
+        "- language: mã ngôn ngữ ngắn gọn như \"vi\", \"en\", \"ja\"...\n"
+        "- confidence: số thực 0..1 thể hiện độ tin cậy tổng thể.\n"
+        "- notes: chuỗi mô tả ngắn, giải thích bạn lấy / đoán thông tin từ đâu.\n\n"
+        "Quy tắc:\n"
+        "- Nếu thông tin đọc được rõ ràng trên ảnh → dùng trực tiếp, confidence có thể ≥ 0.8.\n"
+        "- Nếu bạn dùng kiến thức bên ngoài (đã biết cuốn sách này) → nêu rõ trong 'notes'.\n"
+        "- Nếu bạn chỉ ước lượng (ví dụ số trang, năm) → đặt confidence không quá 0.6 và ghi rõ 'ước lượng' "
+        "trong 'notes'.\n"
+        "- Chỉ để null khi thật sự không thể đọc được, không nhận ra cuốn sách và không ước lượng hợp lý được.\n\n"
+        "Quan trọng:\n"
+        "- Luôn trả về DUY NHẤT một đối tượng JSON (không kèm giải thích bên ngoài JSON).\n"
+        "- Không bao bọc JSON bằng ``` hoặc ký tự thừa khác.\n"
+    )
+
 
 class GeminiBookSchema(BaseModel):
     isbn: Optional[str] = Field(None)
@@ -143,16 +199,20 @@ def _extract_first_json_block(text: str):
         start = text.find("{", start + 1)
     return None
 
-async def _gemini_extract(image_bytes: bytes, mime_type: str = "image/jpeg") -> dict | None:
+async def _gemini_extract(image_bytes: bytes, mime_type: str = "image/jpeg", allow_guess: bool = False) -> dict | None:
     if not GEMINI_KEY:
         logger.error("Gemini API key not configured")
         return None
 
     try:
+        # Chọn prompt + temperature theo mode
+        prompt = _build_gemini_prompt_guess() if allow_guess else _build_gemini_prompt_strict()
+        temperature = 0.5 if allow_guess else 0.2
+
         model = genai.GenerativeModel(
             GEMINI_MODEL,
             generation_config={
-                "temperature": 0.2,
+                "temperature": temperature,
                 "response_mime_type": "application/json",
             }
         )
@@ -161,7 +221,6 @@ async def _gemini_extract(image_bytes: bytes, mime_type: str = "image/jpeg") -> 
         raise HTTPException(status_code=503, detail=f"Không thể khởi tạo Gemini: {str(e)}")
 
     img_part = {"mime_type": mime_type or "image/jpeg", "data": image_bytes}
-    prompt = _build_gemini_prompt()
 
     try:
         resp = await asyncio.to_thread(model.generate_content, [prompt, img_part])
@@ -204,6 +263,7 @@ async def _gemini_extract(image_bytes: bytes, mime_type: str = "image/jpeg") -> 
     except Exception as e:
         logger.warning("Schema cast failed: %s ; data=%s", e, clean)
         return clean
+
 
 # ========== Helpers ==========
 def _year_from_date(date_str: Optional[str]) -> Optional[int]:
@@ -613,57 +673,101 @@ def diag_gemini():
         return {"ok": False, "error": str(e)}
 
 # ---- Gemini-only extract ----
+# ---- Gemini-only extract ----
 @app.post("/extract-gemini", response_model=ExtractResponse, operation_id="extract_with_gemini")
 async def extract_with_gemini(file: UploadFile = File(...)):
     try:
         img_bytes = await file.read()
         mime = file.content_type or "image/jpeg"
 
-        g = await _gemini_extract(img_bytes, mime_type=mime)
-        if not g:
-            raise HTTPException(status_code=503, detail="Gemini chưa sẵn sàng hoặc không phản hồi")
+        async def _run_phase(g: dict | None) -> ExtractResponse:
+            if not g:
+                raise HTTPException(status_code=503, detail="Gemini chưa sẵn sàng hoặc không phản hồi")
 
-        # Chuẩn hoá ISBN (chỉ chấp nhận ISBN-13 978/979 hoặc ISBN-10 hợp lệ)
-        isbn = g.get("isbn")
-        if isbn:
-            s = re.sub(r'[^0-9Xx]', '', isbn)
-            if (len(s) == 13 and s.startswith(("978", "979")) and _isbn13_valid(s)) or \
-               (len(s) == 10 and _isbn10_valid(s)):
-                isbn = s
-            else:
-                isbn = None
-
-        title  = g.get("title")
-        author = g.get("authorName")
-        publisher = g.get("publisher")
-        year   = g.get("publicationYear")
-        pages  = g.get("numberOfPages")
-        fmt    = g.get("format")
-
-        # Enrich
-        meta = None
-        try:
+            # Chuẩn hoá ISBN từ Gemini
+            isbn = g.get("isbn")
             if isbn:
-                meta = await _enrich_core(isbn, None, None)
-            elif title:
-                meta = await _enrich_core(None, title, author)
-        except Exception:
-            meta = None
+                s = re.sub(r'[^0-9Xx]', '', isbn)
+                if (len(s) == 13 and s.startswith(("978", "979")) and _isbn13_valid(s)) or \
+                   (len(s) == 10 and _isbn10_valid(s)):
+                    isbn = s
+                else:
+                    isbn = None
 
-        return ExtractResponse(
-            isbn = (meta.isbn if meta else None) or isbn,
-            title = (meta.title if meta and meta.title else None) or title,
-            authorName = (meta.authorName if meta and meta.authorName else None) or author,
-            publisher = (meta.publisher if meta and meta.publisher else None) or publisher,
-            publicationYear = (meta.publicationYear if meta and meta.publicationYear else None) or year,
-            numberOfPages = (meta.numberOfPages if meta and meta.numberOfPages else None) or pages,
-            format = (meta.format if meta and meta.format else None) or fmt,
+            title  = g.get("title")
+            author = g.get("authorName")
+            publisher = g.get("publisher")
+            year   = g.get("publicationYear")
+            pages  = g.get("numberOfPages")
+            fmt    = g.get("format")
+
+            # Enrich từ nguồn ngoài
+            meta = None
+            try:
+                if isbn:
+                    meta = await _enrich_core(isbn, None, None)
+                elif title:
+                    meta = await _enrich_core(None, title, author)
+            except Exception as e:
+                logger.warning("Enrich failed: %s", e)
+                meta = None
+
+            return ExtractResponse(
+                isbn = (meta.isbn if meta else None) or isbn,
+                title = (meta.title if meta and meta.title else None) or title,
+                authorName = (meta.authorName if meta and meta.authorName else None) or author,
+                publisher = (meta.publisher if meta and meta.publisher else None) or publisher,
+                publicationYear = (meta.publicationYear if meta and meta.publicationYear else None) or year,
+                numberOfPages = (meta.numberOfPages if meta and meta.numberOfPages else None) or pages,
+                format = (meta.format if meta and meta.format else None) or fmt,
+                rawText = None
+            )
+
+        # -------- Phase 1: strict (không đoán) --------
+        g1 = await _gemini_extract(img_bytes, mime_type=mime, allow_guess=False)
+        resp1 = await _run_phase(g1)
+
+        # Kiểm tra còn thiếu field quan trọng không
+        missing_important = any([
+            not resp1.isbn,
+            not resp1.title,
+            not resp1.authorName,
+            not resp1.publisher,
+            not resp1.publicationYear,
+            not resp1.numberOfPages,
+            not resp1.format,
+            not resp1.rawText,  # rawText luôn None với Gemini, chỉ để minh hoạ, có thể bỏ
+        ])
+
+        if not missing_important:
+            # Đủ giàu dữ liệu rồi → không cần đoán thêm
+            return resp1
+
+        # -------- Phase 2: allow_guess (cho phép suy luận/ước lượng) --------
+        logger.info("Còn thiếu metadata, chạy Gemini fallback allow_guess=True để bù thông tin.")
+        g2 = await _gemini_extract(img_bytes, mime_type=mime, allow_guess=True)
+        resp2 = await _run_phase(g2)
+
+        # Hàm chọn: ưu tiên dữ liệu Phase 1, nếu trống thì lấy Phase 2
+        def pick(a, b):
+            return a if a not in (None, "", 0) else b
+
+        merged = ExtractResponse(
+            isbn = pick(resp1.isbn, resp2.isbn),
+            title = pick(resp1.title, resp2.title),
+            authorName = pick(resp1.authorName, resp2.authorName),
+            publisher = pick(resp1.publisher, resp2.publisher),
+            publicationYear = pick(resp1.publicationYear, resp2.publicationYear),
+            numberOfPages = pick(resp1.numberOfPages, resp2.numberOfPages),
+            format = pick(resp1.format, resp2.format),
             rawText = None
         )
+        return merged
 
     except HTTPException:
         raise
     except Exception as e:
+        logger.exception("extract-gemini failed: %s", e)
         return JSONResponse(status_code=500, content={"detail": f"Lỗi server: {str(e)}"})
 
 # ---- Enrich (public) ----

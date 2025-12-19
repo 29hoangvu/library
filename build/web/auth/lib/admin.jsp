@@ -6,7 +6,24 @@
     request.setAttribute("pageTitle", "Quản lý sách - Admin");
 %>
 <%@ include file="../includes/header.jsp" %>
+<style>
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
 
+#excelResultPopup.show {
+    display: flex;
+    animation: slideIn 0.25s ease-out;
+}
+
+</style>
 <!-- Content của trang admin -->
 <main class="transition-all duration-300 pt-32" id="mainContent">
     <section class="bg-gradient-to-br from-blue-50 to-indigo-50 py-10 px-4 sm:px-6">
@@ -615,8 +632,7 @@
 
                 <!-- Body -->
                 <div class="px-6 py-6">
-                    <form action="${pageContext.request.contextPath}/AdminUploadExcelServlet"
-                          method="post" enctype="multipart/form-data" class="space-y-5" id="excelImportForm">
+                    <form method="post" enctype="multipart/form-data" class="space-y-5" id="excelImportForm">
                         <!-- Drag & drop zone -->
                         <label for="excelFile"
                                class="block w-full border-2 border-dashed border-emerald-300 rounded-xl p-8
@@ -658,53 +674,68 @@
         </div>
     </div>
 
-    <!-- Toast container (bottom-right, always on top) -->
+    <!-- Toast container (TOP RIGHT) -->
     <div id="toastContainer"
-         class="fixed bottom-5 right-5 z-[2147483647] flex flex-col-reverse gap-3 pointer-events-none">
+         class="fixed top-6 right-6 z-[2147483647]
+                flex flex-col gap-3 pointer-events-none">
     </div>
 
+
     <script>
-    function showToast(message, type = "info", duration = 3000) {
+    function showToast(message, type = "info", duration = 3500) {
         const container = document.getElementById("toastContainer");
         if (!container) return;
 
-        const styles = {
-            success: "bg-gradient-to-r from-green-500 to-emerald-600 text-white",   // Thành công: xanh lá
-            error:   "bg-gradient-to-r from-red-500 to-rose-600 text-white",     // Lỗi: đỏ
-            warning: "bg-gradient-to-r from-yellow-400 to-amber-500 text-black",  // Cảnh báo: vàng
-            info:    "bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
+        const icons = {
+            success: "fa-circle-check",
+            error: "fa-circle-xmark",
+            warning: "fa-triangle-exclamation",
+            info: "fa-circle-info"
         };
+
+        const colors = {
+            success: "from-emerald-500 to-green-600",
+            error: "from-red-500 to-rose-600",
+            warning: "from-amber-400 to-yellow-500 text-black",
+            info: "from-blue-500 to-indigo-600"
+        };
+
         const toast = document.createElement("div");
         toast.className = `
-            pointer-events-auto rounded-xl shadow-xl px-5 py-4
-            ${styles[type] || styles.info}
-            transition-all duration-300 ease-out
-            opacity-0 translate-y-3
-            ring-1 ring-black/10
+            pointer-events-auto
+            w-[340px]
+            rounded-xl shadow-2xl
+            bg-gradient-to-r ${colors[type] || colors.info}
+            text-white
+            px-5 py-4
+            flex items-start gap-3
+            transform transition-all duration-300 ease-out
+            opacity-0 translate-x-6
         `;
-        toast.textContent = message;
 
-        // thêm vào container (flex-col-reverse để toast mới nằm dưới cùng, gần góc dưới)
+        toast.innerHTML = `
+            <i class="fa-solid ${icons[type] || icons.info} text-xl mt-0.5"></i>
+            <div class="flex-1 text-sm leading-relaxed">${message}</div>
+            <button class="ml-2 text-white/70 hover:text-white transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        `;
+
         container.appendChild(toast);
 
         // animate in
         requestAnimationFrame(() => {
-            toast.classList.remove("opacity-0", "translate-y-3");
-            toast.classList.add("opacity-100", "translate-y-0");
+            toast.classList.remove("opacity-0", "translate-x-6");
+            toast.classList.add("opacity-100", "translate-x-0");
         });
 
-        // auto hide
-        const hide = () => {
-            toast.classList.add("opacity-0", "translate-y-3");
+        const close = () => {
+            toast.classList.add("opacity-0", "translate-x-6");
             setTimeout(() => toast.remove(), 250);
         };
-        const timer = setTimeout(hide, duration);
 
-        // cho phép click để đóng sớm
-        toast.addEventListener("click", () => {
-            clearTimeout(timer);
-            hide();
-        });
+        toast.querySelector("button").onclick = close;
+        setTimeout(close, duration);
     }
     </script>
 
@@ -758,6 +789,89 @@
             okBtn.addEventListener("click", okHandler);
             cancelBtn.addEventListener("click", cancelHandler);
         });
+    }
+    function showExcelLogPopup(logs = []) {
+        const popup = document.getElementById("excelLogPopup");
+        const content = document.getElementById("excelLogContent");
+        const closeBtn = document.getElementById("closeExcelLogPopup");
+        const popupBox = popup.querySelector(".transform");
+
+        content.innerHTML = "";
+
+        if (!logs.length) {
+            content.innerHTML = "<div class='text-gray-500'>Không có log.</div>";
+        } else {
+            logs.forEach(line => {
+                const div = document.createElement("div");
+                div.textContent = line;
+                content.appendChild(div);
+            });
+        }
+
+        popup.classList.remove("hidden");
+        popup.classList.add("flex");
+
+        setTimeout(() => {
+            popupBox.classList.remove("scale-95", "opacity-0");
+            popupBox.classList.add("scale-100", "opacity-100");
+        }, 30);
+
+        function close() {
+            popupBox.classList.remove("scale-100", "opacity-100");
+            popupBox.classList.add("scale-95", "opacity-0");
+            setTimeout(() => {
+                popup.classList.add("hidden");
+                popup.classList.remove("flex");
+            }, 250);
+        }
+
+        closeBtn.onclick = close;
+        popup.onclick = e => {
+            if (e.target === popup) close();
+        };
+    }
+    function showExcelResultPopup(stats, logs = []) {
+        const popup = document.getElementById("excelResultPopup");
+        const box   = popup.querySelector(".transform"); 
+        const list  = document.getElementById("excelLogList");
+
+        document.getElementById("statImported").textContent = stats.imported ?? 0;
+        document.getElementById("statSkipped").textContent  = stats.skipped ?? 0;
+        document.getElementById("statErrors").textContent   = stats.errors ?? 0;
+
+        list.innerHTML = "";
+
+        logs.forEach(line => {
+            const li = document.createElement("li");
+            li.className = `
+                p-3 rounded-lg border
+                ${line.includes("LỖI")
+                    ? "bg-red-50 border-red-200 text-red-700"
+                    : line.includes("bỏ qua")
+                    ? "bg-yellow-50 border-yellow-200 text-yellow-700"
+                    : "bg-green-50 border-green-200 text-green-700"}
+            `;
+            li.textContent = line;
+            list.appendChild(li);
+        });
+
+        // SHOW popup
+        popup.classList.remove("hidden");
+        popup.classList.add("flex");
+
+        requestAnimationFrame(() => {
+            box.classList.remove("scale-95", "opacity-0");
+            box.classList.add("scale-100", "opacity-100");
+        });
+
+        function closeAndReload() {
+            box.classList.remove("scale-100", "opacity-100");
+            box.classList.add("scale-95", "opacity-0");
+            setTimeout(() => location.reload(), 200);
+        }
+
+        document.getElementById("closeExcelResult").onclick = closeAndReload;
+        document.getElementById("confirmReload").onclick   = closeAndReload;
     }
     </script>
               
@@ -868,14 +982,78 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-<script>
+<script>    
 (function () {
     // ========== MODAL NHẬP SÁCH EXCEL ==========
+    const contextPath = '<%= request.getContextPath() %>';
     const modal = document.getElementById("excelModal");
     const openBtn = document.getElementById("openExcelModal");
     const closeBtn = document.getElementById("closeExcelModal");
     const cancelBtn = document.getElementById("cancelExcelModal");
     const modalContent = modal.querySelector('.transform');
+    const excelForm = document.getElementById("excelImportForm");
+    const fileInput = document.getElementById("excelFile");
+    const filePreview = document.getElementById("filePreview");
+    const submitBtn = modal ? modal.querySelector('button[form="excelImportForm"]') : null;
+    if (!excelForm) return;
+
+    excelForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (!fileInput.files || fileInput.files.length === 0) {
+        showToast("Vui lòng chọn file Excel!", "warning");
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const validExts = ['.xlsx', '.xls'];
+      if (!validExts.some(ext => file.name.toLowerCase().endsWith(ext))) {
+        showToast("Chỉ chấp nhận file .xlsx hoặc .xls", "error");
+        return;
+      }
+
+      const originalText = submitBtn ? submitBtn.innerHTML : null;
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...'; }
+
+      try {
+        const formData = new FormData();
+        formData.append("excelFile", file);
+
+        const response = await fetch(contextPath + '/api/admin/upload-excel', {
+          method: 'POST',
+          body: formData
+        });
+
+        // bảo vệ nếu server trả về text/html hoặc lỗi không phải JSON
+        let data = {};
+        try { data = await response.json(); } catch (err) { data = {}; }
+
+        if (response.ok && data.success) {
+          const stats = data.stats || {imported:0, skipped:0, errors:0, total:0};
+          // đóng modal
+          close();
+          // hiển thị toasts tương tự như trước
+          showToast(`📊 Nhập Excel hoàn tất — ✅ ${stats.imported} / ⚠️ ${stats.skipped} / ❌ ${stats.errors}`, "success", 6000);
+          // show detailed logs to console
+          if (Array.isArray(data.logs) && data.logs.length) {
+                showExcelResultPopup(stats, data.logs || []);
+            }
+        } else {
+          const msg = data.message || `Lỗi server (${response.status})`;
+          showToast(msg, "error", 8000);
+          if (data.logs && data.logs.length) {
+            console.group("Lỗi nhập Excel");
+            data.logs.forEach(l => console.error(l));
+            console.groupEnd();
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        showToast("Không thể kết nối server!", "error");
+      } finally {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = originalText; }
+      }
+    });
 
     function open() {
         modal.classList.remove("hidden");
@@ -910,9 +1088,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Drag & drop upload Excel
     const dropZone = document.querySelector('label[for="excelFile"]');
-    const fileInput = document.getElementById("excelFile");
-    const filePreview = document.getElementById("filePreview");
-
     function showFileInfo(file) {
         if (!file) {
             filePreview.innerHTML = "";
@@ -994,4 +1169,58 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+</div>
+<div id="excelResultPopup"
+     class="fixed inset-0 z-[99999] hidden items-center justify-center
+            bg-black/40 backdrop-blur-sm">
+
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl
+                transform transition-all duration-300 scale-95 opacity-0">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 py-5
+                    bg-gradient-to-r from-emerald-600 to-green-700 text-white rounded-t-2xl">
+            <h3 class="text-lg font-bold flex items-center gap-2">
+                <i class="fa-solid fa-file-excel"></i>
+                Kết quả nhập Excel
+            </h3>
+            <button id="closeExcelResult"
+                    class="p-2 rounded-full hover:bg-white/20 transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Stats -->
+        <div class="px-6 py-4 grid grid-cols-3 gap-3 text-center">
+            <div class="rounded-xl bg-green-50 p-3">
+                <div class="text-2xl font-bold text-green-600" id="statImported">0</div>
+                <div class="text-xs text-gray-600">Thành công</div>
+            </div>
+            <div class="rounded-xl bg-yellow-50 p-3">
+                <div class="text-2xl font-bold text-yellow-600" id="statSkipped">0</div>
+                <div class="text-xs text-gray-600">Bỏ qua</div>
+            </div>
+            <div class="rounded-xl bg-red-50 p-3">
+                <div class="text-2xl font-bold text-red-600" id="statErrors">0</div>
+                <div class="text-xs text-gray-600">Lỗi</div>
+            </div>
+        </div>
+
+        <!-- Logs -->
+        <div class="px-6 pb-4 max-h-[300px] overflow-y-auto">
+            <h4 class="font-semibold text-gray-800 mb-2">Chi tiết nhập Excel</h4>
+            <ul id="excelLogList" class="space-y-2 text-sm"></ul>
+        </div>
+
+        <!-- Footer -->
+        <div class="px-6 py-4 border-t bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
+            <button id="confirmReload"
+                    class="px-6 py-2.5 rounded-lg
+                           bg-gradient-to-r from-emerald-600 to-green-600
+                           hover:from-emerald-700 hover:to-green-700
+                           text-white font-medium shadow transition">
+                Đóng & tải lại
+            </button>
+        </div>
+    </div>
 </div>

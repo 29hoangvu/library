@@ -57,7 +57,46 @@ public class BorrowService {
                 }
             }
 
-            // 3) Lấy 1 bản vật lý theo ISBN
+            // 3) Kiểm tra số lượng khả dụng thực tế
+            //    available = quantity - (số đang mượn + số đang chờ duyệt)
+            String availabilitySql = """
+                SELECT 
+                    b.quantity,
+                    COALESCE(COUNT(br.borrow_id), 0) AS reserved_count
+                FROM book b
+                LEFT JOIN bookitem bi ON b.isbn = bi.book_isbn
+                LEFT JOIN borrow br ON bi.book_item_id = br.book_item_id 
+                    AND br.status IN ('Borrowed', 'Pending Approval')
+                WHERE b.isbn = ?
+                GROUP BY b.quantity
+            """;
+
+            int quantity = 0;
+            int reservedCount = 0;
+
+            try (PreparedStatement ps = conn.prepareStatement(availabilitySql)) {
+                ps.setString(1, req.isbn.trim());
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        quantity = rs.getInt("quantity");
+                        reservedCount = rs.getInt("reserved_count");
+                    }
+                }
+            }
+
+            int available = quantity - reservedCount;
+
+            System.out.println("=== AVAILABILITY CHECK ===");
+            System.out.println("ISBN: " + req.isbn.trim());
+            System.out.println("Total quantity: " + quantity);
+            System.out.println("Reserved (Borrowed + Pending): " + reservedCount);
+            System.out.println("Available: " + available);
+
+            if (available <= 0) {
+                throw new IllegalStateException("NO_COPY_AVAILABLE");
+            }
+
+            // 4) Lấy 1 bản vật lý theo ISBN (bất kỳ, không quan tâm status)
             Integer bookItemId = null;
             String getBookItemSql = "SELECT book_item_id FROM bookitem WHERE book_isbn = ? LIMIT 1";
             try (PreparedStatement ps = conn.prepareStatement(getBookItemSql)) {
@@ -72,7 +111,7 @@ public class BorrowService {
                 throw new IllegalStateException("NO_COPY_AVAILABLE");
             }
 
-            // 4) Tạo phiếu mượn
+            // 5) Tạo phiếu mượn với status = 'Pending Approval'
             String borrowSql =
                 "INSERT INTO borrow (book_item_id, user_id, borrowed_date, due_date, status, extended) " +
                 "VALUES (?, ?, CURDATE(), DATE_ADD(CURDATE(), INTERVAL ? DAY), 'Pending Approval', 0)";
@@ -250,16 +289,16 @@ public class BorrowService {
     public void rejectBorrow(RejectBorrowRequest req) throws Exception {
         if (req == null) throw new IllegalArgumentException("request is null");
         if (req.borrowId <= 0) throw new IllegalArgumentException("borrowId không hợp lệ");
-
+        String sql = "UPDATE borrow SET status = 'Rejected', rejection_reason = ? WHERE borrow_id = ?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     "UPDATE borrow SET status = 'Rejected' WHERE borrow_id = ?")) {
-            ps.setInt(1, req.borrowId);
-            int rows = ps.executeUpdate();
-            if (rows == 0) {
-                throw new IllegalStateException("BORROW_NOT_FOUND");
-            }
-        }
+            PreparedStatement ps = conn.prepareStatement(sql)) {
+               ps.setString(1, req.reason);
+               ps.setInt(2, req.borrowId);
+               int rows = ps.executeUpdate();
+               if (rows == 0) {
+                   throw new IllegalStateException("BORROW_NOT_FOUND");
+               }
+           }
     }
 
     /**
