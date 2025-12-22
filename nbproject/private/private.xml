@@ -3,22 +3,31 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/Năm%204/library-management-system/web/auth/lib/admin.jsp</file>
-            <file>file:/D:/Năm%204/library-management-system/web/index.jsp</file>
-            <file>file:/D:/Năm%204/library-management-system/web/auth/includes/header.jsp</file>
-            <file>file:/D:/Năm%204/library-management-system/web/auth/includes/searchBook.jspf</file>
-            <file>file:/D:/Năm%204/library-management-system/web/auth/admin.css</file>
-            <file>file:/D:/Năm%204/library-management-system/src/java/service/admin/ExcelImportService.java</file>
-            <file>file:/D:/Năm%204/library-management-system/src/java/service/admin/ExcelImportServiceImpl.java</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/Servlet/DeleteBookServlet.java</file>
+            <file>file:/D:/Năm%204/library-management-system/web/auth/lib/adminDashboard.jsp</file>
+            <file>file:/D:/Năm%204/library-management-system/web/auth/admin/manageUsers.jsp</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/api/admin/AdminBookApi.java</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/api/admin/AdminCreateUserApi.java</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/api/admin/AdminPendingUsersApi.java</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/api/admin/AdminReviewUserApi.java</file>
             <file>file:/D:/Năm%204/library-management-system/src/java/api/admin/AdminUsersApi.java</file>
-            <file>file:/D:/Năm%204/library-management-system/src/java/api/borrows/BorrowCancelApi.java</file>
-            <file>file:/D:/Năm%204/library-management-system/src/java/api/borrows/BorrowedApi.java</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/api/admin/UserAdminApi.java</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/api/BaseApiServlet.java</file>
+            <file>file:/D:/Năm%204/library-management-system/web/auth/admin/createUser.jsp</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/service/admin/AdminUserManagementService.java</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/service/AdminUserService.java</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/service/AdminResetPasswordService.java</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/api/admin/BookItemApi.java</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/api/admin/AdminBorrowApi.java</file>
+            <file>file:/D:/Năm%204/library-management-system/web/auth/includes/header.jsp</file>
+            <file>file:/D:/Năm%204/library-management-system/web/auth/lib/adminBorrowedBooks.jsp</file>
+            <file>file:/D:/Năm%204/library-management-system/web/auth/admin.css</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/api/borrows/BorrowApi.java</file>
             <file>file:/D:/Năm%204/library-management-system/src/java/api/borrows/BorrowBookApi.java</file>
-            <file>file:/D:/Năm%204/library-management-system/src/java/api/profile/ProfileApi.java</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/service/AuthService.java</file>
             <file>file:/D:/Năm%204/library-management-system/src/java/service/BookService.java</file>
             <file>file:/D:/Năm%204/library-management-system/src/java/service/BorrowService.java</file>
-            <file>file:/D:/Năm%204/library-management-system/src/java/service/AuthService.java</file>
-            <file>file:/D:/Năm%204/library-management-system/src/java/service/AdminUserService.java</file>
+            <file>file:/D:/Năm%204/library-management-system/src/java/dto/borrow/BorrowRegisterRequest.java</file>
         </group>
     </open-files>
 </project-private>

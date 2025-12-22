@@ -341,26 +341,26 @@
       </div>
     </div>
   </div>
-    <!-- Modal -->
-    <div id="messageModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-      <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div class="mt-3 text-center">
-          <div id="modalIcon" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
-            <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-          <h3 id="modalTitle" class="text-lg font-medium text-gray-900 mt-2"></h3>
-          <div class="mt-2 px-7 py-3"><p id="modalMessage" class="text-sm text-gray-500"></p></div>
-          <div class="items-center px-4 py-3">
-            <button id="modalCloseBtn" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">Đóng</button>
-          </div>
-        </div>
+</main>
+
+<!-- Modal -->
+<div id="messageModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+  <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div class="mt-3 text-center">
+      <div id="modalIcon" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
+        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <h3 id="modalTitle" class="text-lg font-medium text-gray-900 mt-2"></h3>
+      <div class="mt-2 px-7 py-3"><p id="modalMessage" class="text-sm text-gray-500"></p></div>
+      <div class="items-center px-4 py-3">
+        <button id="modalCloseBtn" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">Đóng</button>
       </div>
     </div>
-    <!-- Toast Container -->
-    <div class="toast-container" id="toastContainer"></div>
-</main>
+  </div>
+</div>
+
 <script>
 const ADMIN_BORROW_API = '<%=request.getContextPath()%>/api/admin/am-borrows';
 
@@ -379,126 +379,6 @@ function refreshData() {
 document.getElementById('modalCloseBtn').addEventListener('click', ()=>{
   document.getElementById('messageModal').classList.add('hidden')
 });
-// ========== Modal System ==========
-const Modal = {
-    show: function(options) {
-        var type = options.type || 'warning';
-        var title = options.title || 'Xác nhận';
-        var message = options.message || 'Bạn có chắc chắn muốn thực hiện hành động này?';
-        var confirmText = options.confirmText || 'Xác nhận';
-        var cancelText = options.cancelText || 'Hủy';
-        var onConfirm = options.onConfirm || function() {};
-        var onCancel = options.onCancel || function() {};
-        var showInput = options.showInput || false;
-        var inputPlaceholder = options.inputPlaceholder || '';
-        
-        var icons = {
-            warning: '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>',
-            danger: '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>',
-            success: '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>',
-            info: '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>'
-        };
-        
-        var overlay = document.createElement('div');
-        overlay.className = 'modal-overlay';
-        
-        var confirmBtnClass = 'modal-btn modal-btn-confirm';
-        if (type === 'danger') confirmBtnClass += ' danger';
-        if (type === 'success') confirmBtnClass += ' success';
-        
-        var inputHtml = showInput ? '<input type="text" class="modal-input" placeholder="' + inputPlaceholder + '" id="modalInput">' : '';
-        
-        overlay.innerHTML = '<div class="modal-content">' +
-                '<div class="modal-header">' +
-                    '<div class="modal-icon ' + type + '">' +
-                        icons[type] +
-                    '</div>' +
-                    '<div class="modal-header-text">' +
-                        '<h3 class="modal-title">' + title + '</h3>' +
-                        '<p class="modal-message">' + message + '</p>' +
-                        inputHtml +
-                    '</div>' +
-                '</div>' +
-                '<div class="modal-footer">' +
-                    '<button class="modal-btn modal-btn-cancel" data-action="cancel">' +
-                        cancelText +
-                    '</button>' +
-                    '<button class="' + confirmBtnClass + '" data-action="confirm">' +
-                        confirmText +
-                    '</button>' +
-                '</div>' +
-            '</div>';
-        
-        document.body.appendChild(overlay);
-        
-        var self = this;
-        
-        overlay.querySelector('[data-action="cancel"]').addEventListener('click', function() {
-            self.hide(overlay);
-            onCancel();
-        });
-        
-        overlay.querySelector('[data-action="confirm"]').addEventListener('click', function() {
-            var inputValue = '';
-            if (showInput) {
-                var input = document.getElementById('modalInput');
-                inputValue = input ? input.value : '';
-            }
-            self.hide(overlay);
-            onConfirm(inputValue);
-        });
-        
-        overlay.addEventListener('click', function(e) {
-            if (e.target === overlay) {
-                self.hide(overlay);
-                onCancel();
-            }
-        });
-        
-        var escHandler = function(e) {
-            if (e.key === 'Escape') {
-                self.hide(overlay);
-                onCancel();
-                document.removeEventListener('keydown', escHandler);
-            }
-        };
-        document.addEventListener('keydown', escHandler);
-        
-        return overlay;
-    },
-    
-    hide: function(overlay) {
-        overlay.classList.add('hiding');
-        setTimeout(function() {
-            if (overlay.parentNode) {
-                overlay.parentNode.removeChild(overlay);
-            }
-        }, 200);
-    },
-    
-    confirm: function(options) {
-        return new Promise(function(resolve) {
-            var originalOnConfirm = options.onConfirm || function() {};
-            var originalOnCancel = options.onCancel || function() {};
-
-            options.onConfirm = function(value) {
-                originalOnConfirm(value);
-                // FIX: Trả về true nếu không có input
-                if (value === undefined || value === '') {
-                    resolve(true);
-                } else {
-                    resolve(value);
-                }
-            };
-            options.onCancel = function() {
-                originalOnCancel();
-                resolve(false);
-            };
-
-            Modal.show(options);
-        });
-    }
-};
 
 function showModal(title, message){
   const modal = document.getElementById('messageModal');
@@ -506,255 +386,80 @@ function showModal(title, message){
   document.getElementById('modalMessage').textContent = message;
   modal.classList.remove('hidden');
 }
-// ========== Toast Notification System ==========
-const Toast = {
-    container: null,
-    
-    init: function() {
-        this.container = document.getElementById('toastContainer');
-        if (!this.container) {
-            this.container = document.createElement('div');
-            this.container.id = 'toastContainer';
-            this.container.className = 'toast-container';
-            document.body.appendChild(this.container);
-        }
-    },
-    
-    show: function(options) {
-        this.init();
-        
-        var type = options.type || 'info';
-        var title = options.title || '';
-        var message = options.message || '';
-        var duration = options.duration !== undefined ? options.duration : 4000;
-        
-        var toast = document.createElement('div');
-        toast.className = 'toast ' + type;
-        
-        var icons = {
-            success: '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>',
-            error: '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>',
-            warning: '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>',
-            info: '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>'
-        };
-        
-        var titleHtml = title ? '<div class="toast-title">' + title + '</div>' : '';
-        
-        toast.innerHTML = '<div class="toast-icon">' + icons[type] + '</div>' +
-            '<div class="toast-content">' +
-                titleHtml +
-                '<div class="toast-message">' + message + '</div>' +
-            '</div>' +
-            '<div class="toast-close">' +
-                '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">' +
-                    '<path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>' +
-                '</svg>' +
-            '</div>';
-        
-        this.container.appendChild(toast);
-        
-        var self = this;
-        toast.querySelector('.toast-close').addEventListener('click', function() {
-            self.hide(toast);
-        });
-        
-        if (duration > 0) {
-            setTimeout(function() {
-                self.hide(toast);
-            }, duration);
-        }
-        
-        return toast;
-    },
-    
-    hide: function(toast) {
-        toast.classList.add('hiding');
-        setTimeout(function() {
-            if (toast.parentNode) {
-                toast.parentNode.removeChild(toast);
-            }
-        }, 300);
-    },
-    
-    success: function(message, title) {
-        return this.show({ 
-            type: 'success', 
-            title: title || 'Thành công', 
-            message: message 
-        });
-    },
-    
-    error: function(message, title) {
-        return this.show({ 
-            type: 'error', 
-            title: title || 'Lỗi', 
-            message: message 
-        });
-    },
-    
-    warning: function(message, title) {
-        return this.show({ 
-            type: 'warning', 
-            title: title || 'Cảnh báo', 
-            message: message 
-        });
-    },
-    
-    info: function(message, title) {
-        return this.show({ 
-            type: 'info', 
-            title: title || 'Thông tin', 
-            message: message 
-        });
-    }
-};
-function approveBorrow(borrowId, bookItemId) {
-    Modal.confirm({
-        type: 'success',
-        title: 'Xác nhận duyệt',
-        message: 'Bạn có chắc chắn muốn duyệt yêu cầu mượn sách này không?',
-        confirmText: 'Duyệt',
-        cancelText: 'Hủy'
-    }).then(function(confirmed) {
-        if (confirmed === false) {  // Chỉ reject khi === false
-            return;
-        }
-        
-        var token = localStorage.getItem('token');
-        
-        if (!token) {
-            Toast.error('Không tìm thấy token đăng nhập. Vui lòng đăng nhập lại.', 'Lỗi xác thực');
-            return;
-        }
-        
-        var processingToast = Toast.info('Đang xử lý yêu cầu...', 'Vui lòng đợi', 0);
-        
-        var body = new URLSearchParams();
-        body.append('action', 'approve');
-        body.append('borrowId', borrowId);
-        body.append('bookItemId', bookItemId);
-        
-        fetch(ADMIN_BORROW_API, {
-            method: 'POST',
-            headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-                "Authorization": "Bearer " + token
-            },
-            body: body.toString()
-        })
-        .then(function(r) {
 
-            return r.text();
-        })
-        .then(function(text) {
-            try {
-                var d = JSON.parse(text);
-                
-                Toast.hide(processingToast);
-                
-                if (d.ok) {
-                    Toast.success(d.message || 'Đã duyệt yêu cầu mượn sách thành công!', 'Hoàn tất');
-                    setTimeout(function() { location.reload(); }, 1500);
-                } else {
-                    Toast.error(d.message || 'Không thể duyệt yêu cầu. Vui lòng thử lại.', 'Thất bại');
-                }
-            } catch (parseError) {
-                console.error("JSON parse error:", parseError);
-                console.error("Attempted to parse:", text);
-                Toast.hide(processingToast);
-                Toast.error('Lỗi phản hồi từ server: ' + text.substring(0, 100), 'Lỗi');
-            }
-        })
-        .catch(function(err) {
-            console.error("=== FETCH ERROR ===");
-            console.error("Error object:", err);
-            console.error("Error message:", err.message);
-            console.error("Error stack:", err.stack);
-            
-            Toast.hide(processingToast);
-            Toast.error('Đã xảy ra lỗi khi kết nối với máy chủ: ' + err.message, 'Lỗi kết nối');
-        });
-    });
+function approveBorrow(borrowId, bookItemId) {
+  if (!confirm('Bạn có chắc chắn muốn duyệt yêu cầu này?')) return;
+
+  const token = localStorage.getItem('token');
+  if (!token) {
+    showModal('Lỗi', 'Không tìm thấy token đăng nhập. Vui lòng đăng nhập lại.');
+    return;
+  }
+
+  const body = new URLSearchParams();
+  body.append('action', 'approve');
+  body.append('borrowId', borrowId);
+  body.append('bookItemId', bookItemId);
+
+  fetch(ADMIN_BORROW_API, {
+    method: 'POST',
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      "Authorization": "Bearer " + token
+    },
+    body: body.toString()
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) {
+      showModal('Thành công', d.message || 'Đã duyệt yêu cầu!');
+      setTimeout(() => location.reload(), 1200);
+    } else {
+      showModal('Lỗi', d.message || 'Không duyệt được');
+    }
+  })
+  .catch(() => {
+    showModal('Lỗi', 'Không kết nối được server');
+  });
 }
 
-function rejectBorrow(borrowId) {
+function rejectBorrow(borrowId){
+  const reason = prompt('Vui lòng nhập lý do từ chối:');
+  if(!reason || !reason.trim()) return;
 
-    
-    Modal.confirm({
-        type: 'danger',
-        title: 'Từ chối yêu cầu',
-        message: 'Vui lòng nhập lý do từ chối yêu cầu mượn sách:',
-        confirmText: 'Từ chối',
-        cancelText: 'Hủy',
-        showInput: true,
-        inputPlaceholder: 'Nhập lý do từ chối...'
-    }).then(function(reason) {
-        
-        if (!reason || reason === false) {
-            return;
-        }
-        
-        if (!reason.trim()) {
-            Toast.warning('Vui lòng nhập lý do từ chối.', 'Thiếu thông tin');
-            return;
-        }
-        
-        var token = localStorage.getItem('token');        
-        if (!token) {
-            Toast.error('Không tìm thấy token đăng nhập. Vui lòng đăng nhập lại.', 'Lỗi xác thực');
-            return;
-        }
-        
-        var processingToast = Toast.info('Đang xử lý yêu cầu...', 'Vui lòng đợi', 0);
-        
-        var body = new URLSearchParams();
-        body.append('action', 'reject');
-        body.append('borrowId', borrowId);
-        body.append('reason', reason);
-       
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    showModal('Lỗi', 'Không tìm thấy token đăng nhập. Vui lòng đăng nhập lại.');
+    return;
+  }
 
-        fetch(ADMIN_BORROW_API, {
-            method: 'POST',
-            headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-                "Authorization": "Bearer " + token
-            },
-            body: body.toString()
-        })
-        .then(function(r) {
-            return r.text();
-        })
-        .then(function(text) {
-            try {
-                var d = JSON.parse(text);
-                
-                Toast.hide(processingToast);
-                
-                if (d.ok) {
-                    Toast.success(d.message || 'Đã từ chối yêu cầu mượn sách!', 'Hoàn tất');
-                    setTimeout(function() { location.reload(); }, 1500);
-                } else {
-                    Toast.error(d.message || 'Không thể từ chối yêu cầu. Vui lòng thử lại.', 'Thất bại');
-                }
-            } catch (parseError) {
-                console.error("JSON parse error:", parseError);
-                console.error("Attempted to parse:", text);
-                Toast.hide(processingToast);
-                Toast.error('Lỗi phản hồi từ server: ' + text.substring(0, 100), 'Lỗi');
-            }
-        })
-        .catch(function(err) {
-            console.error("=== FETCH ERROR ===");
-            console.error("Error object:", err);
-            console.error("Error message:", err.message);
-            console.error("Error stack:", err.stack);
-            
-            Toast.hide(processingToast);
-            Toast.error('Đã xảy ra lỗi khi kết nối với máy chủ: ' + err.message, 'Lỗi kết nối');
-        });
-    });
+  const body = new URLSearchParams();
+  body.append('action', 'reject');
+  body.append('borrowId', borrowId);
+  body.append('reason', reason);
+
+  fetch(ADMIN_BORROW_API, {
+    method: 'POST',
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      "Authorization": "Bearer " + token
+    },
+    body: body.toString()
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) {
+      showModal('Thành công', d.message || 'Đã từ chối yêu cầu!');
+      setTimeout(() => location.reload(), 1200);
+    } else {
+      showModal('Lỗi', d.message || 'Không từ chối được');
+    }
+  })
+  .catch(() => {
+    showModal('Lỗi', 'Không kết nối được server');
+  });
 }
 </script>
 
@@ -763,258 +468,4 @@ function rejectBorrow(borrowId) {
 .overflow-x-auto::-webkit-scrollbar-track{background:#f1f1f1;border-radius:3px}
 .overflow-x-auto::-webkit-scrollbar-thumb{background:#c1c1c1;border-radius:3px}
 .overflow-x-auto::-webkit-scrollbar-thumb:hover{background:#a8a8a8}
-/* Toast Notification Styles */
-.toast-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    pointer-events: none;
-}
-
-.toast {
-    background: white;
-    border-radius: 12px;
-    padding: 16px 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 320px;
-    max-width: 420px;
-    pointer-events: auto;
-    animation: slideInRight 0.3s ease-out;
-    border-left: 4px solid;
-}
-
-.toast.success { border-left-color: #10b981; }
-.toast.error { border-left-color: #ef4444; }
-.toast.warning { border-left-color: #f59e0b; }
-.toast.info { border-left-color: #3b82f6; }
-
-.toast-icon {
-    flex-shrink: 0;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.toast.success .toast-icon { background: #d1fae5; color: #059669; }
-.toast.error .toast-icon { background: #fee2e2; color: #dc2626; }
-.toast.warning .toast-icon { background: #fef3c7; color: #d97706; }
-.toast.info .toast-icon { background: #dbeafe; color: #2563eb; }
-
-.toast-content { flex: 1; }
-.toast-title { font-weight: 600; color: #111827; margin-bottom: 2px; font-size: 14px; }
-.toast-message { color: #6b7280; font-size: 13px; line-height: 1.4; }
-
-.toast-close {
-    flex-shrink: 0;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: #9ca3af;
-    transition: all 0.2s;
-}
-
-.toast-close:hover { background: #f3f4f6; color: #4b5563; }
-
-@keyframes slideInRight {
-    from { transform: translateX(400px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes slideOutRight {
-    from { transform: translateX(0); opacity: 1; }
-    to { transform: translateX(400px); opacity: 0; }
-}
-
-.toast.hiding { animation: slideOutRight 0.3s ease-out forwards; }
-
-/* Confirmation Modal Styles */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9998;
-    opacity: 0;
-    animation: fadeIn 0.2s ease-out forwards;
-}
-
-.modal-content {
-    background: white;
-    border-radius: 16px;
-    padding: 0;
-    max-width: 450px;
-    width: 90%;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    transform: scale(0.9);
-    animation: scaleIn 0.2s ease-out forwards;
-}
-
-.modal-header {
-    padding: 24px 24px 16px 24px;
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-}
-
-.modal-icon {
-    flex-shrink: 0;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-icon.warning { background: #fef3c7; color: #d97706; }
-.modal-icon.danger { background: #fee2e2; color: #dc2626; }
-.modal-icon.success { background: #d1fae5; color: #059669; }
-.modal-icon.info { background: #dbeafe; color: #2563eb; }
-
-.modal-header-text { flex: 1; padding-top: 4px; }
-.modal-title { font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 8px; }
-.modal-message { font-size: 14px; color: #6b7280; line-height: 1.5; }
-
-.modal-footer {
-    padding: 16px 24px 24px 24px;
-    display: flex;
-    gap: 12px;
-    justify-content: flex-end;
-}
-
-.modal-btn {
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: none;
-    outline: none;
-}
-
-.modal-btn-cancel {
-    background: #f3f4f6;
-    color: #374151;
-}
-
-.modal-btn-cancel:hover {
-    background: #e5e7eb;
-}
-
-.modal-btn-confirm {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: white;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-}
-
-.modal-btn-confirm:hover {
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-    transform: translateY(-1px);
-}
-
-.modal-btn-confirm.danger {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
-}
-
-.modal-btn-confirm.danger:hover {
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-}
-
-.modal-btn-confirm.success {
-    background: linear-gradient(135deg, #10b981, #059669);
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-}
-
-.modal-btn-confirm.success:hover {
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-}
-
-/* Input Modal */
-.modal-input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: all 0.2s;
-    margin-top: 12px;
-}
-
-.modal-input:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.modal-input::placeholder {
-    color: #9ca3af;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes scaleIn {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
-@keyframes fadeOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
-}
-
-@keyframes scaleOut {
-    from { transform: scale(1); opacity: 1; }
-    to { transform: scale(0.9); opacity: 0; }
-}
-
-.modal-overlay.hiding {
-    animation: fadeOut 0.2s ease-out forwards;
-}
-
-.modal-overlay.hiding .modal-content {
-    animation: scaleOut 0.2s ease-out forwards;
-}
-
-/* Responsive */
-@media (max-width: 640px) {
-    .toast-container {
-        left: 10px;
-        right: 10px;
-        top: 10px;
-    }
-    
-    .toast {
-        min-width: auto;
-        max-width: none;
-    }
-    
-    .modal-content {
-        width: 95%;
-    }
-}
 </style>

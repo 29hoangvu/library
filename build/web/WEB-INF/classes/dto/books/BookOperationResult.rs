@@ -1,1 +1,0 @@
-dto.book.BookOperationResult

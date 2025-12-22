@@ -33,6 +33,10 @@
     </filter-mapping>
     <!-- Thời gian session -->
     <servlet>
+        <servlet-name>AdminUploadExcelServlet</servlet-name>
+        <servlet-class>Servlet.AdminUploadExcelServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>ReminderJobServlet</servlet-name>
         <servlet-class>Servlet.ReminderJobServlet</servlet-class>
     </servlet>
@@ -55,6 +59,10 @@
     <servlet-mapping>
         <servlet-name>RestoreBookServlet</servlet-name>
         <url-pattern>/RestoreBookServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminUploadExcelServlet</servlet-name>
+        <url-pattern>/AdminUploadExcelServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ReminderJobServlet</servlet-name>

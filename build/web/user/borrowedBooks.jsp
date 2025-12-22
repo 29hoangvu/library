@@ -281,8 +281,6 @@ function statusBadge(status) {
   if (status === "Borrowed")         return '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-400/40"><span class="w-1.5 h-1.5 rounded-full bg-emerald-300 mr-2"></span>Đang mượn</span>';
   if (status === "Overdue")          return '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-500/15 text-red-300 border border-red-400/40"><span class="w-1.5 h-1.5 rounded-full bg-red-300 mr-2"></span>Quá hạn</span>';
   if (status === "Returned")         return '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/15 text-sky-300 border border-sky-400/40"><span class="w-1.5 h-1.5 rounded-full bg-sky-300 mr-2"></span>Đã trả</span>';
-  if (status === "Rejected")          return '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-500/15 text-red-300 border border-red-400/40"><span class="w-1.5 h-1.5 rounded-full bg-red-300 mr-2"></span>Bị từ chối</span>';
-  if (status === "Cancelled")          return '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-500/20 text-slate-200 border border-slate-400/40"><span class="w-1.5 h-1.5 rounded-full bg-red-300 mr-2"></span>Đã hủy</span>';
   return '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-500/20 text-slate-200 border border-slate-400/40">'+(status || 'Không rõ')+'</span>';
 }
 
