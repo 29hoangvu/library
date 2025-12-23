@@ -356,7 +356,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <% if (status.equals("Borrowed") || status.equals("Overdue")) { %>
                             <button onclick="confirmReturn(<%= rs.getInt("borrow_id")%>)" 
-                                    class="bg-green-600 hover:bg-green-700 text-white px-2 py-2 rounded-lg text-sm font-medium transition duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5">
+                                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5">
                                 Xác nhận Trả
                             </button>
                             <% } else if (status.equals("Returned")) { %>
@@ -516,12 +516,120 @@
         </div>
     </div>
 
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-[2147483647] flex flex-col-reverse gap-3 pointer-events-none"></div>
+
+    <!-- Confirmation Popup -->
+    <div id="confirmPopup" class="fixed inset-0 z-[9998] hidden items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4 transform transition-all duration-300 scale-95 opacity-0">
+            <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-green-100 rounded-full">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Xác nhận trả sách</h3>
+            <p id="confirmMessage" class="text-gray-700 mb-6 text-center">Bạn có chắc muốn xác nhận trả sách không?</p>
+            <div class="flex justify-center gap-3">
+                <button id="confirmCancel" class="px-5 py-2.5 bg-gray-200 rounded-lg hover:bg-gray-300 text-gray-700 font-medium transition-colors">Hủy</button>
+                <button id="confirmOk" class="px-5 py-2.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 font-medium transition-all duration-300">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
 <script>
+function showToast(message, type = "info", duration = 3000) {
+    const container = document.getElementById("toastContainer");
+    if (!container) return;
+
+    const styles = {
+        success: "bg-gradient-to-r from-green-500 to-emerald-600 text-white",
+        error:   "bg-gradient-to-r from-red-500 to-rose-600 text-white",
+        warning: "bg-gradient-to-r from-yellow-400 to-amber-500 text-black",
+        info:    "bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
+    };
+
+    const icons = {
+        success: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>',
+        error: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>',
+        warning: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>',
+        info: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+    };
+
+    const toast = document.createElement("div");
+    toast.className = `
+        pointer-events-auto rounded-xl shadow-xl px-5 py-4
+        ${styles[type] || styles.info}
+        transition-all duration-300 ease-out
+        opacity-0 translate-y-3 ring-1 ring-black/10
+        flex items-center gap-3
+    `;
+    toast.innerHTML = `
+        <div class="flex-shrink-0">${icons[type] || icons.info}</div>
+        <span class="font-medium">${message}</span>
+    `;
+
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => {
+        toast.classList.remove("opacity-0", "translate-y-3");
+        toast.classList.add("opacity-100", "translate-y-0");
+    });
+
+    const hide = () => {
+        toast.classList.add("opacity-0", "translate-y-3");
+        setTimeout(() => toast.remove(), 250);
+    };
+    const timer = setTimeout(hide, duration);
+
+    toast.addEventListener("click", () => {
+        clearTimeout(timer);
+        hide();
+    });
+}
+
+function showConfirm(message) {
+    return new Promise(resolve => {
+        const popup = document.getElementById("confirmPopup");
+        const msgEl = document.getElementById("confirmMessage");
+        const okBtn = document.getElementById("confirmOk");
+        const cancelBtn = document.getElementById("confirmCancel");
+        const popupContent = popup.querySelector('.transform');
+
+        msgEl.textContent = message;
+        popup.classList.remove("hidden");
+        popup.classList.add("flex");
+        
+        setTimeout(() => {
+            popupContent.classList.remove("scale-95", "opacity-0");
+            popupContent.classList.add("scale-100", "opacity-100");
+        }, 50);
+
+        function close(result) {
+            popupContent.classList.remove("scale-100", "opacity-100");
+            popupContent.classList.add("scale-95", "opacity-0");
+            
+            setTimeout(() => {
+                popup.classList.add("hidden");
+                popup.classList.remove("flex");
+                okBtn.removeEventListener("click", okHandler);
+                cancelBtn.removeEventListener("click", cancelHandler);
+                resolve(result);
+            }, 300);
+        }
+
+        function okHandler() { close(true); }
+        function cancelHandler() { close(false); }
+
+        okBtn.addEventListener("click", okHandler);
+        cancelBtn.addEventListener("click", cancelHandler);
+    });
+}
+
   const ADMIN_BORROW_API = '<%=request.getContextPath()%>/api/admin/am-borrows';
 
   // ========== State ==========
-  let originalRows = [];        // << thêm biến toàn cục lưu mọi dòng gốc
-  let currentFilteredRows = []; // tập dòng sau khi lọc
+  let originalRows = [];
+  let currentFilteredRows = [];
   let currentPage = 1;
   let rowsPerPage = 10;
   let totalRecords = 0;
@@ -535,16 +643,13 @@
     const start = Math.min((currentPage - 1) * rowsPerPage + 1, totalRecords);
     const end = Math.min(currentPage * rowsPerPage, totalRecords);
 
-    // cập nhật khu vực thông tin
     document.getElementById('showingStart').textContent = totalRecords > 0 ? start : 0;
     document.getElementById('showingEnd').textContent = end;
     document.getElementById('totalRecords').textContent = totalRecords;
 
-    // mobile indicator
     document.getElementById('currentPageMobile').textContent = currentPage;
     document.getElementById('totalPagesMobile').textContent = totalPages || 1;
 
-    // nút điều hướng + dãy trang
     updatePaginationButtons(totalPages);
     generatePageNumbers(totalPages);
   }
@@ -619,9 +724,7 @@
       const start = (page - 1) * rowsPerPage;
       const end = start + rowsPerPage;
 
-      // ẩn tất cả
       originalRows.forEach(row => row.style.display = 'none');
-      // chỉ hiển thị dòng thuộc trang hiện tại
       rows.forEach((row, index) => {
         row.style.display = (index >= start && index < end) ? '' : 'none';
       });
@@ -651,11 +754,9 @@
   }
 
   function changeRowsPerPage() {
-    // đọc từ combobox duy nhất còn lại (dưới bảng)
     const select = document.getElementById('rowsPerPageSelect');
     const newRowsPerPage = parseInt(select.value, 10);
 
-    // giữ vị trí hàng đầu của trang cũ để “đổi size trang” không nhảy quá xa
     const oldStartIndex = (currentPage - 1) * rowsPerPage;
     rowsPerPage = newRowsPerPage;
     currentPage = Math.floor(oldStartIndex / rowsPerPage) + 1;
@@ -667,7 +768,7 @@
   function applyFilters() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const statusFilter = document.getElementById('statusFilter').value;
-    const borrowedDateFrom = document.getElementById('borrowedDateFrom').value; // yyyy-mm-dd
+    const borrowedDateFrom = document.getElementById('borrowedDateFrom').value;
     const borrowedDateTo   = document.getElementById('borrowedDateTo').value;
     const dueDateFrom      = document.getElementById('dueDateFrom').value;
     const dueDateTo        = document.getElementById('dueDateTo').value;
@@ -685,7 +786,6 @@
       if (searchTerm && !username.includes(searchTerm) && !title.includes(searchTerm)) showRow = false;
       if (statusFilter && status !== statusFilter) showRow = false;
 
-      // so sánh ngày theo chuỗi yyyy-mm-dd là OK (so sánh từ điển đúng thứ tự thời gian)
       if (borrowedDateFrom && borrowed && borrowed < borrowedDateFrom) showRow = false;
       if (borrowedDateTo   && borrowed && borrowed > borrowedDateTo)   showRow = false;
       if (dueDateFrom      && due      && due      < dueDateFrom)      showRow = false;
@@ -697,7 +797,6 @@
     currentPage = 1;
     renderTablePage(currentPage, filteredRows);
 
-    // toggle no-result
     const noResultsMessage = document.getElementById('noResultsMessage');
     const tableWrapper = document.querySelector('.bg-white.rounded-xl.shadow-lg.overflow-hidden');
     if (filteredRows.length === 0) {
@@ -709,19 +808,15 @@
     }
   }
 
-  // NEW: làm việc cho nút "Xóa bộ lọc"
   function clearFilters() {
-    // reset inputs
     document.getElementById('searchInput').value = '';
     document.getElementById('statusFilter').value = '';
     ['borrowedDateFrom','borrowedDateTo','dueDateFrom','dueDateTo']
       .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
 
-    // hiển thị lại toàn bộ
     currentPage = 1;
     renderTablePage(currentPage, originalRows);
 
-    // khôi phục hiển thị bảng & ẩn no-result nếu có
     const noResultsMessage = document.getElementById('noResultsMessage');
     const tableWrapper = document.querySelector('.bg-white.rounded-xl.shadow-lg.overflow-hidden');
     tableWrapper.style.display = '';
@@ -730,58 +825,102 @@
 
   // ========== Init ==========
   document.addEventListener('DOMContentLoaded', function () {
-    // lấy các dòng của bảng
     const rows = document.querySelectorAll('.table-row');
     originalRows = Array.from(rows);
     currentFilteredRows = originalRows.slice();
 
-    // sync rowsPerPage nếu combobox đã set sẵn value
     const select = document.getElementById('rowsPerPageSelect');
     if (select) rowsPerPage = parseInt(select.value, 10) || 10;
 
-    // render trang đầu
     renderTablePage(1);
 
-    // lắng nghe bộ lọc
     document.getElementById('searchInput').addEventListener('input', applyFilters);
     document.getElementById('statusFilter').addEventListener('change', applyFilters);
     ['borrowedDateFrom','borrowedDateTo','dueDateFrom','dueDateTo']
       .forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
   });
 
-  function confirmReturn(borrowId) {
-    if (!confirm("Bạn có chắc muốn xác nhận trả sách không?")) return;
+  async function confirmReturn(borrowId) {
+    const confirm = await showConfirm("Bạn có chắc muốn xác nhận trả sách không?");
+    if (!confirm) {
+        showToast("Đã hủy thao tác", "warning");
+        return;
+    }
+    
     const token = localStorage.getItem('token');
     if (!token) {
-      showModal('Lỗi', 'Không tìm thấy token đăng nhập. Vui lòng đăng nhập lại.');
+      showToast('Không tìm thấy token đăng nhập. Vui lòng đăng nhập lại.', 'error');
       return;
     }
+    
     const body = new URLSearchParams();
     body.append('action', 'return');
     body.append('borrowId', borrowId);
 
-    fetch(ADMIN_BORROW_API, {
-      method: 'POST',
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        "Authorization": "Bearer " + token
-      },
-      body: body.toString()
-    })
-    .then(response => response.json())
-    .then(d => {
-      if (d.ok) {
-        alert(d.message || "Xác nhận trả sách thành công");
-        window.location.reload();
-      } else {
-        alert(d.message || "Không thể xác nhận trả sách.");
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      alert("Lỗi khi xác nhận trả sách.");
-    });
+    try {
+        const response = await fetch(ADMIN_BORROW_API, {
+          method: 'POST',
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "Authorization": "Bearer " + token
+          },
+          body: body.toString()
+        });
+        
+        let data;
+        try {
+            data = await response.json();
+        } catch (e) {
+            console.error("JSON parse error:", e);
+            showToast("Lỗi xử lý phản hồi từ server", "error");
+            return;
+        }
+        
+        console.log("=== DEBUG INFO ===");
+        console.log("HTTP Status:", response.status);
+        console.log("Response OK:", response.ok);
+        console.log("Full Response Data:", data);
+        console.log("data.ok:", data.ok, "type:", typeof data.ok);
+        console.log("data.success:", data.success, "type:", typeof data.success);
+        console.log("data.message:", data.message, "type:", typeof data.message);
+        console.log("data.error:", data.error, "type:", typeof data.error);
+        console.log("==================");
+        
+        // Determine success based on multiple checks
+        const isSuccess = (
+            response.status === 200 &&
+            (data.ok === true || data.success === true || (!data.error && !data.ok === false))
+        );
+        
+        if (isSuccess) {
+            // Extract and validate success message
+            let successMessage = "Xác nhận trả sách thành công";
+            
+            if (data.message && typeof data.message === 'string' && data.message.trim().length > 0) {
+                successMessage = data.message.trim();
+            }
+            
+            console.log("Showing success toast with message:", successMessage);
+            showToast(successMessage, "success");
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            // Extract and validate error message
+            let errorMessage = "Không thể xác nhận trả sách";
+            
+            if (data.message && typeof data.message === 'string' && data.message.trim().length > 0) {
+                errorMessage = data.message.trim();
+            } else if (data.error && typeof data.error === 'string' && data.error.trim().length > 0) {
+                errorMessage = data.error.trim();
+            }
+            
+            console.log("Showing error toast with message:", errorMessage);
+            showToast(errorMessage, "error");
+        }
+    } catch (err) {
+        console.error(err);
+        showToast("Lỗi khi xác nhận trả sách", "error");
+    }
   }
 </script>
           

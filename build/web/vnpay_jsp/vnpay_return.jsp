@@ -46,59 +46,82 @@
             }
 
             /* ===== GỬI EMAIL XÁC NHẬN ===== */
-            DateTimeFormatter dfDate = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            DateTimeFormatter dfDateTime = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-            ZoneId VN = ZoneId.of("Asia/Ho_Chi_Minh");
-            String nowStr = LocalDateTime.now(VN).format(dfDateTime);
-            String startStr = today.format(dfDate);
-            String expiryStr = expiry.format(dfDate);
+            try {
+                DateTimeFormatter dfDate = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                DateTimeFormatter dfDateTime = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+                ZoneId VN = ZoneId.of("Asia/Ho_Chi_Minh");
+                String nowStr = LocalDateTime.now(VN).format(dfDateTime);
+                String startStr = today.format(dfDate);
+                String expiryStr = expiry.format(dfDate);
 
-            NumberFormat vnd = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-            long amount = years.longValue() * 100_000L;
-            String amountStr = vnd.format(amount); // ví dụ: 100.000 ₫
+                NumberFormat vnd = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+                long amount = years.longValue() * 100_000L;
+                String amountStr = vnd.format(amount); // ví dụ: 100.000 ₫
 
-        // Có thể thêm mã GD lấy từ VNPAY nếu bạn lưu, ví dụ:
-            String txnRef = request.getParameter("vnp_TxnRef"); // hoặc lấy từ session nếu đã lưu
-            if (txnRef == null) {
-                txnRef = "(không có)";
+                // Có thể thêm mã GD lấy từ VNPAY nếu bạn lưu, ví dụ:
+                String txnRef = request.getParameter("vnp_TxnRef"); // hoặc lấy từ session nếu đã lưu
+                if (txnRef == null) {
+                    txnRef = "(không có)";
+                }
+
+                // Chủ đề & nội dung (HTML)
+                String subject = "Xác nhận đăng ký thành công - Thư Viện Số";
+
+                String html
+                        = "<div style='font-family:Arial,Helvetica,sans-serif;line-height:1.6'>"
+                        + "  <h2 style='color:#10b981;margin:0 0 12px'>Thanh toán thành công!</h2>"
+                        + "  <p>Xin chào <b>" + username + "</b>,</p>"
+                        + "  <p>Cảm ơn bạn đã đăng ký tài khoản thành viên <b>Thư Viện Số</b>. Giao dịch của bạn đã được xác nhận thành công.</p>"
+                        + "  <ul>"
+                        + "    <li><b>Thời điểm thanh toán:</b> " + nowStr + " (GMT+7)</li>"
+                        + "    <li><b>Thời gian hiệu lực:</b> từ " + startStr + " đến hết ngày " + expiryStr + "</li>"
+                        + "    <li><b>Gói đã đăng ký:</b> " + years + " năm</li>"
+                        + "    <li><b>Số tiền đã thanh toán:</b> " + amountStr + "</li>"
+                        + "    <li><b>Mã giao dịch:</b> " + txnRef + "</li>"
+                        + "    <li><b>Tài khoản:</b> " + username + " (" + email + ")</li>"
+                        + "  </ul>"
+                        + "  <p><b>Tài khoản của bạn đã được kích hoạt!</b> Bạn có thể đăng nhập ngay để sử dụng các dịch vụ của thư viện.</p>"
+                        + "  <p>Vui lòng <b>đăng nhập</b> và <b>cập nhật thông tin cá nhân</b> (họ tên, ngày sinh, số điện thoại, địa chỉ...) để hoàn tất hồ sơ.</p>"
+                        + "  <p style='margin-top:16px'>Trân trọng,<br/>Đội ngũ <b>Thư Viện Số</b></p>"
+                        + "</div>";
+
+                // Gửi HTML (nếu đã thêm sendHtmlEmail)
+                EmailUtility.sendHtmlEmail(email, subject, html);
+            } catch (Exception mailEx) {
+                // Không làm fail quy trình chỉ vì gửi mail lỗi
+                mailEx.printStackTrace();
             }
 
-        // Chủ đề & nội dung (HTML)
-            String subject = "Xác nhận đăng ký thành công - Thư Viện Số";
-
-            String html
-                    = "<div style='font-family:Arial,Helvetica,sans-serif;line-height:1.6'>"
-                    + "  <h2 style='color:#2563eb;margin:0 0 12px'>Đăng ký thành công!</h2>"
-                    + "  <p>Xin chào <b>" + username + "</b>,</p>"
-                    + "  <p>Bạn đã đăng ký tài khoản thành viên <b>Thư Viện Số</b> thành công.</p>"
-                    + "  <ul>"
-                    + "    <li><b>Thời điểm đăng ký:</b> " + nowStr + " (GMT+7)</li>"
-                    + "    <li><b>Thời gian hiệu lực:</b> từ " + startStr + " đến hết ngày " + expiryStr + "</li>"
-                    + "    <li><b>Gói:</b> " + years + " năm</li>"
-                    + "    <li><b>Lệ phí:</b> " + amountStr + "</li>"
-                    + "    <li><b>Mã giao dịch:</b> " + txnRef + "</li>"
-                    + "    <li><b>Email đăng ký:</b> " + email + "</li>"
-                    + "  </ul>"
-                    + "  <p>Vui lòng <b>đăng nhập</b> vào hệ thống để <b>cập nhật thông tin cá nhân</b> (họ tên, ngày sinh, số điện thoại, địa chỉ...).</p>"
-                    + "  <p style='margin-top:16px'>Trân trọng,<br/>Đội ngũ <b>Thư Viện Số</b></p>"
-                    + "</div>";
-
-        // Gửi HTML (nếu đã thêm sendHtmlEmail)
-            EmailUtility.sendHtmlEmail(email, subject, html);
-
-            // Xóa thông tin đăng ký từ session
-            session.removeAttribute("REG_username");
-            session.removeAttribute("REG_hpwd");
-            session.removeAttribute("REG_email");
-            session.removeAttribute("REG_years");
-
-            out.println("<script>alert('Đăng ký và thanh toán thành công! Vui lòng đăng nhập.'); window.location='" + request.getContextPath() + "/user/login.jsp';</script>");
+            // ===== GIỮ THÔNG TIN TRONG SESSION ĐỂ HIỂN THỊ TRANG SUCCESS =====
+            // Không xóa session ngay, để trang success lấy được thông tin
+            // session sẽ được clear sau khi user rời khỏi trang success
+            
+            // Redirect đến trang thành công với phương thức online
+            response.sendRedirect(request.getContextPath() + "/user/registration_success.jsp?paymentMethod=online");
+            
         } catch (Exception e) {
             e.printStackTrace();
             out.println("<script>alert('Có lỗi khi lưu dữ liệu: " + e.getMessage().replace("'", "\\'") + "'); window.location='" + request.getContextPath() + "/user/register.jsp';</script>");
         }
     } else {
         // Thanh toán không thành công
-        out.println("<script>alert('Thanh toán không thành công. Vui lòng thử lại.'); window.location='" + request.getContextPath() + "/user/register.jsp';</script>");
+        String errorMsg = "Thanh toán không thành công!";
+        
+        // Xử lý các mã lỗi cụ thể từ VNPAY
+        if ("24".equals(vnp_ResponseCode)) {
+            errorMsg = "Giao dịch bị hủy bỏ.";
+        } else if ("11".equals(vnp_ResponseCode)) {
+            errorMsg = "Đã hết thời gian thanh toán.";
+        } else if ("51".equals(vnp_ResponseCode)) {
+            errorMsg = "Tài khoản không đủ số dư.";
+        } else if ("65".equals(vnp_ResponseCode)) {
+            errorMsg = "Tài khoản đã vượt quá giới hạn giao dịch.";
+        } else if ("75".equals(vnp_ResponseCode)) {
+            errorMsg = "Ngân hàng thanh toán đang bảo trì.";
+        } else if ("79".equals(vnp_ResponseCode)) {
+            errorMsg = "Giao dịch vượt quá số lần thanh toán cho phép.";
+        }
+        
+        out.println("<script>alert('" + errorMsg + " Vui lòng thử lại!'); window.location='" + request.getContextPath() + "/user/register.jsp';</script>");
     }
 %>

@@ -220,11 +220,11 @@
                 <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                   <div class="flex justify-center space-x-2">
                     <button onclick="approveBorrow(<%= rs.getInt("borrow_id") %>, <%= rs.getInt("book_item_id") %>)"
-                            class="px-3 py-2 rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none">
+                            class="px-3 py-2 rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none transition duration-200 shadow-sm hover:shadow-md">
                       Duyệt
                     </button>
                     <button onclick="rejectBorrow(<%= rs.getInt("borrow_id") %>)"
-                            class="px-3 py-2 rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none">
+                            class="px-3 py-2 rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none transition duration-200 shadow-sm hover:shadow-md">
                       Từ chối
                     </button>
                   </div>
@@ -237,7 +237,13 @@
 %>
               <tr>
                 <td colspan="5" class="px-6 py-12 text-center text-gray-500">
-                  Không có yêu cầu chờ duyệt phù hợp.
+                  <div class="flex flex-col items-center">
+                    <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <p class="text-lg font-medium">Không có yêu cầu chờ duyệt</p>
+                    <p class="text-sm">Không có yêu cầu nào phù hợp với điều kiện tìm kiếm</p>
+                  </div>
                 </td>
               </tr>
 <%
@@ -247,7 +253,13 @@
 %>
               <tr>
                 <td colspan="5" class="px-6 py-10 text-center text-red-600">
-                  Lỗi tải dữ liệu: <%= e.getMessage() %>
+                  <div class="flex flex-col items-center">
+                    <svg class="w-12 h-12 text-red-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p class="text-lg font-medium">Lỗi tải dữ liệu</p>
+                    <p class="text-sm"><%= e.getMessage() %></p>
+                  </div>
                 </td>
               </tr>
 <%
@@ -341,125 +353,282 @@
       </div>
     </div>
   </div>
-</main>
 
-<!-- Modal -->
-<div id="messageModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-  <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-    <div class="mt-3 text-center">
-      <div id="modalIcon" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
-        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+  <!-- Toast Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-[2147483647] flex flex-col-reverse gap-3 pointer-events-none"></div>
+
+  <!-- Confirmation Popup for Approve -->
+  <div id="confirmApprovePopup" class="fixed inset-0 z-[9998] hidden items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4 transform transition-all duration-300 scale-95 opacity-0">
+      <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-green-100 rounded-full">
+        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
         </svg>
       </div>
-      <h3 id="modalTitle" class="text-lg font-medium text-gray-900 mt-2"></h3>
-      <div class="mt-2 px-7 py-3"><p id="modalMessage" class="text-sm text-gray-500"></p></div>
-      <div class="items-center px-4 py-3">
-        <button id="modalCloseBtn" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">Đóng</button>
+      <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Xác nhận duyệt</h3>
+      <p class="text-gray-700 mb-6 text-center">Bạn có chắc chắn muốn duyệt yêu cầu mượn sách này không?</p>
+      <div class="flex justify-center gap-3">
+        <button id="confirmApproveCancel" class="px-5 py-2.5 bg-gray-200 rounded-lg hover:bg-gray-300 text-gray-700 font-medium transition-colors">Hủy</button>
+        <button id="confirmApproveOk" class="px-5 py-2.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 font-medium transition-all duration-300">Duyệt</button>
       </div>
     </div>
   </div>
-</div>
+
+  <!-- Confirmation Popup for Reject -->
+  <div id="confirmRejectPopup" class="fixed inset-0 z-[9998] hidden items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0">
+      <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
+        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Từ chối yêu cầu</h3>
+      <p class="text-gray-700 mb-4 text-center">Vui lòng nhập lý do từ chối:</p>
+      <textarea id="rejectReason" 
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none" 
+                rows="3" 
+                placeholder="Nhập lý do từ chối..."></textarea>
+      <div class="flex justify-center gap-3 mt-4">
+        <button id="confirmRejectCancel" class="px-5 py-2.5 bg-gray-200 rounded-lg hover:bg-gray-300 text-gray-700 font-medium transition-colors">Hủy</button>
+        <button id="confirmRejectOk" class="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 font-medium transition-all duration-300">Từ chối</button>
+      </div>
+    </div>
+  </div>
+</main>
 
 <script>
 const ADMIN_BORROW_API = '<%=request.getContextPath()%>/api/admin/am-borrows';
+
+function showToast(message, type = "info", duration = 3000) {
+    const container = document.getElementById("toastContainer");
+    if (!container) return;
+
+    const styles = {
+        success: "bg-gradient-to-r from-green-500 to-emerald-600 text-white",
+        error:   "bg-gradient-to-r from-red-500 to-rose-600 text-white",
+        warning: "bg-gradient-to-r from-yellow-400 to-amber-500 text-black",
+        info:    "bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
+    };
+
+    const icons = {
+        success: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>',
+        error: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>',
+        warning: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>',
+        info: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+    };
+
+    const toast = document.createElement("div");
+    toast.className = `
+        pointer-events-auto rounded-xl shadow-xl px-5 py-4
+        ${styles[type] || styles.info}
+        transition-all duration-300 ease-out
+        opacity-0 translate-y-3 ring-1 ring-black/10
+        flex items-center gap-3
+    `;
+    toast.innerHTML = `
+        <div class="flex-shrink-0">${icons[type] || icons.info}</div>
+        <span class="font-medium">${message}</span>
+    `;
+
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => {
+        toast.classList.remove("opacity-0", "translate-y-3");
+        toast.classList.add("opacity-100", "translate-y-0");
+    });
+
+    const hide = () => {
+        toast.classList.add("opacity-0", "translate-y-3");
+        setTimeout(() => toast.remove(), 250);
+    };
+    const timer = setTimeout(hide, duration);
+
+    toast.addEventListener("click", () => {
+        clearTimeout(timer);
+        hide();
+    });
+}
+
+// Approve popup
+let currentApproveBorrowId = null;
+let currentApproveBookItemId = null;
+
+function approveBorrow(borrowId, bookItemId) {
+    currentApproveBorrowId = borrowId;
+    currentApproveBookItemId = bookItemId;
+    
+    const popup = document.getElementById("confirmApprovePopup");
+    const popupContent = popup.querySelector('.transform');
+    
+    popup.classList.remove("hidden");
+    popup.classList.add("flex");
+    
+    setTimeout(() => {
+        popupContent.classList.remove("scale-95", "opacity-0");
+        popupContent.classList.add("scale-100", "opacity-100");
+    }, 50);
+}
+
+function closeApprovePopup() {
+    const popup = document.getElementById("confirmApprovePopup");
+    const popupContent = popup.querySelector('.transform');
+    
+    popupContent.classList.remove("scale-100", "opacity-100");
+    popupContent.classList.add("scale-95", "opacity-0");
+    
+    setTimeout(() => {
+        popup.classList.add("hidden");
+        popup.classList.remove("flex");
+        currentApproveBorrowId = null;
+        currentApproveBookItemId = null;
+    }, 300);
+}
+
+document.getElementById("confirmApproveCancel").addEventListener("click", () => {
+    closeApprovePopup();
+    showToast("Đã hủy thao tác", "warning");
+});
+
+document.getElementById("confirmApproveOk").addEventListener("click", async () => {
+    if (!currentApproveBorrowId || !currentApproveBookItemId) return;
+    
+    closeApprovePopup();
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showToast('Không tìm thấy token đăng nhập. Vui lòng đăng nhập lại.', 'error');
+        return;
+    }
+
+    const body = new URLSearchParams();
+    body.append('action', 'approve');
+    body.append('borrowId', currentApproveBorrowId);
+    body.append('bookItemId', currentApproveBookItemId);
+
+    try {
+        const response = await fetch(ADMIN_BORROW_API, {
+            method: 'POST',
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                "Authorization": "Bearer " + token
+            },
+            body: body.toString()
+        });
+        
+        const data = await response.json();
+        
+        if (data.ok) {
+            showToast(data.message || 'Đã duyệt yêu cầu thành công!', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showToast(data.message || 'Không thể duyệt yêu cầu', 'error');
+        }
+    } catch (err) {
+        console.error(err);
+        showToast('Không kết nối được server', 'error');
+    }
+});
+
+// Reject popup
+let currentRejectBorrowId = null;
+
+function rejectBorrow(borrowId) {
+    currentRejectBorrowId = borrowId;
+    
+    const popup = document.getElementById("confirmRejectPopup");
+    const popupContent = popup.querySelector('.transform');
+    const reasonInput = document.getElementById("rejectReason");
+    
+    reasonInput.value = "";
+    popup.classList.remove("hidden");
+    popup.classList.add("flex");
+    
+    setTimeout(() => {
+        popupContent.classList.remove("scale-95", "opacity-0");
+        popupContent.classList.add("scale-100", "opacity-100");
+        reasonInput.focus();
+    }, 50);
+}
+
+function closeRejectPopup() {
+    const popup = document.getElementById("confirmRejectPopup");
+    const popupContent = popup.querySelector('.transform');
+    
+    popupContent.classList.remove("scale-100", "opacity-100");
+    popupContent.classList.add("scale-95", "opacity-0");
+    
+    setTimeout(() => {
+        popup.classList.add("hidden");
+        popup.classList.remove("flex");
+        currentRejectBorrowId = null;
+        document.getElementById("rejectReason").value = "";
+    }, 300);
+}
+
+document.getElementById("confirmRejectCancel").addEventListener("click", () => {
+    closeRejectPopup();
+    showToast("Đã hủy thao tác", "warning");
+});
+
+document.getElementById("confirmRejectOk").addEventListener("click", async () => {
+    const reason = document.getElementById("rejectReason").value.trim();
+    
+    if (!reason) {
+        showToast("Vui lòng nhập lý do từ chối", "warning");
+        return;
+    }
+    
+    if (!currentRejectBorrowId) return;
+    
+    closeRejectPopup();
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showToast('Không tìm thấy token đăng nhập. Vui lòng đăng nhập lại.', 'error');
+        return;
+    }
+
+    const body = new URLSearchParams();
+    body.append('action', 'reject');
+    body.append('borrowId', currentRejectBorrowId);
+    body.append('reason', reason);
+
+    try {
+        const response = await fetch(ADMIN_BORROW_API, {
+            method: 'POST',
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                "Authorization": "Bearer " + token
+            },
+            body: body.toString()
+        });
+        
+        const data = await response.json();
+        
+        if (data.ok) {
+            showToast(data.message || 'Đã từ chối yêu cầu!', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showToast(data.message || 'Không thể từ chối yêu cầu', 'error');
+        }
+    } catch (err) {
+        console.error(err);
+        showToast('Không kết nối được server', 'error');
+    }
+});
 
 function searchBorrow() {
   const searchValue = document.getElementById('searchInput').value || '';
   const url = new URL(window.location);
   url.searchParams.set('search', searchValue);
-  url.searchParams.set('page', '1'); // reset về trang 1
+  url.searchParams.set('page', '1');
   window.location.href = url.toString();
 }
 
 function refreshData() {
   window.location.href = window.location.pathname;
-}
-
-document.getElementById('modalCloseBtn').addEventListener('click', ()=>{
-  document.getElementById('messageModal').classList.add('hidden')
-});
-
-function showModal(title, message){
-  const modal = document.getElementById('messageModal');
-  document.getElementById('modalTitle').textContent = title;
-  document.getElementById('modalMessage').textContent = message;
-  modal.classList.remove('hidden');
-}
-
-function approveBorrow(borrowId, bookItemId) {
-  if (!confirm('Bạn có chắc chắn muốn duyệt yêu cầu này?')) return;
-
-  const token = localStorage.getItem('token');
-  if (!token) {
-    showModal('Lỗi', 'Không tìm thấy token đăng nhập. Vui lòng đăng nhập lại.');
-    return;
-  }
-
-  const body = new URLSearchParams();
-  body.append('action', 'approve');
-  body.append('borrowId', borrowId);
-  body.append('bookItemId', bookItemId);
-
-  fetch(ADMIN_BORROW_API, {
-    method: 'POST',
-    headers: {
-      "Accept": "application/json",
-      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-      "Authorization": "Bearer " + token
-    },
-    body: body.toString()
-  })
-  .then(r => r.json())
-  .then(d => {
-    if (d.ok) {
-      showModal('Thành công', d.message || 'Đã duyệt yêu cầu!');
-      setTimeout(() => location.reload(), 1200);
-    } else {
-      showModal('Lỗi', d.message || 'Không duyệt được');
-    }
-  })
-  .catch(() => {
-    showModal('Lỗi', 'Không kết nối được server');
-  });
-}
-
-function rejectBorrow(borrowId){
-  const reason = prompt('Vui lòng nhập lý do từ chối:');
-  if(!reason || !reason.trim()) return;
-
-  const token = localStorage.getItem('access_token');
-  if (!token) {
-    showModal('Lỗi', 'Không tìm thấy token đăng nhập. Vui lòng đăng nhập lại.');
-    return;
-  }
-
-  const body = new URLSearchParams();
-  body.append('action', 'reject');
-  body.append('borrowId', borrowId);
-  body.append('reason', reason);
-
-  fetch(ADMIN_BORROW_API, {
-    method: 'POST',
-    headers: {
-      "Accept": "application/json",
-      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-      "Authorization": "Bearer " + token
-    },
-    body: body.toString()
-  })
-  .then(r => r.json())
-  .then(d => {
-    if (d.ok) {
-      showModal('Thành công', d.message || 'Đã từ chối yêu cầu!');
-      setTimeout(() => location.reload(), 1200);
-    } else {
-      showModal('Lỗi', d.message || 'Không từ chối được');
-    }
-  })
-  .catch(() => {
-    showModal('Lỗi', 'Không kết nối được server');
-  });
 }
 </script>
 

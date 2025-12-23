@@ -193,7 +193,35 @@
 
   <!-- Toast Container -->
   <div id="toastContainer" class="fixed bottom-5 right-5 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+    <!-- Confirm Popup -->
+<div id="confirmPopup"
+     class="fixed inset-0 z-[10000] hidden items-center justify-center bg-black/40 backdrop-blur-sm">
 
+  <div id="confirmBox"
+       class="bg-white/90 backdrop-blur rounded-2xl shadow-2xl w-full max-w-md
+              transform scale-95 opacity-0 transition-all duration-300">
+
+    <div id="confirmHeader"
+         class="px-6 py-4 rounded-t-2xl text-white bg-gradient-to-r from-blue-500 to-indigo-600">
+      <h3 id="confirmTitle" class="text-lg font-semibold">Xác nhận</h3>
+    </div>
+
+    <div class="p-6 text-gray-700">
+      <p id="confirmMessage" class="leading-relaxed"></p>
+    </div>
+
+    <div class="px-6 py-4 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
+      <button onclick="closeConfirm()"
+              class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition">
+        Hủy
+      </button>
+      <button id="confirmOkBtn"
+              class="px-4 py-2 rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 transition">
+        Xác nhận
+      </button>
+    </div>
+  </div>
+</div>
   <script>
     const CTX = "<%=request.getContextPath()%>";
     const apiList  = CTX + "/api/admin/pending-users";
@@ -253,6 +281,58 @@
           setTimeout(function(){ toast.remove(); }, 300);
         }, duration);
     }
+    let confirmAction = null;
+
+    function openConfirm({ title, message, okText = "Xác nhận", danger = false, onConfirm }) {
+      confirmAction = onConfirm;
+
+      document.getElementById("confirmTitle").textContent = title;
+      document.getElementById("confirmMessage").textContent = message;
+
+      const header = document.getElementById("confirmHeader");
+      const okBtn  = document.getElementById("confirmOkBtn");
+
+      if (danger) {
+        header.className =
+          "px-6 py-4 rounded-t-2xl text-white bg-gradient-to-r from-rose-500 to-red-600";
+        okBtn.className =
+          "px-4 py-2 rounded-lg text-white bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-700 hover:to-red-800 transition";
+        okBtn.textContent = okText || "Từ chối";
+      } else {
+        header.className =
+          "px-6 py-4 rounded-t-2xl text-white bg-gradient-to-r from-blue-500 to-indigo-600";
+        okBtn.className =
+          "px-4 py-2 rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 transition";
+        okBtn.textContent = okText || "Xác nhận";
+      }
+
+      const popup = document.getElementById("confirmPopup");
+      const box   = document.getElementById("confirmBox");
+      popup.classList.remove("hidden");
+      popup.classList.add("flex");
+
+      requestAnimationFrame(() => {
+        box.classList.remove("scale-95", "opacity-0");
+        box.classList.add("scale-100", "opacity-100");
+      });
+    }
+
+    function closeConfirm() {
+      const popup = document.getElementById("confirmPopup");
+      const box   = document.getElementById("confirmBox");
+
+      box.classList.add("scale-95", "opacity-0");
+      setTimeout(() => {
+        popup.classList.add("hidden");
+        popup.classList.remove("flex");
+        confirmAction = null;
+      }, 250);
+    }
+
+    document.getElementById("confirmOkBtn").addEventListener("click", () => {
+      if (typeof confirmAction === "function") confirmAction();
+      closeConfirm();
+    });
 
     async function fetchList() {
         try {
@@ -341,8 +421,25 @@
               '</div>' +
             '</td>';
 
-          tr.querySelector(".approve").addEventListener("click", function(){ review(id, "approve"); });
-          tr.querySelector(".reject").addEventListener("click",  function(){ review(id, "reject");  });
+          tr.querySelector(".approve").addEventListener("click", function () {
+            openConfirm({
+              title: "Xác nhận duyệt tài khoản",
+              message: "Bạn có chắc chắn muốn duyệt tài khoản này không?",
+              okText: "Duyệt",
+              onConfirm: () => review(id, "approve")
+            });
+          });
+
+          tr.querySelector(".reject").addEventListener("click", function () {
+            openConfirm({
+              title: "Xác nhận từ chối",
+              message: "Bạn có chắc chắn muốn từ chối tài khoản này không? Thao tác này không thể hoàn tác.",
+              okText: "Từ chối",
+              danger: true,
+              onConfirm: () => review(id, "reject")
+            });
+          });
+
           tbody.appendChild(tr);
         });
       }
@@ -454,5 +551,7 @@
     // Initialize
     fetchList();
   </script>
+
+  
 </body>
 </html>

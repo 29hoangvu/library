@@ -15,7 +15,7 @@
 
     if (username == null || rawPwd == null || email == null || yearsStr == null
             || username.trim().isEmpty() || rawPwd.trim().isEmpty() || email.trim().isEmpty()) {
-        out.println("<script>showPopup('Vui lòng điền đầy đủ thông tin.'); history.back();</script>");
+        out.println("<script>alert('Vui lòng điền đầy đủ thông tin.'); history.back();</script>");
     } else {
         int years = 1;
         try {
@@ -35,7 +35,7 @@
                     ck.setString(1, username);
                     try (ResultSet rs = ck.executeQuery()) {
                         if (rs.next()) {
-                            out.println("<script>showPopup('Tên đăng nhập đã tồn tại, vui lòng chọn tên khác.'); history.back();</script>");
+                            out.println("<script>alert('Tên đăng nhập đã tồn tại, vui lòng chọn tên khác.'); history.back();</script>");
                             return; // dừng hẳn nhánh offline
                         }
                     }
@@ -95,14 +95,22 @@
                     mailEx.printStackTrace();
                 }
 
-                out.println("<script>showPopup('Đăng ký thành công! Vui lòng đến thư viện để nộp lệ phí trong 7 ngày để kích hoạt tài khoản.'); "
-                        + "window.location='" + request.getContextPath() + "/user/login.jsp';</script>");
+                // ===== LƯU THÔNG TIN VÀO SESSION VÀ REDIRECT ĐẾN TRANG SUCCESS =====
+                session.setAttribute("REG_username", username);
+                session.setAttribute("REG_email", email);
+                session.setAttribute("REG_years", years);
+                
+                // Redirect đến trang thành công với phương thức offline
+                response.sendRedirect(request.getContextPath() + "/user/registration_success.jsp?paymentMethod=offline");
                 return;
+                
             } catch (Exception e) {
                 e.printStackTrace();
+                out.println("<script>alert('Có lỗi xảy ra trong quá trình đăng ký. Vui lòng thử lại!'); history.back();</script>");
                 return;
             }
         } else {
+            // ONLINE PAYMENT
             long amount = 100_000L * years; // đơn vị VND
             session.setAttribute("REG_username", username);
             session.setAttribute("REG_hpwd", hashedPwd);
@@ -116,8 +124,7 @@
                     + "&language=vn";
 
             response.sendRedirect(target);
-            // KHÔNG viết gì bên dưới và KHÔNG thêm return;
+            // KHÔNG viết gì bên dưới
         }
     }
 %>
-

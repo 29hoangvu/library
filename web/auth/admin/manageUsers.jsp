@@ -540,7 +540,6 @@
           +     '<button onclick="viewUser('+u.id+')" class="px-2 py-1 text-blue-600 hover:underline text-sm"><i class="fas fa-eye mr-1"></i>Xem</button>'
           +     '<button onclick="editUser('+u.id+')" class="px-2 py-1 text-yellow-600 hover:underline text-sm"><i class="fas fa-edit mr-1"></i>Sửa</button>'
           +     '<button onclick="resetPw('+u.id+')" class="px-2 py-1 text-purple-600 hover:underline text-sm"><i class="fas fa-key mr-1"></i>Reset</button>'
-          +     '<button onclick="deleteUser('+u.id+')" class="px-2 py-1 text-red-600 hover:underline text-sm"><i class="fas fa-trash-alt mr-1"></i>Xóa</button>'
           +   '</td>'
           + '</tr>';
         tbody.insertAdjacentHTML('beforeend', row);

@@ -719,6 +719,34 @@
             </div>
         </div>
     </div>
+    <div id="excelResultPopup"
+        class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+       <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl
+                   transform transition-all duration-300 scale-95 opacity-0">
+
+           <div class="px-6 py-4 rounded-t-2xl text-white font-bold
+                       bg-gradient-to-r from-emerald-500 to-green-600">
+               Kết quả nhập Excel
+           </div>
+
+           <div class="p-6">
+               <p id="excelSummary" class="font-semibold mb-4"></p>
+
+               <div id="excelLogs"
+                    class="max-h-72 overflow-y-auto border rounded-xl bg-gray-50 p-4 text-sm space-y-1">
+               </div>
+           </div>
+
+           <div class="px-6 py-4 bg-gray-50 flex justify-end rounded-b-2xl">
+               <button onclick="closeExcelResultPopup()"
+                       class="px-5 py-2.5 rounded-lg
+                              bg-gradient-to-r from-blue-600 to-indigo-700
+                              text-white font-medium">
+                   Đóng
+               </button>
+           </div>
+       </div>
+   </div>
 
     <script>
     function showConfirm(message) {
@@ -991,6 +1019,66 @@ document.addEventListener("DOMContentLoaded", () => {
             showToast("Vui lòng nhập hoặc chọn tác giả.", "warning");
         }
     });
+});
+</script>
+<script>
+    function showExcelResultPopup(data) {
+    const popup = document.getElementById("excelResultPopup");
+    const box = popup.querySelector(".transform");
+    const summary = document.getElementById("excelSummary");
+    const logs = document.getElementById("excelLogs");
+
+    summary.textContent = data.summary || "";
+    logs.innerHTML = "";
+
+    (data.logs || []).forEach(line => {
+        const div = document.createElement("div");
+        div.textContent = line;
+        logs.appendChild(div);
+    });
+
+    popup.classList.remove("hidden");
+    popup.classList.add("flex");
+
+    setTimeout(() => {
+        box.classList.remove("scale-95", "opacity-0");
+        box.classList.add("scale-100", "opacity-100");
+    }, 50);
+}
+
+function closeExcelResultPopup() {
+    const popup = document.getElementById("excelResultPopup");
+    const box = popup.querySelector(".transform");
+
+    box.classList.remove("scale-100", "opacity-100");
+    box.classList.add("scale-95", "opacity-0");
+
+    setTimeout(() => {
+        popup.classList.add("hidden");
+        popup.classList.remove("flex");
+        location.reload(); // reload sau khi user đọc xong
+    }, 300);
+}
+document.getElementById("excelImportForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const form = e.target;
+    const fd = new FormData(form);
+
+    try {
+        const res = await fetch(form.action, {
+            method: "POST",
+            body: fd
+        });
+
+        const data = await res.json();
+
+        showExcelResultPopup(data);
+
+    } catch (err) {
+        console.error(err);
+        showToast("Không thể upload Excel", "error");
+    }
 });
 </script>
 

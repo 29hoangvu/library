@@ -103,6 +103,13 @@
               </span>
               <span>Sách đã mượn</span>
             </a>
+            <a href="<%=request.getContextPath()%>/user/myReservations.jsp"
+               class="block px-4 py-2.5 text-sm text-slate-100 hover:bg-white/5 flex items-center gap-2 transition-colors">
+              <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/5 text-indigo-300">
+                <i class="fas fa-book-reader text-xs"></i>
+              </span>
+              <span>Sách đã đăng ký</span>
+            </a>
             <a href="#"
                onclick="logout()"
                class="block px-4 py-2.5 text-sm text-rose-300 hover:bg-rose-500/10 flex items-center gap-2 transition-colors rounded-b-2xl">

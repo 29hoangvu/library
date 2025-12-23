@@ -1,26 +1,22 @@
-from app import load_user_isbn_map
-from reco import jaccard
+import os
+from dotenv import load_dotenv
 
-def debug_top_neighbors(user_items: dict[int, set[str]], target_user_id: int, k: int = 10):
-    SA = user_items.get(target_user_id, set())
-    if not SA:
-        print(f"❌ User {target_user_id} chưa mượn sách nào.")
-        return
+print("=== Before load_dotenv ===")
+print(f"GOOGLE_API_KEY: {os.getenv('GOOGLE_API_KEY', 'NOT SET')}")
 
-    sims = []
-    for uid, items in user_items.items():
-        if uid == target_user_id:
-            continue
-        s = jaccard(SA, items)
-        if s > 0:
-            sims.append((uid, s))
+load_dotenv()
 
-    sims.sort(key=lambda x: x[1], reverse=True)
-    print(f"\n📊 Top {k} người dùng tương tự nhất với user {target_user_id}:\n")
-    for rank, (uid, score) in enumerate(sims[:k], 1):
-        print(f"{rank:2d}. User {uid:4d} – Jaccard = {score:.3f}")
+print("\n=== After load_dotenv ===")
+print(f"GOOGLE_API_KEY: {os.getenv('GOOGLE_API_KEY', 'NOT SET')}")
 
-# ---- Chạy thật từ DB ----
-if __name__ == "__main__":
-    user_items = load_user_isbn_map()
-    debug_top_neighbors(user_items, target_user_id=16, k=10)
+# Check if .env file exists
+import pathlib
+env_path = pathlib.Path('.env')
+print(f"\n.env exists: {env_path.exists()}")
+
+if env_path.exists():
+    print("\n=== .env content ===")
+    with open('.env', 'r') as f:
+        for line in f:
+            if 'GOOGLE_API_KEY' in line or 'API_KEY' in line:
+                print(line.strip())

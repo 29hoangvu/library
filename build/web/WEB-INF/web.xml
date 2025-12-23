@@ -33,10 +33,6 @@
     </filter-mapping>
     <!-- Thời gian session -->
     <servlet>
-        <servlet-name>AdminUploadExcelServlet</servlet-name>
-        <servlet-class>Servlet.AdminUploadExcelServlet</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>ReminderJobServlet</servlet-name>
         <servlet-class>Servlet.ReminderJobServlet</servlet-class>
     </servlet>
@@ -59,10 +55,6 @@
     <servlet-mapping>
         <servlet-name>RestoreBookServlet</servlet-name>
         <url-pattern>/RestoreBookServlet</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>AdminUploadExcelServlet</servlet-name>
-        <url-pattern>/AdminUploadExcelServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ReminderJobServlet</servlet-name>
@@ -157,5 +149,24 @@
     <servlet-mapping>
         <servlet-name>DeleteBookServlet</servlet-name>
         <url-pattern>/DeleteBookServlet</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>ReservationAPI</servlet-name>
+        <servlet-class>api.ReservationAPI</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    
+    <servlet-mapping>
+        <servlet-name>ReservationAPI</servlet-name>
+        <url-pattern>/api/reservation/*</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>AdminUploadExcelServlet</servlet-name>
+        <servlet-class>Servlet.AdminUploadExcelServlet</servlet-class>
+    </servlet>
+    
+    <servlet-mapping>
+        <servlet-name>AdminUploadExcelServlet</servlet-name>
+        <url-pattern>/AdminUploadExcelServlet</url-pattern>
     </servlet-mapping>
 </web-app>
